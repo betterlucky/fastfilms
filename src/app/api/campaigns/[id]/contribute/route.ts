@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db"
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -54,7 +54,7 @@ export async function POST(
     })
 
     // Create contribution record
-    await (prisma as any).contribution.create({
+    await prisma.contribution.create({
       data: {
         amount: Number(amount),
         campaignId: params.id,
