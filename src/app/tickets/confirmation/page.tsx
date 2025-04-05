@@ -16,9 +16,10 @@ export const dynamic = 'force-dynamic'
 export default async function ConfirmationPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ ids?: string }>
 }) {
-  const ticketIds = (searchParams.ids as string)?.split(",") || []
+  const resolvedParams = await searchParams
+  const ticketIds = resolvedParams.ids?.split(",") || []
 
   const session = await getServerSession(authOptions)
 
