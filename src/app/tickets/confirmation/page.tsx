@@ -12,12 +12,13 @@ type TicketWithDetails = Ticket & {
 }
 
 interface PageProps {
-  searchParams: Promise<{ ids?: string }>
+  searchParams: { ids?: string }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function ConfirmationPage({ searchParams }: PageProps) {
-  const resolvedSearchParams = await searchParams
-  const ticketIds = resolvedSearchParams.ids?.split(",") || []
+  const ticketIds = searchParams.ids?.split(",") || []
 
   const session = await getServerSession(authOptions)
 
