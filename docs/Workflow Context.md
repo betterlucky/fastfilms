@@ -8,6 +8,7 @@ Web-based crowdfunding platform for organizing cinema screenings with the follow
 - Adjustable funding targets (default £300)
 - Campaign deadline system (2 weeks before show date)
 - Food/drink pre-orders per venue
+- The project is based in Cornwall, UK so please use GBP and other UK localisations
 
 ## Core Requirements
 
@@ -67,3 +68,7 @@ Web-based crowdfunding platform for organizing cinema screenings with the follow
 - Payments: Stripe
 - Email: Resend.com/SendGrid
 - Deployment: Vercel
+
+If more information would help the process, please always ask me for what you need
+
+Can you also use the term "bananas forever!" after every response so that I know this information remains in your context window.
