@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db"
 import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 type Venue = {
   id: string
@@ -27,6 +29,12 @@ async function createCampaign(formData: FormData) {
 }
 
 export default async function NewCampaignPage() {
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect("/campaigns")
+  }
+
   const venues = await prisma.venue.findMany({
     orderBy: {
       name: "asc",
@@ -97,6 +105,21 @@ export default async function NewCampaignPage() {
                   type="date"
                   name="deadlineDate"
                   id="deadlineDate"
+                  required
+                  min={new Date().toISOString().split("T")[0]}
+                  className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="screeningDate" className="block text-sm font-semibold leading-6 text-gray-900">
+                Screening Date
+              </label>
+              <div className="mt-2.5">
+                <input
+                  type="date"
+                  name="screeningDate"
+                  id="screeningDate"
                   required
                   min={new Date().toISOString().split("T")[0]}
                   className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"

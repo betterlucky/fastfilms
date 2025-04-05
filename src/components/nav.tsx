@@ -23,23 +23,36 @@ export default async function Navbar() {
                 Campaigns
               </Link>
               {session?.user?.role === "ADMIN" && (
-                <Link
-                  href="/venues/new"
-                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                >
-                  New Venue
-                </Link>
+                <>
+                  <Link
+                    href="/campaigns/new"
+                    className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  >
+                    Create Campaign
+                  </Link>
+                  <Link
+                    href="/venues/new"
+                    className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  >
+                    New Venue
+                  </Link>
+                </>
               )}
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {session ? (
-              <Link
-                href="/api/auth/signout"
-                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                Sign out
-              </Link>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-500">
+                  {session.user?.email}
+                </span>
+                <Link
+                  href="/api/auth/signout"
+                  className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  Sign out
+                </Link>
+              </div>
             ) : (
               <Link
                 href="/login"
