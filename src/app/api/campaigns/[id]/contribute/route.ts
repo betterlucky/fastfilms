@@ -5,7 +5,6 @@ import { authOptions } from "@/lib/auth"
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,6 +13,15 @@ export async function POST(
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
+      )
+    }
+
+    // Get campaign ID from URL
+    const campaignId = request.url.split('/').pop()
+    if (!campaignId) {
+      return NextResponse.json(
+        { error: "Campaign ID is required" },
+        { status: 400 }
       )
     }
 
@@ -27,7 +35,7 @@ export async function POST(
     }
 
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id: campaignId },
     })
 
     if (!campaign) {
@@ -45,7 +53,7 @@ export async function POST(
     }
 
     const updatedCampaign = await prisma.campaign.update({
-      where: { id: params.id },
+      where: { id: campaignId },
       data: {
         currentFunding: {
           increment: amount,
@@ -57,7 +65,7 @@ export async function POST(
     await prisma.contribution.create({
       data: {
         amount: Number(amount),
-        campaignId: params.id,
+        campaignId: campaignId,
         userId: session.user.id,
       },
     })

@@ -1,9 +1,10 @@
-import { NextRequest } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { stripe } from "@/lib/stripe"
 import { Campaign, MenuItem, MenuItemOption, Ticket } from "@prisma/client"
+import Stripe from "stripe"
 
 interface Order {
   menuItemId: string
@@ -24,25 +25,33 @@ interface CampaignWithVenue extends Campaign {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Get campaign ID from URL
+    const campaignId = request.url.split('/').pop()
+    if (!campaignId) {
+      return NextResponse.json(
+        { error: "Campaign ID is required" },
+        { status: 400 }
+      )
     }
 
     const { quantity, orders } = await request.json()
 
     if (!quantity || quantity < 1) {
-      return Response.json(
+      return NextResponse.json(
         { error: "Invalid ticket quantity" },
         { status: 400 }
       )
     }
 
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id: campaignId },
       include: {
         venue: {
           include: {
@@ -95,7 +104,7 @@ export async function POST(
         for (const option of menuItem.options) {
           if (option.required) {
             const choice = order.choices.find(
-              (c) => c.optionId === option.id
+              (c: { optionId: string; selectedChoice: string }) => c.optionId === option.id
             )
             if (!choice) {
               return Response.json(
@@ -181,21 +190,61 @@ export async function POST(
       )
     }
 
-    // Create Stripe payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: total * 100, // Convert to cents
-      currency: "gbp",
-      metadata: {
-        ticketIds: tickets.map((ticket) => ticket.id).join(","),
-        campaignId: campaign.id,
-        userId: session.user.id,
-      },
-    })
+    try {
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(total * 100), // Convert to cents and ensure integer
+        currency: "gbp",
+        metadata: {
+          ticketIds: tickets.map((ticket) => ticket.id).join(","),
+          campaignId: campaign.id,
+          userId: session.user.id,
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      })
 
-    return Response.json({
-      clientSecret: paymentIntent.client_secret,
-      ticketIds: tickets.map((ticket) => ticket.id),
-    })
+      // Update tickets with payment intent ID
+      await prisma.ticket.updateMany({
+        where: {
+          id: {
+            in: tickets.map((ticket) => ticket.id),
+          },
+        },
+        data: {
+          stripePaymentIntentId: paymentIntent.id,
+        },
+      })
+
+      return Response.json({
+        clientSecret: paymentIntent.client_secret,
+        ticketIds: tickets.map((ticket) => ticket.id),
+      })
+    } catch (stripeError) {
+      console.error("Stripe error:", stripeError)
+      
+      // Clean up pending tickets and orders
+      await prisma.ticket.deleteMany({
+        where: {
+          id: {
+            in: tickets.map((ticket) => ticket.id),
+          },
+        },
+      })
+
+      if (stripeError instanceof Stripe.errors.StripeError) {
+        return Response.json(
+          { error: stripeError.message },
+          { status: stripeError.statusCode || 500 }
+        )
+      }
+
+      return Response.json(
+        { error: "Failed to create payment intent" },
+        { status: 500 }
+      )
+    }
   } catch (error) {
     console.error("Error processing ticket purchase:", error)
     return Response.json(

@@ -1,13 +1,16 @@
 {
   "version": 2,
-  "buildCommand": "prisma generate && next build",
-  "git": {
-    "deploymentEnabled": {
-      "main": false,
-      "staging": true
-    }
-  },
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["lhr1"],
   "env": {
-    "VERCEL_ENV": "staging"
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "@stripe_publishable_key",
+    "STRIPE_SECRET_KEY": "@stripe_secret_key",
+    "STRIPE_WEBHOOK_SECRET": "@stripe_webhook_secret",
+    "NEXTAUTH_URL": "https://fastfilms-staging.vercel.app",
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "DATABASE_URL": "@database_url"
   }
 } 

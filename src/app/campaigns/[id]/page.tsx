@@ -4,17 +4,17 @@ import { notFound } from "next/navigation"
 import { ContributionForm } from "@/components/contribution-form"
 import { TicketForm } from "@/components/ticket-form"
 
-export default async function CampaignPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+async function getCampaign(id: string) {
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       venue: {
         include: {
-          menuItems: true,
+          menuItems: {
+            include: {
+              options: true,
+            },
+          },
         },
       },
     },
@@ -23,6 +23,18 @@ export default async function CampaignPage({
   if (!campaign) {
     notFound()
   }
+
+  return campaign
+}
+
+type PageProps = {
+  params: Promise<{ id: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function CampaignPage({ params }: PageProps) {
+  const resolvedParams = await params
+  const campaign = await getCampaign(resolvedParams.id)
 
   const progress = calculateProgress(Number(campaign.currentFunding), Number(campaign.fundingTarget))
   const timeLeft = calculateTimeLeft(campaign.deadlineDate)
@@ -91,8 +103,7 @@ export default async function CampaignPage({
             <div className="mt-4">
               <TicketForm
                 campaignId={campaign.id}
-                ticketCap={campaign.ticketCap}
-                currentTickets={campaign.currentTickets}
+                ticketPrice={5}
                 menuItems={campaign.venue.menuItems}
               />
             </div>

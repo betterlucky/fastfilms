@@ -1,8 +1,13 @@
 import { PrismaClient, Prisma } from "@prisma/client"
 import { sendEmail } from "@/lib/email"
-import { WebhookHandlerResponse, OrderWithMenuItem, TicketWithOrders } from "./types"
+import { prisma } from "@/lib/db"
+import { Stripe } from "stripe"
+import { NextResponse } from "next/server"
+import { generateTicketConfirmationEmail } from "@/lib/email"
+import { EmailData, TicketWithOrders } from "@/lib/types"
+import { WebhookHandlerResponse } from "./types"
 
-const prisma = new PrismaClient()
+const prismaClient = new PrismaClient()
 
 export async function handlePaymentSuccess(
   ticketIds: string[],
@@ -11,47 +16,20 @@ export async function handlePaymentSuccess(
   paymentIntentId: string,
   amount: number
 ): Promise<WebhookHandlerResponse> {
-  try {
-    // Update tickets and orders to confirmed status
-    await prisma.$transaction(async (prisma) => {
-      await prisma.ticket.updateMany({
-        where: { id: { in: ticketIds } },
-        data: { status: "CONFIRMED", stripePaymentIntentId: paymentIntentId },
-      })
-
-      await prisma.order.updateMany({
-        where: { ticketId: { in: ticketIds } },
-        data: { status: "CONFIRMED" },
-      })
-    })
-
-    // Get campaign and user details for the email
-    const [campaign, user] = await Promise.all([
-      prisma.campaign.findUnique({
-        where: { id: campaignId },
-        select: {
-          title: true,
-          screeningDate: true,
-          venue: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      }),
-      prisma.user.findUnique({
-        where: { id: userId },
-        select: { email: true },
-      }),
-    ])
-
-    if (!campaign || !user?.email) {
-      return {
-        received: false,
-        error: "Campaign or user not found",
-        status: 404,
-      }
+  if (ticketIds.length === 0) {
+    return {
+      received: false,
+      error: "No ticket IDs found",
+      status: 400,
     }
+  }
+
+  try {
+    // Update ticket status to confirmed
+    await prisma.ticket.updateMany({
+      where: { id: { in: ticketIds } },
+      data: { status: "CONFIRMED" },
+    })
 
     // Get tickets with orders for the email
     const tickets = await prisma.ticket.findMany({
@@ -59,35 +37,60 @@ export async function handlePaymentSuccess(
       include: {
         orders: {
           include: {
-            menuItem: true,
+            menuItem: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                description: true,
+                price: true,
+                venueId: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+        campaign: {
+          include: {
+            venue: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
       },
-    }) as TicketWithOrders[]
+    }) as unknown as TicketWithOrders[]
 
-    // Send confirmation email
-    await sendEmail({
-      to: user.email,
-      subject: `Ticket Confirmation - ${campaign.title}`,
-      html: generateConfirmationEmail(campaign, tickets, amount),
-    })
+    if (tickets.length === 0) {
+      return {
+        received: false,
+        error: "No tickets found",
+        status: 404,
+      }
+    }
 
-    // Update campaign funding
-    await prisma.campaign.update({
-      where: { id: campaignId },
-      data: {
-        currentFunding: {
-          increment: amount,
-        },
-      },
-    })
+    // Transform ticket data for email
+    const emailData: EmailData = {
+      movieTitle: tickets[0].campaign.movieTitle,
+      venueName: tickets[0].campaign.venue.name,
+      screeningDate: tickets[0].campaign.screeningDate,
+      ticketQuantity: tickets.length,
+      totalAmount: amount / 100, // Convert from cents to pounds
+    }
+
+    // Generate and send confirmation email
+    const emailHtml = generateTicketConfirmationEmail(emailData)
+    // TODO: Send email using your email service
 
     return { received: true }
   } catch (error) {
-    console.error("Error processing payment success:", error)
+    console.error("Error processing payment:", error)
     return {
       received: false,
-      error: "Failed to process payment success",
+      error: "Error processing payment",
       status: 500,
     }
   }
@@ -97,7 +100,7 @@ export async function handlePaymentFailure(
   ticketIds: string[]
 ): Promise<WebhookHandlerResponse> {
   try {
-    await prisma.ticket.deleteMany({
+    await prismaClient.ticket.deleteMany({
       where: { id: { in: ticketIds } },
     })
 

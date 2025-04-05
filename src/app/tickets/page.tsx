@@ -22,7 +22,7 @@ export default async function TicketsPage() {
       },
     },
     orderBy: {
-      purchaseDate: "desc",
+      createdAt: "desc",
     },
   })
 

@@ -1,10 +1,10 @@
 import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { stripe, formatAmountForStripe } from "@/lib/stripe"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -73,7 +73,6 @@ export async function POST(request: Request) {
             campaignId,
             userId: session.user.id,
             pricePaid: ticketPrice,
-            transactionFee,
             status: "PENDING",
             stripePaymentIntentId: paymentIntent.id,
           },

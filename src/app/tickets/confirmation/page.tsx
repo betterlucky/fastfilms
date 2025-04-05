@@ -1,5 +1,5 @@
+import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import Link from "next/link"
@@ -11,22 +11,24 @@ type TicketWithDetails = Ticket & {
   }
 }
 
-export default async function ConfirmationPage({
-  searchParams,
-}: {
-  searchParams: { ids?: string }
-}) {
+interface PageProps {
+  searchParams: Promise<{ ids?: string }>
+}
+
+export default async function ConfirmationPage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams
+  const ticketIds = resolvedSearchParams.ids?.split(",") || []
+
   const session = await getServerSession(authOptions)
 
-  if (!session?.user?.id) {
-    redirect("/login")
+  if (!session) {
+    redirect("/auth/signin")
   }
 
-  if (!searchParams.ids) {
+  if (ticketIds.length === 0) {
     redirect("/campaigns")
   }
 
-  const ticketIds = searchParams.ids.split(",")
   const tickets = await prisma.ticket.findMany({
     where: {
       id: {
@@ -51,12 +53,20 @@ export default async function ConfirmationPage({
     <div className="bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Thank you for your purchase!
-          </h2>
-          <p className="mt-2 text-lg leading-8 text-gray-600">
-            Your tickets have been confirmed
+          </h1>
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            Your tickets have been confirmed. You will receive an email with your tickets shortly.
           </p>
+          <div className="mt-10">
+            <a
+              href="/"
+              className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Return to Home
+            </a>
+          </div>
         </div>
 
         <div className="mx-auto mt-16 max-w-2xl">

@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/db"
 import { formatPrice, formatDate, calculateProgress, calculateTimeLeft } from "@/lib/utils"
 import Link from "next/link"
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 export default async function CampaignsPage() {
   const session = await getServerSession(authOptions)
-  const isAdmin = session?.user?.role === "ADMIN"
+  const isAdmin = session?.user?.isAdmin
 
   // If not admin, find and redirect to featured campaign
   if (!isAdmin) {
