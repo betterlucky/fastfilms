@@ -12,11 +12,18 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        // Allow access to public routes
+        const publicRoutes = ["/login", "/register", "/api/auth"]
+        if (publicRoutes.some(route => req.nextUrl.pathname.startsWith(route))) {
+          return true
+        }
+        return !!token
+      },
     },
   }
 )
 
 export const config = {
-  matcher: ["/campaigns/new"],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
 } 
