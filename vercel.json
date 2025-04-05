@@ -6,11 +6,6 @@
   "framework": "nextjs",
   "regions": ["lhr1"],
   "env": {
-    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51RAegEGgAuvFMhhmM1LD9u5TrPwXfl7VdirArQ08EQO9f7XtobtWS9Au2dqWqnrMl4e6e4ChiXBfFZFfABDobrL700ULPfKWdi",
-    "STRIPE_SECRET_KEY": "sk_test_51RAegEGgAuvFMhhmM1LD9u5TrPwXfl7VdirArQ08EQO9f7XtobtWS9Au2dqWqnrMl4e6e4ChiXBfFZFfABDobrL700ULPfKWdi",
-    "STRIPE_WEBHOOK_SECRET": "whsec_51RAegEGgAuvFMhhmM1LD9u5TrPwXfl7VdirArQ08EQO9f7XtobtWS9Au2dqWqnrMl4e6e4ChiXBfFZFfABDobrL700ULPfKWdi",
-    "NEXTAUTH_URL": "https://fastfilms-staging.vercel.app",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "DATABASE_URL": "@database_url"
+    "NEXTAUTH_URL": "https://fastfilms-staging.vercel.app"
   }
 } 
