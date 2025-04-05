@@ -6,8 +6,8 @@
     "node": "18.x"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --debug",
+    "dev": "next dev",
+    "build": "prisma generate && next build --debug",
     "start": "next start",
     "lint": "next lint",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
