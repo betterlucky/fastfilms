@@ -1,34 +1,48 @@
-const { PrismaClient } = require("@prisma/client")
-const bcrypt = require("bcryptjs")
+import { PrismaClient } from "@prisma/client"
+import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL || "admin@fastfilms.com"
-  const password = process.env.ADMIN_PASSWORD || "admin123"
-  const name = "Admin User"
+  try {
+    // Test database connection
+    await prisma.$connect()
+    console.log("Successfully connected to database")
 
-  const hashedPassword = await bcrypt.hash(password, 10)
+    const email = process.env.ADMIN_EMAIL || "admin@fastfilms.com"
+    const password = process.env.ADMIN_PASSWORD || "admin123"
+    const name = "Admin User"
 
-  const admin = await prisma.user.upsert({
-    where: { email },
-    update: {},
-    create: {
-      email,
-      name,
-      password: hashedPassword,
-      role: "ADMIN",
-    },
-  })
+    console.log(`Attempting to create/update admin user with email: ${email}`)
 
-  console.log(`Admin user created/updated: ${admin.email}`)
+    const hashedPassword = await bcrypt.hash(password, 10)
+    console.log("Password hashed successfully")
+
+    const admin = await prisma.user.upsert({
+      where: { email },
+      update: {
+        password: hashedPassword,
+        role: "ADMIN",
+      },
+      create: {
+        email,
+        name,
+        password: hashedPassword,
+        role: "ADMIN",
+      },
+    })
+
+    console.log(`Admin user created/updated successfully:`, admin)
+  } catch (error) {
+    console.error("Error creating admin user:", error)
+    process.exit(1)
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
+  .catch((error) => {
+    console.error("Fatal error:", error)
     process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
   }) 
