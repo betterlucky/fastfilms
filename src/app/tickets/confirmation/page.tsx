@@ -11,14 +11,14 @@ type TicketWithDetails = Ticket & {
   }
 }
 
-interface PageProps {
-  searchParams: { ids?: string }
-}
-
 export const dynamic = 'force-dynamic'
 
-export default async function ConfirmationPage({ searchParams }: PageProps) {
-  const ticketIds = searchParams.ids?.split(",") || []
+export default async function ConfirmationPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
+  const ticketIds = (searchParams.ids as string)?.split(",") || []
 
   const session = await getServerSession(authOptions)
 
