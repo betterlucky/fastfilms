@@ -1,0 +1,69 @@
+# Cinema Crowdfunding Platform - Project Context
+
+## Project Overview
+Web-based crowdfunding platform for organizing cinema screenings with the following core features:
+- Multiple concurrent crowdfunding campaigns for film screenings
+- Flexible ticket pricing (minimum £5 + £0.50 transaction fee)
+- Adjustable ticket caps (default 400)
+- Adjustable funding targets (default £300)
+- Campaign deadline system (2 weeks before show date)
+- Food/drink pre-orders per venue
+
+## Core Requirements
+
+### User Types
+1. Customers
+   - Register/login
+   - Purchase tickets
+   - Order food/drinks
+   - View order history
+   - Participate in comments
+   - Share on social media
+
+2. Administrators
+   - Manage campaigns
+   - Approve refunds
+   - Manage venues
+   - Moderate comments
+   - View analytics
+
+### Payment System
+- Stripe integration
+- Variable ticket pricing (£5 minimum)
+- £0.50 transaction fee
+- Automatic refund triggers (admin approval required)
+
+### Venue System
+- Multiple venue support
+- Venue-specific menu items
+- Fixed price food/drink combos
+- Managed by venue staff
+
+### Communication System
+- Email notifications for:
+  * Purchase confirmation
+  * Campaign updates
+  * Refund status
+  * Comment notifications
+  * Campaign success/failure
+- Comment/message board system
+- Social media sharing
+
+## Technical Requirements
+- Fully responsive design
+- PWA support
+- Mobile-optimized checkout
+- Secure authentication
+- Real-time updates
+- Performance optimization
+
+## Database Schema Overview
+[Previous database schema from earlier response]
+
+## Tech Stack
+- Frontend: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
+- Backend: Next.js API routes, Prisma, PostgreSQL
+- Authentication: NextAuth.js
+- Payments: Stripe
+- Email: Resend.com/SendGrid
+- Deployment: Vercel
