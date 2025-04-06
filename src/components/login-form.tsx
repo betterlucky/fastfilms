@@ -30,6 +30,13 @@ export default function LoginForm() {
         throw new Error("Invalid credentials")
       }
 
+      // Debug session state
+      console.log("Login response:", response)
+      
+      // Force a session refresh
+      const session = await fetch('/api/auth/session')
+      console.log("Session after login:", await session.json())
+
       router.push(callbackUrl)
       router.refresh()
     } catch (err) {

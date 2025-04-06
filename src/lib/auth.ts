@@ -86,6 +86,9 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ token, session }) {
+      console.log("Session callback - Token:", token)
+      console.log("Session callback - Session before update:", session)
+      
       if (token) {
         session.user.id = token.id
         session.user.name = token.name
@@ -93,6 +96,8 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role
         session.user.isAdmin = token.isAdmin
       }
+      
+      console.log("Session callback - Session after update:", session)
       return session
     },
   },
