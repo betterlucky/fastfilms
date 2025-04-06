@@ -25,11 +25,21 @@ export async function handlePaymentSuccess(
   }
 
   try {
-    // Update ticket status to confirmed
-    await prisma.ticket.updateMany({
-      where: { id: { in: ticketIds } },
-      data: { status: "CONFIRMED" },
-    })
+    // Update ticket status to confirmed and increment campaign's currentTickets
+    await prisma.$transaction([
+      prisma.ticket.updateMany({
+        where: { id: { in: ticketIds } },
+        data: { status: "CONFIRMED" },
+      }),
+      prisma.campaign.update({
+        where: { id: campaignId },
+        data: {
+          currentTickets: {
+            increment: ticketIds.length
+          }
+        }
+      })
+    ]);
 
     // Get tickets with orders for the email
     const tickets = await prisma.ticket.findMany({
@@ -41,7 +51,6 @@ export async function handlePaymentSuccess(
               select: {
                 id: true,
                 name: true,
-                type: true,
                 description: true,
                 price: true,
                 venueId: true,

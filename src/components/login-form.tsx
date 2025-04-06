@@ -13,6 +13,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const callbackUrl = searchParams.get("callbackUrl") || "/campaigns"
   const justRegistered = searchParams.get("registered")
+  const verified = searchParams.get("verified")
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -28,7 +29,12 @@ export default function LoginForm() {
       })
 
       if (!response?.ok) {
-        throw new Error("Invalid credentials")
+        if (response?.error === "Please verify your email before logging in") {
+          setError("Please check your email for a verification link before logging in.")
+        } else {
+          setError("Invalid email or password")
+        }
+        return
       }
 
       // Update the session
@@ -55,7 +61,13 @@ export default function LoginForm() {
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         {justRegistered && (
           <div className="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg">
-            Registration successful! Please sign in with your new account.
+            Registration successful! Please check your email for a verification link.
+          </div>
+        )}
+
+        {verified && (
+          <div className="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg">
+            Email verified successfully! You can now sign in.
           </div>
         )}
 

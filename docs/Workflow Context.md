@@ -3,10 +3,11 @@
 ## Project Overview
 Web-based crowdfunding platform for organizing cinema screenings with the following core features:
 - Multiple concurrent crowdfunding campaigns for film screenings
+- But a user should be directed toward the current featured campaign as while campaign overlaps may happen in the future, they will be rare initally
 - Flexible ticket pricing (minimum £5 + £0.50 transaction fee)
 - Adjustable ticket caps (default 400)
 - Adjustable funding targets (default £300)
-- Campaign deadline system (2 weeks before show date)
+- Campaign deadline system (2 weeks before show date as default but adjustable by admin)
 - Food/drink pre-orders per venue
 - The project is based in Cornwall, UK so please use GBP and other UK localisations
 

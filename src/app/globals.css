@@ -1,26 +1,75 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f9fafb;
+  --foreground: #1f2937;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  h1 {
+    @apply text-4xl font-bold tracking-tight text-gray-900 mb-6;
+  }
+  @media (min-width: 640px) {
+    h1 {
+      @apply text-5xl;
+    }
+  }
+  h2 {
+    @apply text-2xl font-semibold tracking-tight text-gray-900 mb-4;
+  }
+  h3 {
+    @apply text-xl font-semibold text-gray-900 mb-3;
+  }
+  p {
+    @apply text-base text-gray-600 leading-relaxed mb-4;
+  }
+  a {
+    @apply text-primary-600 transition-colors duration-150;
+  }
+  a:hover {
+    @apply text-primary-700;
+  }
+  .force-tailwind {
+    @apply text-4xl;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors duration-150;
+  }
+  .btn-primary:hover {
+    @apply bg-primary-500;
+  }
+  .btn-secondary {
+    @apply rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-soft border border-gray-300 transition-colors duration-150;
+  }
+  .btn-secondary:hover {
+    @apply bg-gray-50;
+  }
+  .input-field {
+    @apply block w-full rounded-md px-3.5 py-2 text-gray-900 shadow-soft border border-gray-300;
+  }
+  .input-field::placeholder {
+    @apply text-gray-400;
+  }
+  .input-field:focus {
+    @apply outline-none border-primary-600 ring-2 ring-primary-600;
+  }
+  .card {
+    @apply bg-white shadow-soft rounded-xl p-6;
+  }
+  .test-heading {
+    @apply text-4xl text-gray-900;
+  }
 }

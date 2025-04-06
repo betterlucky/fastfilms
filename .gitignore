@@ -43,3 +43,8 @@ next-env.d.ts
 
 # Admin scripts
 scripts/create-admin.ts
+
+# Context documentation
+docs/Project prompt.md
+docs/Workflow Context.md
+docs/supplementary_context.md

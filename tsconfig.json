@@ -22,7 +22,8 @@
       "@/*": ["./src/*"]
     },
     "baseUrl": ".",
-    "typeRoots": ["./src/types", "./node_modules/@types"]
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "types": ["react-datepicker"]
   },
   "include": [
     "next-env.d.ts",

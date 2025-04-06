@@ -1,6 +1,15 @@
-import { Resend } from "resend"
+import nodemailer from "nodemailer"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Create a transporter using Gmail SMTP with secure settings
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // use SSL
+  auth: {
+    user: process.env.CONTACT_EMAIL,
+    pass: process.env.EMAIL_HOST_PASSWORD,
+  },
+})
 
 interface SendEmailOptions {
   to: string
@@ -9,20 +18,24 @@ interface SendEmailOptions {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn("RESEND_API_KEY not found. Skipping email send.")
+  if (!process.env.CONTACT_EMAIL || !process.env.EMAIL_HOST_PASSWORD) {
+    console.warn("Email credentials not found. Skipping email send.")
     return
   }
 
   try {
-    await resend.emails.send({
-      from: "FastFilms <noreply@fastfilms.example.com>",
+    // Verify the connection configuration
+    await transporter.verify()
+    
+    await transporter.sendMail({
+      from: `FastFilms <${process.env.CONTACT_EMAIL}>`,
       to,
       subject,
       html,
     })
   } catch (error) {
     console.error("Failed to send email:", error)
+    throw error // Re-throw to handle in the calling code
   }
 }
 
@@ -70,6 +83,41 @@ export function generateTicketConfirmationEmail(data: {
           <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
             <p style="color: #6b7280; font-size: 14px;">
               If you have any questions about your booking, please contact us at support@fastfilms.example.com
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+export function generateVerificationEmail(token: string) {
+  const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Verify Your Email</title>
+      </head>
+      <body style="font-family: sans-serif; line-height: 1.5; color: #1f2937;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #4f46e5; margin-bottom: 24px;">Verify Your Email</h1>
+          
+          <p>Thank you for registering with FastFilms! Please click the button below to verify your email address:</p>
+          
+          <div style="margin: 32px 0;">
+            <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+              Verify Email Address
+            </a>
+          </div>
+          
+          <p>If you did not create an account with FastFilms, you can safely ignore this email.</p>
+          
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px;">
+              This link will expire in 24 hours. If you need a new verification link, please contact us at support@fastfilms.example.com
             </p>
           </div>
         </div>

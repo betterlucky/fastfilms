@@ -62,39 +62,42 @@ export default async function CampaignsPage() {
             const timeLeft = calculateTimeLeft(campaign.deadlineDate)
             
             return (
-              <article key={campaign.id} className="flex flex-col items-start">
-                <div className="w-full">
-                  <div className="flex items-center gap-x-4 text-xs">
-                    <time dateTime={campaign.deadlineDate.toISOString()} className="text-gray-500">
-                      {timeLeft.days} days remaining
-                    </time>
-                    <div className="relative flex items-center gap-x-4">
-                      <div className="text-gray-500">{campaign.venue.name}</div>
+              <Link 
+                key={campaign.id} 
+                href={`/campaigns/${campaign.id}`}
+                className="group block transition-transform hover:-translate-y-1 hover:shadow-lg rounded-lg"
+              >
+                <article className="flex flex-col items-start h-full relative bg-white p-6 rounded-lg">
+                  <div className="w-full">
+                    <div className="flex items-center gap-x-4 text-xs">
+                      <time dateTime={campaign.deadlineDate.toISOString()} className="text-gray-500">
+                        {timeLeft.days} days remaining
+                      </time>
+                      <div className="relative flex items-center gap-x-4">
+                        <div className="text-gray-500">{campaign.venue.name}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="group relative">
-                    <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-                      <Link href={`/campaigns/${campaign.id}`}>
-                        <span className="absolute inset-0" />
+                    <div className="relative">
+                      <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
                         {campaign.movieTitle}
-                      </Link>
-                    </h3>
-                    <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{campaign.description}</p>
-                  </div>
-                  <div className="mt-4">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-indigo-600 h-2.5 rounded-full"
-                        style={{ width: `${progress}%` }}
-                      />
+                      </h3>
+                      <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{campaign.description}</p>
                     </div>
-                    <div className="mt-2 flex items-center justify-between text-sm">
-                      <span className="text-gray-500">£{formatPrice(Number(campaign.currentFunding))} raised</span>
-                      <span className="text-gray-500">£{formatPrice(Number(campaign.fundingTarget))} target</span>
+                    <div className="mt-4">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className="bg-indigo-600 h-2.5 rounded-full"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                      <div className="mt-2 flex items-center justify-between text-sm">
+                        <span className="text-gray-500">{formatPrice(Number(campaign.currentFunding))} raised</span>
+                        <span className="text-gray-500">{formatPrice(Number(campaign.fundingTarget))} target</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              </Link>
             )
           })}
         </div>

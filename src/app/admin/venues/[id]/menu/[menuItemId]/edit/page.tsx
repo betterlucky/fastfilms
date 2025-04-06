@@ -1,0 +1,72 @@
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { prisma } from "@/lib/db"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import MenuItemForm from "../../MenuItemForm"
+
+export default async function EditMenuItemPage({ params }: { params: { id: string; menuItemId: string } }) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect("/")
+  }
+
+  const [venue, menuItem] = await Promise.all([
+    prisma.venue.findUnique({
+      where: { id: params.id },
+    }),
+    prisma.menuItem.findUnique({
+      where: { id: params.menuItemId },
+      include: {
+        options: {
+          include: {
+            choices: true,
+          },
+        },
+      },
+    }),
+  ])
+
+  if (!venue || !menuItem || menuItem.venueId !== venue.id) {
+    redirect("/admin/venues")
+  }
+
+  return (
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold">Edit Menu Item for {venue.name}</h1>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Menu Item Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MenuItemForm
+            venueId={venue.id}
+            initialData={{
+              id: menuItem.id,
+              name: menuItem.name,
+              description: menuItem.description,
+              price: Number(menuItem.price),
+              category: menuItem.category,
+              isActive: menuItem.isActive,
+              options: menuItem.options.map(option => ({
+                id: option.id,
+                name: option.name,
+                description: option.description || undefined,
+                isRequired: option.isRequired,
+                minChoices: option.minChoices,
+                maxChoices: option.maxChoices,
+                choices: option.choices.map(choice => ({
+                  id: choice.id,
+                  name: choice.name,
+                  priceAdjustment: Number(choice.priceAdjustment),
+                })),
+              })),
+            }}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  )
+} 

@@ -15,9 +15,19 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json()
+    console.log("Received campaign data:", data)
 
     // Validate required fields
-    if (!data.title || !data.description || !data.venueId || !data.screeningDate || !data.deadlineDate || !data.fundingTarget) {
+    if (!data.title || !data.description || !data.venueId || !data.screeningDate || !data.deadlineDate || !data.fundingTarget || !data.screeningTime) {
+      console.log("Missing required fields:", {
+        title: !data.title,
+        description: !data.description,
+        venueId: !data.venueId,
+        screeningDate: !data.screeningDate,
+        screeningTime: !data.screeningTime,
+        deadlineDate: !data.deadlineDate,
+        fundingTarget: !data.fundingTarget
+      })
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -51,6 +61,7 @@ export async function POST(request: NextRequest) {
         movieTitle: data.movieTitle,
         venueId: data.venueId,
         screeningDate: screeningDate,
+        screeningTime: data.screeningTime,
         deadlineDate: deadlineDate,
         fundingTarget: data.fundingTarget,
         currentFunding: 0,
@@ -60,11 +71,12 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log("Successfully created campaign:", campaign)
     return NextResponse.json(campaign)
   } catch (error) {
     console.error("Error creating campaign:", error)
     return NextResponse.json(
-      { error: "Failed to create campaign" },
+      { error: error instanceof Error ? error.message : "Failed to create campaign" },
       { status: 500 }
     )
   }
