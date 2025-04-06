@@ -74,6 +74,7 @@ model Campaign {
   title           String
   description     String
   movieTitle      String
+  tmdbId          String?
   posterPath      String?
   screeningDate   DateTime
   screeningTime   String
