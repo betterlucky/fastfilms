@@ -124,4 +124,39 @@ export function generateVerificationEmail(token: string) {
       </body>
     </html>
   `
+}
+
+export function generatePasswordResetEmail(token: string) {
+  const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Reset Your Password</title>
+      </head>
+      <body style="font-family: sans-serif; line-height: 1.5; color: #1f2937;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #4f46e5; margin-bottom: 24px;">Reset Your Password</h1>
+          
+          <p>We received a request to reset your password. Click the button below to create a new password:</p>
+          
+          <div style="margin: 32px 0;">
+            <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+              Reset Password
+            </a>
+          </div>
+          
+          <p>If you didn't request a password reset, you can safely ignore this email.</p>
+          
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px;">
+              This link will expire in 1 hour. If you need a new password reset link, please request another one.
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
 } 

@@ -15,7 +15,6 @@ interface Option {
   id?: string
   name: string
   description?: string
-  isRequired: boolean
   minChoices: number
   maxChoices: number
   choices: Choice[]
@@ -62,7 +61,6 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
       options: [...prev.options, {
         name: "",
         description: "",
-        isRequired: false,
         minChoices: 1,
         maxChoices: 1,
         choices: []
@@ -246,13 +244,6 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                           onChange={(e) => updateOption(optionIndex, 'name', e.target.value)}
                           required
                         />
-                      </div>
-                      <div className="flex items-center space-x-2 mt-6">
-                        <Switch
-                          checked={option.isRequired}
-                          onCheckedChange={(checked) => updateOption(optionIndex, 'isRequired', checked)}
-                        />
-                        <Label>Required</Label>
                       </div>
                     </div>
 

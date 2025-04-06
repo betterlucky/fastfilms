@@ -54,7 +54,6 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
                 id: option.id,
                 name: option.name,
                 description: option.description || undefined,
-                isRequired: option.isRequired,
                 minChoices: option.minChoices,
                 maxChoices: option.maxChoices,
                 choices: option.choices.map(choice => ({

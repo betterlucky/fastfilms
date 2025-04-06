@@ -44,7 +44,7 @@ export default function LoginForm() {
       router.refresh()
       router.push(callbackUrl)
     } catch (err) {
-      setError("Invalid email or password")
+      setError("Something went wrong")
     } finally {
       setIsLoading(false)
     }
@@ -68,6 +68,22 @@ export default function LoginForm() {
         {verified && (
           <div className="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg">
             Email verified successfully! You can now sign in.
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+            {error}
+            {error === "Please check your email for a verification link before logging in." && (
+              <div className="mt-2">
+                <Link
+                  href="/resend-verification"
+                  className="font-semibold text-indigo-600 hover:text-indigo-500"
+                >
+                  Resend verification email
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
@@ -104,12 +120,6 @@ export default function LoginForm() {
             </div>
           </div>
 
-          {error && (
-            <div className="text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
           <div>
             <button
               type="submit"
@@ -118,6 +128,15 @@ export default function LoginForm() {
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </button>
+          </div>
+
+          <div className="text-sm text-center">
+            <Link
+              href="/forgot-password"
+              className="font-semibold text-indigo-600 hover:text-indigo-500"
+            >
+              Forgot password?
+            </Link>
           </div>
         </form>
 
