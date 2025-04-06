@@ -29,7 +29,7 @@ export default function Navbar() {
               >
                 Campaigns
               </Link>
-              {session?.user?.role === "ADMIN" && (
+              {session?.user?.isAdmin && (
                 <>
                   <Link
                     href="/campaigns/new"
