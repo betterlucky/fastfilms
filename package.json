@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build --debug",
+    "build": "prisma generate && prisma db push && next build --debug",
     "start": "next start",
     "lint": "next lint",
     "seed": "NODE_OPTIONS=\"--loader ts-node/esm\" node scripts/create-admin.ts",
