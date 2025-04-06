@@ -83,7 +83,7 @@ model Campaign {
   currentFunding  Float     @default(0)
   ticketCap       Int
   currentTickets  Int       @default(0)
-  status          String    @default("active")
+  status          CampaignStatus    @default(ACTIVE)
   isFeatured      Boolean   @default(false)
   customBlurb     String?
   createdAt       DateTime  @default(now())
@@ -260,4 +260,11 @@ model PasswordResetToken {
 enum UserRole {
   ADMIN
   CUSTOMER
+}
+
+enum CampaignStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  FAILED
 }

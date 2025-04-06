@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         currentFunding: 0,
         ticketCap: data.ticketCap || 400,
         currentTickets: 0,
-        status: "active",
+        status: "ACTIVE",
         isFeatured: false,
         tmdbId: data.tmdbId || null,
         posterPath: data.posterPath || null,
