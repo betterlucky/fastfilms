@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
 export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { update } = useSession()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const callbackUrl = searchParams.get("callbackUrl") || "/campaigns"
@@ -30,8 +31,12 @@ export default function LoginForm() {
         throw new Error("Invalid credentials")
       }
 
-      router.push(callbackUrl)
+      // Update the session
+      await update()
+      
+      // Refresh the router and navigate
       router.refresh()
+      router.push(callbackUrl)
     } catch (err) {
       setError("Invalid email or password")
     } finally {

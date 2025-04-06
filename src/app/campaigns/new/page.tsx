@@ -45,7 +45,7 @@ export default async function NewCampaignPage() {
     <div className="bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Create New Campaign</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Create New Screening</h2>
           <p className="mt-2 text-lg leading-8 text-gray-600">
             Start a new film screening campaign in your community
           </p>
@@ -54,7 +54,7 @@ export default async function NewCampaignPage() {
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label htmlFor="movieTitle" className="block text-sm font-semibold leading-6 text-gray-900">
-                Movie Title
+                Film Title
               </label>
               <div className="mt-2.5">
                 <input
@@ -82,7 +82,7 @@ export default async function NewCampaignPage() {
             </div>
             <div>
               <label htmlFor="fundingTarget" className="block text-sm font-semibold leading-6 text-gray-900">
-                Funding Target
+                Funding Target (£)
               </label>
               <div className="mt-2.5">
                 <input
@@ -98,7 +98,7 @@ export default async function NewCampaignPage() {
             </div>
             <div>
               <label htmlFor="deadlineDate" className="block text-sm font-semibold leading-6 text-gray-900">
-                Deadline Date
+                Campaign Deadline
               </label>
               <div className="mt-2.5">
                 <input

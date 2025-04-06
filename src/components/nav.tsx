@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    console.log("Session status:", status);
+    console.log("Session data:", session);
+  }, [session, status]);
 
   return (
     <nav className="bg-white shadow">
@@ -42,7 +48,9 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {session ? (
+            {status === "loading" ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+            ) : session ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-500">
                   {session.user?.email}
@@ -51,7 +59,7 @@ export default function Navbar() {
                   href="/api/auth/signout"
                   className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
-                  Sign out
+                  Log out
                 </Link>
               </div>
             ) : (
