@@ -81,30 +81,24 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.role = user.role
-        token.isAdmin = user.isAdmin
+        token.isAdmin = user.role === 'ADMIN'
       }
       return token
     },
     async session({ token, session }) {
-      console.log("Session callback - Token:", token)
-      console.log("Session callback - Session before update:", session)
-      
       if (token) {
         session.user.id = token.id
         session.user.name = token.name
         session.user.email = token.email
         session.user.role = token.role
-        session.user.isAdmin = token.isAdmin
+        session.user.isAdmin = token.role === 'ADMIN'
       }
-      
-      console.log("Session callback - Session after update:", session)
       return session
     },
   },
   pages: {
     signIn: "/login",
   },
-  debug: process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
   },
