@@ -3,16 +3,20 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
 
 export default function NewVenuePage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  if (session?.user?.role !== "ADMIN") {
-    router.push("/")
-    return null
+  if (status === "loading") {
+    return <div>Loading...</div>
+  }
+
+  if (status === "unauthenticated" || session?.user?.role !== "ADMIN") {
+    redirect("/")
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -58,14 +62,17 @@ export default function NewVenuePage() {
             Create New Venue
           </h2>
           <p className="mt-2 text-lg leading-8 text-gray-600">
-            Add a new cinema venue to the platform
+            Add a new venue for film screenings
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mx-auto mt-16 max-w-xl">
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label htmlFor="name" className="block text-sm font-semibold leading-6 text-gray-900">
+              <label
+                htmlFor="name"
+                className="block text-sm font-semibold leading-6 text-gray-900"
+              >
                 Venue Name
               </label>
               <div className="mt-2.5">
@@ -80,7 +87,10 @@ export default function NewVenuePage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label htmlFor="address" className="block text-sm font-semibold leading-6 text-gray-900">
+              <label
+                htmlFor="address"
+                className="block text-sm font-semibold leading-6 text-gray-900"
+              >
                 Address
               </label>
               <div className="mt-2.5">
@@ -95,7 +105,10 @@ export default function NewVenuePage() {
             </div>
 
             <div>
-              <label htmlFor="city" className="block text-sm font-semibold leading-6 text-gray-900">
+              <label
+                htmlFor="city"
+                className="block text-sm font-semibold leading-6 text-gray-900"
+              >
                 City
               </label>
               <div className="mt-2.5">
@@ -110,7 +123,10 @@ export default function NewVenuePage() {
             </div>
 
             <div>
-              <label htmlFor="postcode" className="block text-sm font-semibold leading-6 text-gray-900">
+              <label
+                htmlFor="postcode"
+                className="block text-sm font-semibold leading-6 text-gray-900"
+              >
                 Postcode
               </label>
               <div className="mt-2.5">
