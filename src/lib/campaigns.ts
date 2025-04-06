@@ -32,6 +32,13 @@ export async function getFeaturedCampaign() {
           name: true,
         },
       },
+      screen: {
+        select: {
+          id: true,
+          name: true,
+          capacity: true,
+        },
+      },
     },
   });
 
@@ -71,6 +78,13 @@ export async function getFeaturedCampaign() {
             name: true,
           },
         },
+        screen: {
+          select: {
+            id: true,
+            name: true,
+            capacity: true,
+          },
+        },
       },
     });
   }
@@ -90,6 +104,7 @@ export async function getFeaturedCampaign() {
       ? `https://image.tmdb.org/t/p/w500${campaign.posterPath}`
       : null,
     hasAssignedVenue: campaign.venueId !== null,
+    hasScreenAllocated: campaign.screen !== null,
   };
 }
 

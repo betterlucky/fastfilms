@@ -51,13 +51,13 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
                   price: Number(menuItem.price),
                   category: menuItem.category,
                   isActive: menuItem.isActive,
-                  options: menuItem.options.map(option => ({
+                  options: menuItem.options.map((option, index) => ({
                     id: option.id,
                     name: option.name,
                     description: option.description || undefined,
-                    isRequired: option.isRequired,
                     minChoices: option.minChoices,
                     maxChoices: option.maxChoices,
+                    order: index,
                     choices: option.choices.map(choice => ({
                       id: choice.id,
                       name: choice.name,

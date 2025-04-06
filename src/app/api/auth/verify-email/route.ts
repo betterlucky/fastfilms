@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/db"
 import { NextResponse, type NextRequest } from "next/server"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const { searchParams } = request.nextUrl
     const token = searchParams.get("token")
 
     if (!token) {
@@ -48,8 +50,9 @@ export async function GET(request: NextRequest) {
     })
 
     // Redirect to login page with success message
+    const baseUrl = request.nextUrl.origin
     return NextResponse.redirect(
-      new URL("/login?verified=true", request.url)
+      new URL("/login?verified=true", baseUrl)
     )
   } catch (error) {
     console.error("Error verifying email:", error)

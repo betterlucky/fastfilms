@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { MenuItem, MenuItemOption } from "@prisma/client"
+import { MenuItem, MenuItemOption, MenuItemOptionChoice } from "@prisma/client"
 
 interface MenuItemWithOptions extends MenuItem {
-  options: MenuItemOption[]
+  options: (MenuItemOption & {
+    choices: MenuItemOptionChoice[]
+  })[]
 }
 
 interface OrderChoice {
@@ -63,7 +65,7 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
           quantity,
           choices: menuItem?.options.map(option => ({
             optionId: option.id,
-            selectedChoice: itemChoices[option.id] || option.choices[0],
+            selectedChoice: itemChoices[option.id] || option.choices[0].id,
           })) || [],
         }
       })
@@ -72,19 +74,19 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
   }
 
   const groupedItems = menuItems.reduce((groups, item) => {
-    const group = groups[item.type] || []
+    const group = groups[item.category] || []
     group.push(item)
-    return { ...groups, [item.type]: group }
+    return { ...groups, [item.category]: group }
   }, {} as Record<string, MenuItemWithOptions[]>)
 
   return (
     <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl">
       <div className="px-4 py-6 sm:p-8">
         <div className="space-y-8">
-          {Object.entries(groupedItems).map(([type, items]) => (
-            <div key={type}>
+          {Object.entries(groupedItems).map(([category, items]) => (
+            <div key={category}>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}s
+                {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}s
               </h3>
               <div className="space-y-4">
                 {items.map((item) => (
@@ -139,13 +141,13 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                           <div key={option.id}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               {option.name}
-                              {option.required && (
+                              {option.minChoices > 0 && (
                                 <span className="text-red-500 ml-1">*</span>
                               )}
                             </label>
                             <select
                               value={
-                                choices[item.id]?.[option.id] || option.choices[0]
+                                choices[item.id]?.[option.id] || option.choices[0].id
                               }
                               onChange={(e) =>
                                 handleChoiceChange(
@@ -157,8 +159,8 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                               className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             >
                               {option.choices.map((choice) => (
-                                <option key={choice} value={choice}>
-                                  {choice}
+                                <option key={choice.id} value={choice.id}>
+                                  {choice.name}
                                 </option>
                               ))}
                             </select>
