@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
 
     try {
       // Send password reset email
-      const emailHtml = generatePasswordResetEmail(token)
+      const baseUrl = request.nextUrl.origin
+      const emailHtml = generatePasswordResetEmail(token, baseUrl)
       await sendEmail({
         to: email,
         subject: "Reset your FastFilms password",

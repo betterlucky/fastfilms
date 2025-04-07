@@ -126,8 +126,8 @@ export function generateVerificationEmail(token: string) {
   `
 }
 
-export function generatePasswordResetEmail(token: string) {
-  const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`
+export function generatePasswordResetEmail(token: string, baseUrl: string) {
+  const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
   return `
     <!DOCTYPE html>
