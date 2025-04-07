@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/nav";
+import { Nav } from "@/components/nav";
 import { Providers } from "@/components/providers";
 
 const inter = Inter({ 
@@ -42,10 +42,14 @@ export default function RootLayout({
     <html lang="en-GB" className={cn("h-full", inter.variable)}>
       <body className="min-h-full bg-gray-50">
         <Providers>
-          <Navbar />
-          <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </main>
+          <div className="flex min-h-screen">
+            <Nav />
+            <div className="flex-1">
+              <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+                {children}
+              </main>
+            </div>
+          </div>
         </Providers>
       </body>
     </html>

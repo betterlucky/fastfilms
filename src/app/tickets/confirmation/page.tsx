@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 interface Ticket {
   id: string;
@@ -15,7 +15,7 @@ interface Ticket {
   screeningDate: string;
 }
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [ticket, setTicket] = useState<Ticket | null>(null);
@@ -98,9 +98,7 @@ export default function ConfirmationPage() {
             </p>
 
             <div className="mt-6">
-              <div
-                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:rounded-lg"
-              >
+              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <dl className="flex flex-wrap">
                   <div className="flex-auto pl-6 pt-6">
                     <dt className="text-sm font-medium text-gray-900">Ticket ID</dt>
@@ -121,7 +119,7 @@ export default function ConfirmationPage() {
 
                   <div className="mt-4 flex w-full flex-none gap-x-4 px-6 pb-6">
                     <dt>
-                      <svg className="h-6 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <svg className="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                       </svg>
                     </dt>
@@ -152,5 +150,25 @@ export default function ConfirmationPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          <main>
+            <div className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                Loading...
+              </h1>
+            </div>
+          </main>
+        </div>
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
   );
 } 
