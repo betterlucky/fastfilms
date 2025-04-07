@@ -14,6 +14,7 @@ interface UserFormProps {
 export function UserForm({ user }: UserFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(user.role === 'ADMIN')
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -28,7 +29,7 @@ export function UserForm({ user }: UserFormProps) {
         body: JSON.stringify({
           name: formData.get('name'),
           email: formData.get('email'),
-          isAdmin: formData.get('isAdmin') === 'on',
+          isAdmin: isAdmin,
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -76,8 +77,8 @@ export function UserForm({ user }: UserFormProps) {
         <div className="flex items-center space-x-2">
           <Checkbox
             id="isAdmin"
-            name="isAdmin"
-            defaultChecked={user.role === 'ADMIN'}
+            checked={isAdmin}
+            onCheckedChange={(checked) => setIsAdmin(checked === true)}
           />
           <label
             htmlFor="isAdmin"
