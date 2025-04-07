@@ -162,7 +162,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
             // Initialize new slots, auto-selecting single choices if minChoices > 0
             while (updatedOptions[option.id].length < newQuantity) {
               updatedOptions[option.id].push(
-                option.choices.length === 1 && option.minChoices > 0 ? [option.choices[0].id] : []
+                option.choices.length === 1 ? [option.choices[0].id] : []
               );
             }
           });
@@ -447,57 +447,51 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                             </div>
                                           </RadioGroup>
                                         </div>
-                                      ) : (
+                                      ) : option.choices.length > 1 ? (
                                         <div className="space-y-1">
                                           <div className="flex items-center justify-between">
                                             <p className="text-sm font-medium">
                                               {option.name}
-                                              {option.minChoices > 0 && option.choices.length > 1 && (
+                                              {option.minChoices > 0 && (
                                                 <span className="text-red-500 ml-1">*</span>
                                               )}
                                             </p>
-                                            {option.choices.length > 1 && (
-                                              <p className="text-xs text-gray-500">
-                                                {option.minChoices === option.maxChoices
-                                                  ? `Select ${option.minChoices}`
-                                                  : `Select ${option.minChoices}-${option.maxChoices}`}
-                                              </p>
-                                            )}
+                                            <p className="text-xs text-gray-500">
+                                              {option.minChoices === option.maxChoices
+                                                ? `Select ${option.minChoices}`
+                                                : `Select ${option.minChoices}-${option.maxChoices}`}
+                                            </p>
                                           </div>
-                                          {option.choices.length === 1 ? (
-                                            null
-                                          ) : (
-                                            <Select
-                                              value={menuSelections[item.id]?.options[option.id]?.[index]?.join(',') || ''}
-                                              onValueChange={(value) => handleOptionChoiceChange(
-                                                item.id,
-                                                option.id,
-                                                value ? value.split(',') : [],
-                                                index
-                                              )}
-                                            >
-                                              <SelectTrigger className={cn(
-                                                "bg-white",
-                                                validation[item.id]?.[option.id]?.isValid === false && "border-red-500"
-                                              )}>
-                                                <SelectValue placeholder={`Select ${option.name.toLowerCase()}`} />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {option.choices.map(choice => (
-                                                  <SelectItem 
-                                                    key={choice.id} 
-                                                    value={choice.id}
-                                                    className="bg-white hover:bg-gray-100"
-                                                  >
-                                                    {choice.name}
-                                                    {choice.priceAdjustment > 0 && ` (+£${choice.priceAdjustment.toFixed(2)})`}
-                                                  </SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          )}
+                                          <Select
+                                            value={menuSelections[item.id]?.options[option.id]?.[index]?.join(',') || ''}
+                                            onValueChange={(value) => handleOptionChoiceChange(
+                                              item.id,
+                                              option.id,
+                                              value ? value.split(',') : [],
+                                              index
+                                            )}
+                                          >
+                                            <SelectTrigger className={cn(
+                                              "bg-white",
+                                              validation[item.id]?.[option.id]?.isValid === false && "border-red-500"
+                                            )}>
+                                              <SelectValue placeholder={`Select ${option.name.toLowerCase()}`} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {option.choices.map(choice => (
+                                                <SelectItem 
+                                                  key={choice.id} 
+                                                  value={choice.id}
+                                                  className="bg-white hover:bg-gray-100"
+                                                >
+                                                  {choice.name}
+                                                  {choice.priceAdjustment > 0 && ` (+£${choice.priceAdjustment.toFixed(2)})`}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
                                         </div>
-                                      )}
+                                      ) : null}
                                     </div>
                                   ))}
                                   {validation[item.id] && Object.values(validation[item.id]).some(v => !v.isValid) && (
