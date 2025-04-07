@@ -326,17 +326,11 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
               <p className="text-sm text-gray-500">
                 {isAdmin ? "Minimum £0.01 (Admin testing mode)" : "Minimum £5.00"}
               </p>
-              <div className="mt-2 space-y-2">
-                {charity ? (
-                  <p className="text-sm text-green-600">
-                    <span className="font-medium">Support {charity.name}:</span> You can choose to pay more than the minimum price of £5.00. Any money taken beyond what's needed to make the show happen will be donated to {charity.name}.
-                  </p>
-                ) : (
-                  <p className="text-sm text-green-600">
-                    <span className="font-medium">Flexible Pricing:</span> You can choose to pay more than the minimum price. This helps ensure the screening gets funded and supports the venue.
-                  </p>
-                )}
-              </div>
+              {charity && (
+                <p className="text-sm text-green-600 mt-2">
+                  <span className="font-medium">Support {charity.name}:</span> You can choose to pay more than the minimum price of £5.00. Any money taken beyond what's needed to make the show happen will be donated to {charity.name}.
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-500">£</span>
@@ -369,6 +363,41 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
               </p>
             </div>
           )}
+
+          <div>
+            <h2 className="text-lg font-semibold">Pay It Forward</h2>
+            <p className="text-sm text-gray-500 mb-2">
+              Have you been on the receiving end of a random act of kindness recently? Or perhaps just having a good month? Here's a chance to pay it forward and buy tickets for someone that might otherwise miss out.
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              If you feel you can't afford to buy tickets, then give us an email at{" "}
+              <a 
+                href="mailto:classicsbackonscreen+PIF@gmail.com" 
+                className="text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                classicsbackonscreen+PIF@gmail.com
+              </a>{" "}
+              and we'll put you on the waiting list for any tickets donated this way, no questions asked.
+            </p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Number of Pay it Forward Tickets</p>
+                  <p className="text-sm text-gray-500">£{settings.minimumTicketPrice.toFixed(2)} per ticket</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    name="payItForwardTickets"
+                    min="0"
+                    value={payItForwardTickets}
+                    onChange={(e) => setPayItForwardTickets(parseInt(e.target.value))}
+                    className="w-20"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {menuItems.length > 0 && (
             <div className="mt-6">
@@ -491,7 +520,18 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                             </SelectContent>
                                           </Select>
                                         </div>
-                                      ) : null}
+                                      ) : (
+                                        <div className="space-y-1">
+                                          <p className="text-sm font-medium">
+                                            {option.name}
+                                            {option.choices[0].priceAdjustment > 0 && (
+                                              <span className="text-gray-500 ml-1">
+                                                (+£{option.choices[0].priceAdjustment.toFixed(2)})
+                                              </span>
+                                            )}
+                                          </p>
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                                   {validation[item.id] && Object.values(validation[item.id]).some(v => !v.isValid) && (
@@ -531,41 +571,6 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
             <div className="flex justify-between font-medium mt-2">
               <span>Total</span>
               <span>£{totals.grandTotal.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-lg font-semibold">Pay It Forward</h2>
-        <p className="text-sm text-gray-500 mb-2">
-          Have you been on the receiving end of a random act of kindness recently? Or perhaps just having a good month? Here's a chance to pay it forward and buy tickets for someone that might otherwise miss out.
-        </p>
-        <p className="text-sm text-gray-500 mb-4">
-          If you feel you can't afford to buy tickets, then give us an email at{" "}
-          <a 
-            href="mailto:classicsbackonscreen+PIF@gmail.com" 
-            className="text-blue-600 hover:text-blue-800 hover:underline"
-          >
-            classicsbackonscreen+PIF@gmail.com
-          </a>{" "}
-          and we'll put you on the waiting list for any tickets donated this way, no questions asked.
-        </p>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Number of Pay it Forward Tickets</p>
-              <p className="text-sm text-gray-500">£{settings.minimumTicketPrice.toFixed(2)} per ticket</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                name="payItForwardTickets"
-                min="0"
-                value={payItForwardTickets}
-                onChange={(e) => setPayItForwardTickets(parseInt(e.target.value))}
-                className="w-20"
-              />
             </div>
           </div>
         </div>
