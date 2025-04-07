@@ -5,6 +5,9 @@ import { sendGuestListsForToday } from "@/lib/cron/send-guest-lists"
 // This secret should match the one set in your Vercel project settings
 const CRON_SECRET = process.env.CRON_SECRET
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET(request: Request) {
   try {
     const headersList = headers()

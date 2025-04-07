@@ -14,7 +14,23 @@ export default async function CampaignPage({
 
   const campaign = await prisma.campaign.findUnique({
     where: { id },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      movieTitle: true,
+      screeningDate: true,
+      screeningTime: true,
+      ticketCap: true,
+      currentTickets: true,
+      fundingTarget: true,
+      currentFunding: true,
+      customBlurb: true,
+      posterPath: true,
+      deadlineDate: true,
+      screenId: true,
+      charityId: true,
+      venueId: true,
       venue: {
         select: {
           id: true,
