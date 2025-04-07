@@ -6,6 +6,7 @@ import { toggleCampaignFeatured } from "@/lib/campaigns";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 export async function toggleFeature(campaignId: string) {
   const session = await getServerSession(authOptions);
@@ -70,121 +71,126 @@ export async function updateCustomBlurb(campaignId: string, customBlurb: string 
   revalidatePath(`/campaigns/${campaignId}`);
 }
 
+async function checkAdminAccess() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.email) {
+    throw new Error("Not authenticated")
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { role: true }
+  })
+
+  if (user?.role !== "ADMIN") {
+    throw new Error("Not authorized")
+  }
+}
+
 export async function handleCustomBlurbUpdate(formData: FormData) {
-  'use server'
-  const campaignId = formData.get('campaignId') as string
-  const customBlurb = formData.get('customBlurb') as string
-  await updateCustomBlurb(campaignId, customBlurb)
+  await checkAdminAccess()
+
+  const campaignId = formData.get("campaignId") as string
+  const customBlurb = formData.get("customBlurb") as string
+
+  await prisma.campaign.update({
+    where: { id: campaignId },
+    data: { customBlurb }
+  })
+
+  revalidatePath(`/campaigns/${campaignId}`)
 }
 
 export async function handleTicketCapUpdate(formData: FormData) {
-  'use server'
-  const campaignId = formData.get('campaignId') as string
-  const ticketCap = parseInt(formData.get('ticketCap') as string)
-  await updateTicketCap(campaignId, ticketCap)
+  await checkAdminAccess()
+
+  const campaignId = formData.get("campaignId") as string
+  const ticketCap = parseInt(formData.get("ticketCap") as string)
+
+  if (isNaN(ticketCap) || ticketCap < 0) {
+    throw new Error("Invalid ticket cap")
+  }
+
+  await prisma.campaign.update({
+    where: { id: campaignId },
+    data: { ticketCap }
+  })
+
+  revalidatePath(`/campaigns/${campaignId}`)
 }
 
 export async function updateScreeningDateTime(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.isAdmin) {
-    throw new Error("Unauthorized");
+  await checkAdminAccess()
+
+  const campaignId = formData.get("campaignId") as string
+  const screeningDate = formData.get("screeningDate") as string
+  const screeningTime = formData.get("screeningTime") as string
+
+  if (!screeningDate || !screeningTime) {
+    throw new Error("Missing required fields")
   }
-
-  const campaignId = formData.get('campaignId') as string;
-  const screeningDate = formData.get('screeningDate') as string;
-  const screeningTime = formData.get('screeningTime') as string;
-
-  // Combine date and time into a single DateTime
-  const [hours, minutes] = screeningTime.split(':').map(Number);
-  const date = new Date(screeningDate);
-  date.setHours(hours, minutes);
 
   await prisma.campaign.update({
     where: { id: campaignId },
     data: {
-      screeningDate: date,
-      screeningTime: screeningTime,
-    },
-  });
+      screeningDate: new Date(screeningDate),
+      screeningTime
+    }
+  })
 
-  revalidatePath("/");
-  revalidatePath(`/campaigns/${campaignId}`);
+  revalidatePath(`/campaigns/${campaignId}`)
 }
 
 export async function updateDeadlineDate(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.isAdmin) {
-    throw new Error("Unauthorized");
-  }
+  await checkAdminAccess()
 
-  const campaignId = formData.get('campaignId') as string;
-  const deadlineDate = formData.get('deadlineDate') as string;
+  const campaignId = formData.get("campaignId") as string
+  const deadlineDate = formData.get("deadlineDate") as string
+
+  if (!deadlineDate) {
+    throw new Error("Missing deadline date")
+  }
 
   await prisma.campaign.update({
     where: { id: campaignId },
     data: {
-      deadlineDate: new Date(deadlineDate),
-    },
-  });
+      deadlineDate: new Date(deadlineDate)
+    }
+  })
 
-  revalidatePath("/");
-  revalidatePath(`/campaigns/${campaignId}`);
+  revalidatePath(`/campaigns/${campaignId}`)
 }
 
 export async function updateCharity(formData: FormData) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user || session.user.role !== "ADMIN") {
-    throw new Error("Unauthorized")
-  }
+  await checkAdminAccess()
 
   const campaignId = formData.get("campaignId") as string
   const charityId = formData.get("charityId") as string
 
-  try {
-    await prisma.campaign.update({
-      where: { id: campaignId },
-      data: {
-        charityId: charityId === "none" ? null : charityId
-      }
-    })
+  await prisma.campaign.update({
+    where: { id: campaignId },
+    data: {
+      charityId: charityId === "none" ? null : charityId
+    }
+  })
 
-    revalidatePath(`/campaigns/${campaignId}`)
-  } catch (error) {
-    console.error("Error updating charity:", error)
-    throw new Error("Failed to update charity")
-  }
+  revalidatePath(`/campaigns/${campaignId}`)
 }
 
 export async function updateCampaignMenuItems(formData: FormData) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user || session.user.role !== "ADMIN") {
-    throw new Error("Unauthorized")
-  }
+  await checkAdminAccess()
 
   const campaignId = formData.get("campaignId") as string
-  const menuItemIds = formData.getAll("menuItemIds[]") as string[]
+  const menuItemIds = formData.getAll("menuItemIds[]").map(id => id.toString())
 
-  try {
-    // First, remove all existing menu items
-    await prisma.campaignMenuItem.deleteMany({
-      where: { campaignId }
-    })
-
-    // Then add the selected menu items
-    if (menuItemIds.length > 0) {
-      await prisma.campaignMenuItem.createMany({
-        data: menuItemIds.map(menuItemId => ({
-          campaignId,
-          menuItemId
-        }))
-      })
+  await prisma.campaign.update({
+    where: { id: campaignId },
+    data: {
+      menuItems: {
+        set: menuItemIds.map(id => ({ id }))
+      }
     }
+  })
 
-    revalidatePath(`/campaigns/${campaignId}`)
-  } catch (error) {
-    console.error("Error updating campaign menu items:", error)
-    throw new Error("Failed to update campaign menu items")
-  }
+  revalidatePath(`/campaigns/${campaignId}`)
 } 
