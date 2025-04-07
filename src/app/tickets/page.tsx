@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { formatDate } from "@/lib/utils"
+import { LocalizedDate } from "@/components/LocalizedDate"
 
 export const dynamic = 'force-dynamic'
 
@@ -84,12 +86,7 @@ export default async function TicketsPage() {
                         </svg>
                       </dt>
                       <dd className="text-sm leading-6 text-gray-900">
-                        {new Date(ticket.campaign.screeningDate).toLocaleDateString("en-GB", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        <LocalizedDate date={formatDate(ticket.campaign.screeningDate)} />
                       </dd>
                     </div>
                   </dl>

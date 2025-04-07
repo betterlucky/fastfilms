@@ -4,9 +4,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'fastfilms-uploads.s3.eu-west-2.amazonaws.com',
+        hostname: 'image.tmdb.org',
         port: '',
-        pathname: '/**',
+        pathname: '/t/p/**',
       },
     ],
   },

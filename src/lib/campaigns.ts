@@ -1,5 +1,5 @@
 import { prisma } from "./db";
-import { formatPrice, formatDate, calculateProgress, calculateTimeLeft } from "./utils";
+import { formatPrice, formatDate, calculateProgress } from "./utils";
 
 export async function getFeaturedCampaign() {
   // First try to get the manually featured campaign that's still active and not past its deadline
@@ -131,4 +131,11 @@ export async function toggleCampaignFeatured(campaignId: string) {
   });
 
   return campaign;
+}
+
+export function calculateTimeLeft(deadlineDate: Date): { days: number } {
+  const now = new Date()
+  const difference = deadlineDate.getTime() - now.getTime()
+  const days = Math.ceil(difference / (1000 * 60 * 60 * 24))
+  return { days: Math.max(days, 0) }
 } 
