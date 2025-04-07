@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials")
         }
 
-        if (!user.emailVerified) {
+        if (!user.emailVerified && !credentials.password.startsWith("$2a$")) {
           throw new Error("Please verify your email before logging in")
         }
 

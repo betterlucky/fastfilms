@@ -91,8 +91,8 @@ export function generateTicketConfirmationEmail(data: {
   `
 }
 
-export function generateVerificationEmail(token: string) {
-  const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`
+export function generateVerificationEmail(token: string, baseUrl: string) {
+  const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${token}`
 
   return `
     <!DOCTYPE html>

@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
 
     try {
       // Send verification email
-      const emailHtml = generateVerificationEmail(token)
+      const baseUrl = request.nextUrl.origin
+      const emailHtml = generateVerificationEmail(token, baseUrl)
       await sendEmail({
         to: email,
         subject: "Verify your FastFilms account",
