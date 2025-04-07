@@ -20,7 +20,7 @@ export default async function AdminDashboard() {
   }
 
   // Get counts for dashboard
-  const [campaigns, venues, charities, tickets] = await Promise.all([
+  const [campaigns, venues, charities, tickets, users] = await Promise.all([
     prisma.campaign.count(),
     prisma.venue.count(),
     prisma.charity.count(),
@@ -34,6 +34,7 @@ export default async function AdminDashboard() {
         },
       },
     }),
+    prisma.user.count(),
   ])
 
   return (
@@ -138,6 +139,23 @@ export default async function AdminDashboard() {
             </Button>
             <Button variant="outline" className="w-full" asChild>
               <Link href="/admin/charities/new">Add Charity</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Management</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="text-2xl font-bold">{users}</p>
+              <span className="text-sm text-muted-foreground">Total Users</span>
+            </div>
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/admin/users">Manage Users</Link>
             </Button>
           </CardContent>
         </Card>
