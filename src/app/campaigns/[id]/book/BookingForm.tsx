@@ -524,11 +524,6 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                         <div className="space-y-1">
                                           <p className="text-sm font-medium">
                                             {option.name}
-                                            {option.choices[0].priceAdjustment > 0 && (
-                                              <span className="text-gray-500 ml-1">
-                                                (+£{option.choices[0].priceAdjustment.toFixed(2)})
-                                              </span>
-                                            )}
                                           </p>
                                         </div>
                                       )}
