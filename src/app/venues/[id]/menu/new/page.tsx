@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import MenuItemForm from "../MenuItemForm"
+import { Button } from "@/components/ui/button"
 
 export default async function NewMenuItemPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
@@ -30,6 +31,15 @@ export default async function NewMenuItemPage({ params }: { params: { id: string
               <CardTitle>Add Menu Item for {venue.name}</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold">New Menu Item</h1>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.location.href = `/venues/${params.id}/menu`}
+                >
+                  Back to Menu
+                </Button>
+              </div>
               <MenuItemForm venueId={venue.id} />
             </CardContent>
           </Card>

@@ -1,6 +1,8 @@
+'use client'
+
 import { MenuItem, MenuItemOption, MenuItemOptionChoice } from "@prisma/client"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface MenuItemWithOptions extends MenuItem {
@@ -15,28 +17,38 @@ interface MenuItemListProps {
 }
 
 export default function MenuItemList({ venueId, menuItems }: MenuItemListProps) {
+  const router = useRouter()
   const groupedItems = menuItems.reduce((groups, item) => {
-    const group = groups[item.category] || []
-    group.push(item)
-    return { ...groups, [item.category]: group }
+    const category = item.category || 'Uncategorized'
+    if (!groups[category]) {
+      groups[category] = []
+    }
+    groups[category].push(item)
+    return groups
   }, {} as Record<string, MenuItemWithOptions[]>)
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Menu Items</h1>
+        <Button 
+          onClick={() => router.push(`/admin/venues/${venueId}/menu/new`)}
+        >
+          Add Item
+        </Button>
+      </div>
       {Object.entries(groupedItems).map(([category, items]) => (
         <div key={category}>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {category}
-          </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <h2 className="text-2xl font-bold mb-4">{category}</h2>
+          <div className="grid gap-4">
             {items.map((item) => (
               <Card key={item.id}>
                 <CardHeader>
-                  <CardTitle className="text-lg">{item.name}</CardTitle>
+                  <CardTitle>{item.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-500 mb-2">{item.description}</p>
-                  <p className="text-sm font-medium mb-4">£{Number(item.price).toFixed(2)}</p>
+                  <p className="text-gray-600">{item.description}</p>
+                  <p className="text-lg font-semibold mt-2">£{item.price.toFixed(2)}</p>
                   
                   {item.options.length > 0 && (
                     <div className="space-y-2">
@@ -60,15 +72,19 @@ export default function MenuItemList({ venueId, menuItems }: MenuItemListProps) 
                   )}
 
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/admin/venues/${venueId}/menu/${item.id}/edit`}>
-                        Edit
-                      </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => router.push(`/admin/venues/${venueId}/menu/${item.id}/edit`)}
+                    >
+                      Edit
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/admin/venues/${venueId}/menu/${item.id}/delete`}>
-                        Delete
-                      </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => router.push(`/admin/venues/${venueId}/menu/${item.id}/delete`)}
+                    >
+                      Delete
                     </Button>
                   </div>
                 </CardContent>

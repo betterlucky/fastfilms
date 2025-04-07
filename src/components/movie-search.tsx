@@ -79,8 +79,10 @@ export default function FilmSearch({ onSelect }: FilmSearchProps) {
                   <Image
                     src={`https://image.tmdb.org/t/p/w92${film.poster_path}`}
                     alt={film.title}
-                    fill
-                    className="object-cover"
+                    width={92}
+                    height={138}
+                    className="rounded-md"
+                    sizes="(max-width: 768px) 92px, 92px"
                   />
                 </div>
               )}

@@ -23,6 +23,14 @@ export default function MenuItemList({ venueId, menuItems }: MenuItemListProps) 
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Menu Items</h1>
+        <Button 
+          onClick={() => window.location.href = `/venues/${venueId}/menu/new`}
+        >
+          Add Item
+        </Button>
+      </div>
       {Object.entries(groupedItems).map(([category, items]) => (
         <div key={category}>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">

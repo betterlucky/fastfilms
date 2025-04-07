@@ -296,9 +296,19 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">Tickets</h2>
-        <div className="space-y-4">
+      {charity && (
+        <div className="p-4 bg-green-50 rounded-lg">
+          <p className="text-sm text-green-700">
+            If you are able to pay more for your ticket, you'll help make this screening more likely to happen as well as supporting {charity.name}'s important work.
+          </p>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+            Number of Tickets
+          </label>
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Number of Tickets</p>
@@ -319,7 +329,12 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
               />
             </div>
           </div>
+        </div>
 
+        <div>
+          <label htmlFor="ticketPrice" className="block text-sm font-medium text-gray-700">
+            Price per Ticket
+          </label>
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Price per Ticket</p>
@@ -340,228 +355,231 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
               />
             </div>
           </div>
+        </div>
 
-          {charity && (
-            <div className="flex items-center gap-2 p-4 bg-green-50 rounded-lg">
-              {charity.logoPath && (
-                <div className="relative w-12 h-12">
-                  <Image
-                    src={charity.logoPath}
-                    alt={`${charity.name} logo`}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              )}
-              <p className="text-sm text-green-700">
-                Supporting {charity.name} with your ticket purchase
-              </p>
-            </div>
-          )}
+        {charity && (
+          <div className="flex items-center gap-2 p-4 bg-green-50 rounded-lg">
+            {charity.logoPath && (
+              <div className="relative w-12 h-12">
+                <Image
+                  src={charity.logoPath}
+                  alt={`${charity.name} logo`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
-          <div>
-            <h2 className="text-lg font-semibold">Pay It Forward</h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Have you been on the receiving end of a random act of kindness recently? Or perhaps just having a good month? Here's a chance to pay it forward and buy tickets for someone that might otherwise miss out.
-            </p>
-            <p className="text-sm text-gray-500 mb-4">
-              If you feel you can't afford to buy tickets, then give us an email at{" "}
-              <a 
-                href="mailto:classicsbackonscreen+PIF@gmail.com" 
-                className="text-blue-600 hover:text-blue-800 hover:underline"
-              >
-                classicsbackonscreen+PIF@gmail.com
-              </a>{" "}
-              and we'll put you on the waiting list for any tickets donated this way, no questions asked.
-            </p>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Number of Pay it Forward Tickets</p>
-                  <p className="text-sm text-gray-500">£{settings.minimumTicketPrice.toFixed(2)} per ticket</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    name="payItForwardTickets"
-                    min="0"
-                    value={payItForwardTickets}
-                    onChange={(e) => setPayItForwardTickets(parseInt(e.target.value))}
-                    className="w-20"
-                  />
-                </div>
+        <div>
+          <h2 className="text-lg font-semibold">Pay It Forward</h2>
+          <p className="text-sm text-gray-500 mb-2">
+            Have you been on the receiving end of a random act of kindness recently? Or perhaps just having a good month? Here's a chance to pay it forward and buy tickets for someone that might otherwise miss out.
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            If you feel you can't afford to buy tickets, then give us an email at{" "}
+            <a 
+              href="mailto:classicsbackonscreen+PIF@gmail.com" 
+              className="text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              classicsbackonscreen+PIF@gmail.com
+            </a>{" "}
+            and we'll put you on the waiting list for any tickets donated this way, no questions asked.
+          </p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Number of Pay it Forward Tickets</p>
+                <p className="text-sm text-gray-500">£{settings.minimumTicketPrice.toFixed(2)} per ticket</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  name="payItForwardTickets"
+                  min="0"
+                  value={payItForwardTickets}
+                  onChange={(e) => setPayItForwardTickets(parseInt(e.target.value))}
+                  className="w-20"
+                />
               </div>
             </div>
           </div>
+        </div>
 
-          {menuItems.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-4">Food & Drinks</h2>
-              <div className="space-y-6">
-                {Object.entries(groupedMenuItems).map(([category, items]) => (
-                  <Card key={category} className="p-4">
-                    <h3 className="font-medium mb-3">{category}</h3>
-                    <div className="space-y-4">
-                      {items.map((item) => (
-                        <div key={item.id} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{item.name}</p>
-                              {item.description && (
-                                <p className="text-sm text-gray-500">{item.description}</p>
-                              )}
-                              <p className="text-sm">£{item.price.toFixed(2)}</p>
-                            </div>
-                            <Input
-                              type="number"
-                              min="0"
-                              value={menuSelections[item.id]?.quantity || 0}
-                              onChange={(e) => handleMenuItemQuantityChange(item.id, parseInt(e.target.value))}
-                              className="w-20"
-                            />
+        {menuItems.length > 0 && (
+          <div className="mt-6">
+            <h2 className="text-lg font-semibold mb-4">Food & Drinks</h2>
+            <div className="space-y-6">
+              {Object.entries(groupedMenuItems).map(([category, items]) => (
+                <Card key={category} className="p-4">
+                  <h3 className="font-medium mb-3">{category}</h3>
+                  <div className="space-y-4">
+                    {items.map((item) => (
+                      <div key={item.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{item.name}</p>
+                            {item.description && (
+                              <p className="text-sm text-gray-500">{item.description}</p>
+                            )}
+                            <p className="text-sm">£{item.price.toFixed(2)}</p>
                           </div>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={menuSelections[item.id]?.quantity || 0}
+                            onChange={(e) => handleMenuItemQuantityChange(item.id, parseInt(e.target.value))}
+                            className="w-20"
+                          />
+                        </div>
 
-                          {(menuSelections[item.id]?.quantity || 0) > 0 && (
-                            <div className="ml-4 space-y-4">
-                              {Array.from({ length: menuSelections[item.id].quantity }).map((_, index) => (
-                                <div key={index} className="space-y-2 border-l-2 border-gray-200 pl-4">
-                                  <p className="text-sm font-medium text-gray-500">Item {index + 1}</p>
-                                  {item.options.map(option => (
-                                    <div key={option.id} className="space-y-2">
-                                      {option.minChoices === 0 ? (
-                                        <div className="mt-4">
-                                          <p className="text-sm font-medium">{option.name}</p>
-                                          <RadioGroup
-                                            className="mt-1.5"
-                                            value={menuSelections[item.id]?.options[option.id]?.[index]?.[0] || "none"}
-                                            onValueChange={(value) => {
-                                              handleOptionChoiceChange(
-                                                item.id,
-                                                option.id,
-                                                value === "none" ? [] : [value],
-                                                index
-                                              );
-                                            }}
-                                          >
-                                            <div className="space-y-1.5">
-                                              <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="none" id={`${item.id}-${option.id}-${index}-none`} />
-                                                <label
-                                                  htmlFor={`${item.id}-${option.id}-${index}-none`}
-                                                  className="text-sm text-gray-600"
-                                                >
-                                                  No thanks
-                                                </label>
-                                              </div>
-                                              {option.choices.map(choice => (
-                                                <div key={choice.id} className="flex items-center space-x-2">
-                                                  <RadioGroupItem 
-                                                    value={choice.id} 
-                                                    id={`${item.id}-${option.id}-${index}-${choice.id}`}
-                                                  />
-                                                  <label
-                                                    htmlFor={`${item.id}-${option.id}-${index}-${choice.id}`}
-                                                    className="text-sm text-gray-600"
-                                                  >
-                                                    {choice.name}
-                                                    {choice.priceAdjustment > 0 && ` (+£${choice.priceAdjustment.toFixed(2)})`}
-                                                  </label>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </RadioGroup>
-                                        </div>
-                                      ) : option.choices.length > 1 ? (
-                                        <div className="space-y-1">
-                                          <div className="flex items-center justify-between">
-                                            <p className="text-sm font-medium">
-                                              {option.name}
-                                              {option.minChoices > 0 && (
-                                                <span className="text-red-500 ml-1">*</span>
-                                              )}
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                              {option.minChoices === option.maxChoices
-                                                ? `Select ${option.minChoices}`
-                                                : `Select ${option.minChoices}-${option.maxChoices}`}
-                                            </p>
-                                          </div>
-                                          <Select
-                                            value={menuSelections[item.id]?.options[option.id]?.[index]?.join(',') || ''}
-                                            onValueChange={(value) => handleOptionChoiceChange(
+                        {(menuSelections[item.id]?.quantity || 0) > 0 && (
+                          <div className="ml-4 space-y-4">
+                            {Array.from({ length: menuSelections[item.id].quantity }).map((_, index) => (
+                              <div key={index} className="space-y-2 border-l-2 border-gray-200 pl-4">
+                                <p className="text-sm font-medium text-gray-500">Item {index + 1}</p>
+                                {item.options.map(option => (
+                                  <div key={option.id} className="space-y-2">
+                                    {option.minChoices === 0 ? (
+                                      <div className="mt-4">
+                                        <p className="text-sm font-medium">{option.name}</p>
+                                        <RadioGroup
+                                          className="mt-1.5"
+                                          value={menuSelections[item.id]?.options[option.id]?.[index]?.[0] || "none"}
+                                          onValueChange={(value) => {
+                                            handleOptionChoiceChange(
                                               item.id,
                                               option.id,
-                                              value ? value.split(',') : [],
+                                              value === "none" ? [] : [value],
                                               index
-                                            )}
-                                          >
-                                            <SelectTrigger className={cn(
-                                              "bg-white",
-                                              validation[item.id]?.[option.id]?.isValid === false && "border-red-500"
-                                            )}>
-                                              <SelectValue placeholder={`Select ${option.name.toLowerCase()}`} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {option.choices.map(choice => (
-                                                <SelectItem 
-                                                  key={choice.id} 
-                                                  value={choice.id}
-                                                  className="bg-white hover:bg-gray-100"
+                                            );
+                                          }}
+                                        >
+                                          <div className="space-y-1.5">
+                                            <div className="flex items-center space-x-2">
+                                              <RadioGroupItem value="none" id={`${item.id}-${option.id}-${index}-none`} />
+                                              <label
+                                                htmlFor={`${item.id}-${option.id}-${index}-none`}
+                                                className="text-sm text-gray-600"
+                                              >
+                                                No thanks
+                                              </label>
+                                            </div>
+                                            {option.choices.map(choice => (
+                                              <div key={choice.id} className="flex items-center space-x-2">
+                                                <RadioGroupItem 
+                                                  value={choice.id} 
+                                                  id={`${item.id}-${option.id}-${index}-${choice.id}`}
+                                                />
+                                                <label
+                                                  htmlFor={`${item.id}-${option.id}-${index}-${choice.id}`}
+                                                  className="text-sm text-gray-600"
                                                 >
                                                   {choice.name}
                                                   {choice.priceAdjustment > 0 && ` (+£${choice.priceAdjustment.toFixed(2)})`}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                      ) : (
-                                        <div className="space-y-1">
+                                                </label>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </RadioGroup>
+                                      </div>
+                                    ) : option.choices.length > 1 ? (
+                                      <div className="space-y-1">
+                                        <div className="flex items-center justify-between">
                                           <p className="text-sm font-medium">
                                             {option.name}
+                                            {option.minChoices > 0 && (
+                                              <span className="text-red-500 ml-1">*</span>
+                                            )}
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            {option.minChoices === option.maxChoices
+                                              ? `Select ${option.minChoices}`
+                                              : `Select ${option.minChoices}-${option.maxChoices}`}
                                           </p>
                                         </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                  {validation[item.id] && Object.values(validation[item.id]).some(v => !v.isValid) && (
-                                    <div className="flex items-center gap-2 text-xs text-red-500 mt-1">
-                                      <AlertCircle className="h-4 w-4" />
-                                      <span>Please complete all required selections for each item</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                                        <Select
+                                          value={menuSelections[item.id]?.options[option.id]?.[index]?.join(',') || ''}
+                                          onValueChange={(value) => handleOptionChoiceChange(
+                                            item.id,
+                                            option.id,
+                                            value ? value.split(',') : [],
+                                            index
+                                          )}
+                                        >
+                                          <SelectTrigger className={cn(
+                                            "bg-white",
+                                            validation[item.id]?.[option.id]?.isValid === false && "border-red-500"
+                                          )}>
+                                            <SelectValue placeholder={`Select ${option.name.toLowerCase()}`} />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {option.choices.map(choice => (
+                                              <SelectItem 
+                                                key={choice.id} 
+                                                value={choice.id}
+                                                className="bg-white hover:bg-gray-100"
+                                              >
+                                                {choice.name}
+                                                {choice.priceAdjustment > 0 && ` (+£${choice.priceAdjustment.toFixed(2)})`}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-1">
+                                        <p className="text-sm font-medium">
+                                          {option.name}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                                {validation[item.id] && Object.values(validation[item.id]).some(v => !v.isValid) && (
+                                  <div className="flex items-center gap-2 text-xs text-red-500 mt-1">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <span>Please complete all required selections for each item</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="border-t pt-4">
+          <div className="flex justify-between text-sm text-gray-500">
+            <span>Tickets Subtotal</span>
+            <span>£{totals.subtotal.toFixed(2)}</span>
+          </div>
+          {payItForwardTickets > 0 && (
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Pay It Forward Tickets</span>
+              <span>£{(payItForwardTickets * settings.minimumTicketPrice).toFixed(2)}</span>
             </div>
           )}
-
-          <div className="border-t pt-4">
+          {totals.menuTotal > 0 && (
             <div className="flex justify-between text-sm text-gray-500">
-              <span>Tickets Subtotal</span>
-              <span>£{totals.subtotal.toFixed(2)}</span>
+              <span>Menu Items Total</span>
+              <span>£{totals.menuTotal.toFixed(2)}</span>
             </div>
-            {totals.menuTotal > 0 && (
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>Menu Items Total</span>
-                <span>£{totals.menuTotal.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Transaction Fee</span>
-              <span>£{settings.transactionFee.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-medium mt-2">
-              <span>Total</span>
-              <span>£{totals.grandTotal.toFixed(2)}</span>
-            </div>
+          )}
+          <div className="flex justify-between text-sm text-gray-500">
+            <span>Transaction Fee</span>
+            <span>£{settings.transactionFee.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between font-medium mt-2">
+            <span>Total</span>
+            <span>£{totals.grandTotal.toFixed(2)}</span>
           </div>
         </div>
       </div>

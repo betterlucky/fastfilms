@@ -40,9 +40,20 @@ export default async function CharitiesPage() {
                     <p className="text-gray-500 mt-2">{charity.description}</p>
                   )}
                 </div>
-                <Link href={`/admin/charities/${charity.id}/edit`}>
-                  <Button variant="outline">Edit</Button>
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.location.href = `/admin/charities/${charity.id}/edit`}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="destructive"
+                    onClick={() => window.location.href = `/admin/charities/${charity.id}/delete`}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>

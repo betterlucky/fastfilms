@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Ticket, Campaign, Venue } from "@prisma/client"
 import { formatDate } from "@/lib/utils"
 import { LocalizedDate } from "@/components/LocalizedDate"
+import { Button } from "@/components/ui/button"
 
 type TicketWithDetails = Ticket & {
   campaign: Campaign & {
@@ -109,18 +110,19 @@ export default async function ConfirmationPage({
             </div>
 
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link
-                href="/campaigns"
+              <Button
+                onClick={() => window.location.href = "/campaigns"}
                 className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Browse More Campaigns
-              </Link>
-              <Link
-                href="/tickets"
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => window.location.href = "/tickets"}
                 className="text-sm font-semibold leading-6 text-gray-900"
               >
                 View All Tickets <span aria-hidden="true">→</span>
-              </Link>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,8 +1,9 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { useRouter } from "next/navigation";
 
 interface Campaign {
   id: string;
@@ -39,6 +40,8 @@ interface CampaignHeroProps {
 }
 
 export function CampaignHero({ campaign }: CampaignHeroProps) {
+  const router = useRouter();
+
   return (
     <div className="space-y-12">
       {/* Hero Section */}
@@ -53,7 +56,10 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
 
       {/* Featured Campaign Section */}
       <section className="max-w-4xl mx-auto">
-        <Link href={`/campaigns/${campaign.id}`} className="block group">
+        <div
+          className="block group cursor-pointer"
+          onClick={() => router.push(`/campaigns/${campaign.id}`)}
+        >
           <Card className="border-2 border-primary transition-transform hover:-translate-y-1 hover:shadow-lg">
             <CardHeader>
               <CardTitle className="text-3xl group-hover:text-gray-600">{campaign.movieTitle}</CardTitle>
@@ -123,7 +129,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
               </div>
             </CardFooter>
           </Card>
-        </Link>
+        </div>
       </section>
 
       {/* Features Section */}
@@ -165,8 +171,12 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Browse our upcoming campaigns and help bring cinema to your community.
         </p>
-        <Button asChild variant="outline" size="lg">
-          <Link href="/campaigns">View All Campaigns</Link>
+        <Button 
+          variant="outline" 
+          size="lg"
+          onClick={() => router.push("/campaigns")}
+        >
+          View All Campaigns
         </Button>
       </section>
     </div>

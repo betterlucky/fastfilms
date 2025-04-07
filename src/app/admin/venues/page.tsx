@@ -47,17 +47,33 @@ export default async function VenuesPage() {
               <p className="text-sm text-gray-500">{venue.postcode}</p>
               <p className="text-sm text-gray-500">Screens: {venue._count.screens}</p>
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" asChild size="sm">
-                  <Link href={`/admin/venues/${venue.id}/features`}>Features</Link>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = `/admin/venues/${venue.id}/features`}
+                >
+                  Features
                 </Button>
-                <Button variant="outline" asChild size="sm">
-                  <Link href={`/admin/venues/${venue.id}/menu`}>Manage Menu</Link>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = `/admin/venues/${venue.id}/menu`}
+                >
+                  Manage Menu
                 </Button>
-                <Button variant="outline" asChild size="sm">
-                  <Link href={`/admin/venues/${venue.id}/screens`}>Manage Screens</Link>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = `/admin/venues/${venue.id}/screens`}
+                >
+                  Manage Screens
                 </Button>
-                <Button variant="outline" asChild size="sm">
-                  <Link href={`/admin/venues/${venue.id}/edit`}>Edit Venue</Link>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = `/admin/venues/${venue.id}/edit`}
+                >
+                  Edit Venue
                 </Button>
               </div>
             </CardContent>

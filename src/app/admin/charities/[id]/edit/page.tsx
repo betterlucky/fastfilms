@@ -97,9 +97,12 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
           >
             {isDeleting ? "Deleting..." : "Delete Charity"}
           </Button>
-          <Link href="/admin/charities">
-            <Button variant="outline">Back to Charities</Button>
-          </Link>
+          <Button 
+            variant="outline"
+            onClick={() => window.location.href = "/admin/charities"}
+          >
+            Back to Charities
+          </Button>
         </div>
       </div>
 

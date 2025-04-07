@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { redirect } from "next/navigation"
 import Image from "next/image"
 import BookingForm from "./BookingForm"
+import { BackButton } from "./BackButton"
 
 export default async function BookPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
@@ -101,6 +102,8 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                         src={`https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
                         alt={campaign.movieTitle}
                         fill
+                        priority
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover"
                       />
                     </div>
@@ -110,6 +113,9 @@ export default async function BookPage({ params }: { params: { id: string } }) {
             </CardContent>
           </Card>
         </div>
+      </div>
+      <div className="flex justify-between items-center mb-8">
+        <BackButton campaignId={params.id} />
       </div>
     </div>
   )

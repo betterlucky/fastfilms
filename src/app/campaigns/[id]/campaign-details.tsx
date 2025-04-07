@@ -10,6 +10,7 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import Link from "next/link"
 
 interface CampaignDetailsProps {
   campaign: {
@@ -97,9 +98,15 @@ export default function CampaignDetails({
                     <h1 className="text-2xl font-bold">{campaign.title}</h1>
                     <p className="text-gray-500">{campaign.description}</p>
                     <div className="mt-4">
-                      <Button asChild size="lg" className="w-full md:w-auto">
-                        <a href={`/campaigns/${campaign.id}/book`}>Book Tickets</a>
-                      </Button>
+                      <div className="flex flex-col md:flex-row gap-4">
+                        <Button 
+                          size="lg" 
+                          className="w-full md:w-auto"
+                          onClick={() => window.location.href = `/campaigns/${campaign.id}/book`}
+                        >
+                          Book Tickets
+                        </Button>
+                      </div>
                       {campaign.charityId && (
                         <div className="mt-4 flex items-center gap-2 p-4 bg-green-50 rounded-lg">
                           <p className="text-sm text-green-700">
@@ -115,6 +122,8 @@ export default function CampaignDetails({
                         src={`https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
                         alt={campaign.movieTitle}
                         fill
+                        priority
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover"
                       />
                     </div>

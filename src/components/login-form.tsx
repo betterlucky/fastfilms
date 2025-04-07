@@ -4,6 +4,7 @@ import { useState } from "react"
 import { signIn, useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function LoginForm() {
   const router = useRouter()
@@ -131,20 +132,25 @@ export default function LoginForm() {
           </div>
 
           <div className="text-sm text-center">
-            <Link
-              href="/forgot-password"
+            <Button
+              variant="link"
               className="font-semibold text-indigo-600 hover:text-indigo-500"
+              onClick={() => router.push("/forgot-password")}
             >
               Forgot password?
-            </Link>
+            </Button>
           </div>
         </form>
 
         <p className="mt-10 text-center text-sm text-gray-500">
           Don't have an account?{" "}
-          <Link href="/register" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+          <Button
+            variant="link"
+            className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+            onClick={() => router.push("/register")}
+          >
             Register
-          </Link>
+          </Button>
         </p>
       </div>
     </div>

@@ -127,18 +127,16 @@ export default async function VenuesPage() {
                         </div>
                         <div className="flex space-x-2">
                           <Button type="submit">Update Venue</Button>
-                          <Link
-                            href={`/venues/${venue.id}/screens`}
-                            className="btn-primary"
+                          <Button
+                            onClick={() => window.location.href = `/venues/${venue.id}/screens`}
                           >
                             Manage Screens
-                          </Link>
-                          <Link
-                            href={`/venues/${venue.id}/menu`}
-                            className="btn-primary"
+                          </Button>
+                          <Button
+                            onClick={() => window.location.href = `/venues/${venue.id}/menu`}
                           >
                             Manage Menu
-                          </Link>
+                          </Button>
                         </div>
                       </div>
                     </form>
