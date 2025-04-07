@@ -55,7 +55,7 @@ export default function FilmSearch({ onSelect }: FilmSearchProps) {
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+            <div className="size-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
           </div>
         )}
       </div>
@@ -75,7 +75,7 @@ export default function FilmSearch({ onSelect }: FilmSearchProps) {
               className="flex w-full items-center space-x-3 rounded-lg border p-3 text-left hover:bg-gray-50"
             >
               {film.poster_path && (
-                <div className="relative h-16 w-12 flex-shrink-0 overflow-hidden rounded">
+                <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded">
                   <Image
                     src={`https://image.tmdb.org/t/p/w92${film.poster_path}`}
                     alt={film.title}

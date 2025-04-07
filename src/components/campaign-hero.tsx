@@ -45,19 +45,19 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <section className="text-center space-y-4">
+      <section className="space-y-4 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
           Bring Cinema to Your Community
         </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <p className="mx-auto max-w-3xl text-xl text-gray-600">
           Support and attend community film screenings across Cornwall. Book tickets, pre-order food and drinks, and help bring cinema to your local area.
         </p>
       </section>
 
       {/* Featured Campaign Section */}
-      <section className="max-w-4xl mx-auto">
+      <section className="mx-auto max-w-4xl">
         <div
-          className="block group cursor-pointer"
+          className="group block cursor-pointer"
           onClick={() => router.push(`/campaigns/${campaign.id}`)}
         >
           <Card className="border-2 border-primary transition-transform hover:-translate-y-1 hover:shadow-lg">
@@ -67,7 +67,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               {campaign.posterUrl ? (
-                <div className="aspect-[2/3] relative rounded-lg overflow-hidden">
+                <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
                   <Image
                     src={campaign.posterUrl}
                     alt={campaign.movieTitle}
@@ -76,7 +76,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                   />
                 </div>
               ) : (
-                <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
+                <div className="flex aspect-video items-center justify-center rounded-lg bg-gray-200">
                   <span className="text-gray-500">No poster available</span>
                 </div>
               )}
@@ -97,7 +97,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">Progress: {campaign.progress}%</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="h-2.5 w-full rounded-full bg-gray-200">
                       <div
                         className={`h-2.5 rounded-full ${
                           campaign.progress >= 100
@@ -110,7 +110,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                       />
                     </div>
                     {campaign.progress >= 100 && (
-                      <p className={`text-sm ${campaign.currentTickets >= campaign.ticketCap ? "text-red-500" : "text-green-500"} font-medium`}>
+                      <p className={`text-sm font-medium ${campaign.currentTickets >= campaign.ticketCap ? "text-red-500" : "text-green-500"}`}>
                         {campaign.currentTickets >= campaign.ticketCap
                           ? "SOLD OUT"
                           : "Show confirmed, tickets still available"}
@@ -120,11 +120,11 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between items-center">
+            <CardFooter className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
                 Tickets from £5 + £0.50 fee
               </div>
-              <div className="text-primary font-semibold group-hover:text-gray-600">
+              <div className="font-semibold text-primary group-hover:text-gray-600">
                 Support This Campaign →
               </div>
             </CardFooter>
@@ -133,7 +133,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
       </section>
 
       {/* Features Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Community Powered</CardTitle>
@@ -166,9 +166,9 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
       </section>
 
       {/* Secondary CTA */}
-      <section className="text-center space-y-4">
+      <section className="space-y-4 text-center">
         <h2 className="text-3xl font-bold">Want to See More?</h2>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-xl text-gray-600">
           Browse our upcoming campaigns and help bring cinema to your community.
         </p>
         <Button 
