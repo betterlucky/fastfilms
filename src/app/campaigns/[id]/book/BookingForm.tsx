@@ -326,11 +326,6 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
               <p className="text-sm text-gray-500">
                 {isAdmin ? "Minimum £0.01 (Admin testing mode)" : "Minimum £5.00"}
               </p>
-              {charity && (
-                <p className="text-sm text-green-600 mt-2">
-                  <span className="font-medium">Support {charity.name}:</span> You can choose to pay more than the minimum price of £5.00. Any money taken beyond what's needed to make the show happen will be donated to {charity.name}.
-                </p>
-              )}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-500">£</span>
