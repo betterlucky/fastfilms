@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Nav } from "@/components/nav";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -39,18 +41,23 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en-GB" className={cn("h-full", inter.variable)}>
-      <body className="min-h-full bg-gray-50">
-        <Providers>
-          <div className="flex min-h-screen">
+    <html lang="en" suppressHydrationWarning>
+      <head />
+      <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="relative flex min-h-screen flex-col">
             <Nav />
-            <div className="flex-1">
-              <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-                {children}
-              </main>
-            </div>
+            <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
+              {children}
+            </main>
           </div>
-        </Providers>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

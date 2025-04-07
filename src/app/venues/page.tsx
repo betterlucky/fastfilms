@@ -1,11 +1,14 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { handleUpdateVenue } from "./actions"
+import { PlusIcon } from "@heroicons/react/24/outline"
+import Image from "next/image"
+import { MapPinIcon } from "@heroicons/react/24/outline"
 
 async function getVenues() {
   return prisma.venue.findMany({

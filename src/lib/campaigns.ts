@@ -138,4 +138,62 @@ export function calculateTimeLeft(deadlineDate: Date): { days: number } {
   const difference = deadlineDate.getTime() - now.getTime()
   const days = Math.ceil(difference / (1000 * 60 * 60 * 24))
   return { days: Math.max(days, 0) }
+}
+
+export async function getCampaigns() {
+  const campaigns = await prisma.campaign.findMany({
+    where: {
+      status: "ACTIVE",
+      deadlineDate: {
+        gt: new Date(),
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      movieTitle: true,
+      venueId: true,
+      screeningDate: true,
+      deadlineDate: true,
+      ticketCap: true,
+      currentTickets: true,
+      fundingTarget: true,
+      currentFunding: true,
+      status: true,
+      isFeatured: true,
+      posterPath: true,
+      venue: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      screen: {
+        select: {
+          id: true,
+          name: true,
+          capacity: true,
+        },
+      },
+    },
+  });
+
+  return campaigns.map(campaign => ({
+    ...campaign,
+    fundingTarget: campaign.fundingTarget.toString(),
+    currentFunding: campaign.currentFunding.toString(),
+    formattedTarget: formatPrice(Number(campaign.fundingTarget)),
+    formattedCurrent: formatPrice(Number(campaign.currentFunding)),
+    formattedDate: formatDate(campaign.screeningDate),
+    progress: calculateProgress(Number(campaign.currentFunding), Number(campaign.fundingTarget)),
+    timeLeft: calculateTimeLeft(campaign.deadlineDate),
+    posterUrl: campaign.posterPath 
+      ? `https://image.tmdb.org/t/p/w500${campaign.posterPath}`
+      : null,
+    hasAssignedVenue: campaign.venueId !== null,
+    hasScreenAllocated: campaign.screen !== null,
+    startDate: campaign.screeningDate,
+    endDate: campaign.deadlineDate,
+  }));
 } 

@@ -141,7 +141,7 @@ function ConfirmationContent() {
               <Button
                 variant="outline"
                 onClick={() => router.push('/tickets')}
-                className="text-sm font-semibold leading-6 text-gray-900"
+                className="text-sm font-semibold text-gray-900"
               >
                 View My Tickets
               </Button>

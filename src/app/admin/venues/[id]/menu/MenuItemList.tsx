@@ -3,7 +3,8 @@
 import { MenuItem, MenuItemOption, MenuItemOptionChoice } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import Link from "next/link"
 
 interface MenuItemWithOptions extends MenuItem {
   options: (MenuItemOption & {
@@ -29,7 +30,7 @@ export default function MenuItemList({ venueId, menuItems }: MenuItemListProps) 
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Menu Items</h1>
         <Button 
           onClick={() => router.push(`/admin/venues/${venueId}/menu/new`)}

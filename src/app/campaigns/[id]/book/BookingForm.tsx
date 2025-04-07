@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { AlertCircle } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { TrashIcon } from "lucide-react"
 
 interface MenuItem {
   id: string
@@ -89,11 +90,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
   })
   const [validation, setValidation] = useState<MenuValidation>({})
 
-  useEffect(() => {
-    updateTotals()
-  }, [quantity, ticketPrice, payItForwardTickets, menuSelections])
-
-  function calculateMenuTotal() {
+  const calculateMenuTotal = useCallback(() => {
     return Object.entries(menuSelections).reduce((total, [menuItemId, selection]) => {
       const menuItem = menuItems.find(item => item.id === menuItemId)
       if (!menuItem) return total
@@ -116,9 +113,9 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
 
       return total + itemTotal + optionsTotal
     }, 0)
-  }
+  }, [menuSelections, menuItems])
 
-  function updateTotals() {
+  const updateTotals = useCallback(() => {
     const subtotal = quantity * ticketPrice
     const payItForwardSubtotal = payItForwardTickets * settings.minimumTicketPrice
     const menuTotal = calculateMenuTotal()
@@ -131,7 +128,11 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
       regularTotal,
       grandTotal
     })
-  }
+  }, [quantity, ticketPrice, payItForwardTickets, calculateMenuTotal])
+
+  useEffect(() => {
+    updateTotals()
+  }, [updateTotals])
 
   const handleMenuItemQuantityChange = (menuItemId: string, newQuantity: number) => {
     setMenuSelections(prev => {
@@ -539,7 +540,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                 ))}
                                 {validation[item.id] && Object.values(validation[item.id]).some(v => !v.isValid) && (
                                   <div className="flex items-center gap-2 text-xs text-red-500 mt-1">
-                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertCircle className="size-4" />
                                     <span>Please complete all required selections for each item</span>
                                   </div>
                                 )}

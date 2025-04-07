@@ -227,7 +227,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Options</h3>
               <Button type="button" onClick={addOption} variant="outline" size="sm">
-                <PlusIcon className="h-4 w-4 mr-2" />
+                <PlusIcon className="size-4 mr-2" />
                 Add Option
               </Button>
             </div>
@@ -276,7 +276,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                     size="sm"
                     onClick={() => removeOption(optionIndex)}
                   >
-                    <TrashIcon className="h-4 w-4" />
+                    <TrashIcon className="size-4" />
                   </Button>
                 </div>
 
@@ -289,38 +289,46 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                       variant="outline"
                       size="sm"
                     >
-                      <PlusIcon className="h-4 w-4 mr-2" />
+                      <PlusIcon className="size-4 mr-2" />
                       Add Choice
                     </Button>
                   </div>
 
-                  {option.choices.map((choice, choiceIndex) => (
-                    <div key={choiceIndex} className="flex items-center space-x-2">
-                      <Input
-                        placeholder="Choice name"
-                        value={choice.name}
-                        onChange={(e) => updateChoice(optionIndex, choiceIndex, 'name', e.target.value)}
-                        required
-                      />
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="Price adjustment"
-                        value={choice.priceAdjustment}
-                        onChange={(e) => updateChoice(optionIndex, choiceIndex, 'priceAdjustment', parseFloat(e.target.value))}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeChoice(optionIndex, choiceIndex)}
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </Button>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <TrashIcon className="size-4 text-red-500" />
+                      <span className="text-sm font-medium">Delete</span>
                     </div>
-                  ))}
+                    <div className="grid gap-4">
+                      {option.choices.map((choice, choiceIndex) => (
+                        <div key={choiceIndex} className="flex items-center gap-2">
+                          <Input
+                            placeholder="Choice name"
+                            value={choice.name}
+                            onChange={(e) => updateChoice(optionIndex, choiceIndex, 'name', e.target.value)}
+                            required
+                          />
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Price adjustment"
+                            value={choice.priceAdjustment}
+                            onChange={(e) => updateChoice(optionIndex, choiceIndex, 'priceAdjustment', parseFloat(e.target.value))}
+                            required
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeChoice(optionIndex, choiceIndex)}
+                          >
+                            <TrashIcon className="size-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
