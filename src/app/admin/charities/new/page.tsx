@@ -26,7 +26,8 @@ export default function NewCharityPage() {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to create charity")
+        const data = await response.json()
+        throw new Error(data.error || "Failed to create charity")
       }
 
       router.push("/admin/charities")
@@ -55,7 +56,7 @@ export default function NewCharityPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium mb-1">
-                Name
+                Name <span className="text-red-500">*</span>
               </label>
               <Input
                 id="name"
@@ -82,24 +83,28 @@ export default function NewCharityPage() {
                 id="url"
                 name="url"
                 type="url"
+                placeholder="https://"
               />
             </div>
 
             <div>
-              <label htmlFor="logo" className="block text-sm font-medium mb-1">
-                Logo
+              <label htmlFor="logoUrl" className="block text-sm font-medium mb-1">
+                Logo URL
               </label>
               <Input
-                id="logo"
-                name="logo"
-                type="file"
-                accept="image/*"
+                id="logoUrl"
+                name="logoUrl"
+                type="url"
+                placeholder="https://"
               />
+              <p className="text-sm text-gray-500 mt-1">
+                Enter the URL of the charity's logo image
+              </p>
             </div>
 
             {error && (
-              <div className="text-sm text-red-600">
-                {error}
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="text-sm text-red-700">{error}</div>
               </div>
             )}
 

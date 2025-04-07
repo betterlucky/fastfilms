@@ -288,11 +288,18 @@ export default async function CampaignPage({ params }: { params: { id: string } 
                         <input type="hidden" name="campaignId" value={campaign.id} />
                         <div className="flex flex-col gap-2">
                           <div className="flex gap-2">
-                            <Input
-                              type="date"
-                              name="screeningDate"
-                              defaultValue={new Date(campaign.screeningDate).toISOString().split('T')[0]}
-                              className="flex-1"
+                            <DatePicker
+                              selected={new Date(campaign.screeningDate)}
+                              onChange={(date: Date) => {
+                                const input = document.querySelector('input[name="screeningDate"]') as HTMLInputElement;
+                                if (input && date) {
+                                  input.value = date.toISOString().split('T')[0];
+                                }
+                              }}
+                              dateFormat="dd/MM/yyyy"
+                              className="flex-1 rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              placeholderText="Select date (DD/MM/YYYY)"
+                              required
                             />
                             <Input
                               type="time"
@@ -311,10 +318,18 @@ export default async function CampaignPage({ params }: { params: { id: string } 
                       <form action={updateDeadlineDate}>
                         <input type="hidden" name="campaignId" value={campaign.id} />
                         <div className="flex flex-col gap-2">
-                          <Input
-                            type="date"
-                            name="deadlineDate"
-                            defaultValue={new Date(campaign.deadlineDate).toISOString().split('T')[0]}
+                          <DatePicker
+                            selected={new Date(campaign.deadlineDate)}
+                            onChange={(date: Date) => {
+                              const input = document.querySelector('input[name="deadlineDate"]') as HTMLInputElement;
+                              if (input && date) {
+                                input.value = date.toISOString().split('T')[0];
+                              }
+                            }}
+                            dateFormat="dd/MM/yyyy"
+                            className="flex-1 rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            placeholderText="Select date (DD/MM/YYYY)"
+                            required
                           />
                           <Button type="submit">Update Deadline</Button>
                         </div>
