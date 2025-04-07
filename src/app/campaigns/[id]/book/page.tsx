@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { getCampaign } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { redirect } from "next/navigation"
 import Image from "next/image"
@@ -8,7 +8,27 @@ import BookingForm from "./BookingForm"
 
 export default async function BookPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
-  const campaign = await getCampaign(params.id)
+  const campaign = await prisma.campaign.findUnique({
+    where: { id: params.id },
+    include: {
+      venue: true,
+      screen: true,
+      charity: true,
+      menuItems: {
+        include: {
+          menuItem: {
+            include: {
+              options: {
+                include: {
+                  choices: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
 
   if (!campaign) {
     return <div>Campaign not found</div>
@@ -24,6 +44,26 @@ export default async function BookPage({ params }: { params: { id: string } }) {
     month: "long",
     year: "numeric",
   })
+
+  // Transform menu items to match the expected format
+  const formattedMenuItems = campaign.menuItems.map(({ menuItem }) => ({
+    id: menuItem.id,
+    name: menuItem.name,
+    description: menuItem.description,
+    price: Number(menuItem.price),
+    category: menuItem.category,
+    options: menuItem.options.map(option => ({
+      id: option.id,
+      name: option.name,
+      minChoices: option.minChoices,
+      maxChoices: option.maxChoices,
+      choices: option.choices.map(choice => ({
+        id: choice.id,
+        name: choice.name,
+        priceAdjustment: Number(choice.priceAdjustment)
+      }))
+    }))
+  }))
 
   return (
     <div className="container mx-auto py-8">
@@ -50,7 +90,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                     campaignId={campaign.id}
                     maxTickets={Math.min(10, campaign.ticketCap - campaign.currentTickets)}
                     charity={campaign.charity}
-                    menuItems={campaign.menuItems || []}
+                    menuItems={formattedMenuItems}
                   />
                 </div>
 
