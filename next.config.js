@@ -4,11 +4,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'image.tmdb.org',
-        pathname: '/t/p/**',
+        hostname: 'fastfilms-uploads.s3.eu-west-2.amazonaws.com',
+        port: '',
+        pathname: '/**',
       },
     ],
   },
 }
 
-export default nextConfig 
+module.exports = nextConfig 

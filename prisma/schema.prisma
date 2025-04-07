@@ -83,7 +83,7 @@ model Campaign {
   currentFunding  Float     @default(0)
   ticketCap       Int
   currentTickets  Int       @default(0)
-  status          CampaignStatus    @default(ACTIVE)
+  status          String    @default("ACTIVE")
   isFeatured      Boolean   @default(false)
   customBlurb     String?
   createdAt       DateTime  @default(now())
