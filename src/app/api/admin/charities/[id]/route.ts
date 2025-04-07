@@ -116,7 +116,13 @@ export async function DELETE(
     const charity = await prisma.charity.findUnique({
       where: { id: params.id },
       include: {
-        campaigns: true,
+        campaigns: {
+          where: {
+            status: {
+              in: ['ACTIVE', 'UPCOMING']
+            }
+          }
+        },
       },
     })
 
@@ -124,10 +130,10 @@ export async function DELETE(
       return new NextResponse("Charity not found", { status: 404 })
     }
 
-    // Check if charity is linked to any campaigns
+    // Check if charity is linked to any live campaigns
     if (charity.campaigns.length > 0) {
       return new NextResponse(
-        "Cannot delete charity that is linked to campaigns. Remove charity from campaigns first.",
+        "Cannot delete charity that is linked to live campaigns. Remove charity from campaigns first.",
         { status: 400 }
       )
     }

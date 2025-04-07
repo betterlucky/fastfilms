@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/db"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { notFound } from "next/navigation"
@@ -15,7 +15,18 @@ export default async function CampaignPage({
   const campaign = await prisma.campaign.findUnique({
     where: { id },
     include: {
-      venue: true,
+      venue: {
+        select: {
+          id: true,
+          name: true,
+          address: true,
+          city: true,
+          postcode: true,
+          phone: true,
+          url: true,
+          contactEmail: true
+        }
+      },
       screen: true,
       menuItems: {
         include: {

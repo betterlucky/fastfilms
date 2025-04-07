@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
         currentTickets: 0,
         status: "ACTIVE",
         isFeatured: false,
+        isTest: data.isTest || false,
         tmdbId: data.tmdbId || null,
         posterPath: data.posterPath || null,
       },

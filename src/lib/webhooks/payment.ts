@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db"
 import { Stripe } from "stripe"
 import { NextResponse } from "next/server"
 import { generateTicketConfirmationEmail } from "@/lib/email"
-import { EmailData, TicketWithOrders } from "@/lib/types"
+import { EmailData } from "@/lib/types"
 import { WebhookHandlerResponse } from "./types"
 
 const prismaClient = new PrismaClient()
@@ -58,6 +58,26 @@ export async function handlePaymentSuccess(
                 updatedAt: true,
               },
             },
+            choices: {
+              include: {
+                option: {
+                  select: {
+                    name: true,
+                  },
+                },
+                selectedChoice: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
           },
         },
         campaign: {
@@ -71,7 +91,7 @@ export async function handlePaymentSuccess(
           },
         },
       },
-    }) as unknown as TicketWithOrders[]
+    })
 
     if (tickets.length === 0) {
       return {
@@ -81,7 +101,7 @@ export async function handlePaymentSuccess(
       }
     }
 
-    // Transform ticket data for email
+    // Transform ticket data for customer confirmation email
     const emailData: EmailData = {
       movieTitle: tickets[0].campaign.movieTitle,
       venueName: tickets[0].campaign.venue.name,
@@ -90,9 +110,13 @@ export async function handlePaymentSuccess(
       totalAmount: amount / 100, // Convert from cents to pounds
     }
 
-    // Generate and send confirmation email
+    // Generate and send confirmation email to customer
     const emailHtml = generateTicketConfirmationEmail(emailData)
-    // TODO: Send email using your email service
+    await sendEmail({
+      to: tickets[0].user?.email || "",
+      subject: `Your tickets for ${tickets[0].campaign.movieTitle}`,
+      html: emailHtml,
+    })
 
     return { received: true }
   } catch (error) {
@@ -132,10 +156,24 @@ interface Campaign {
   screeningDate: Date
 }
 
+interface Ticket {
+  id: string
+  orders: Array<{
+    menuItem: {
+      name: string
+      price: number | Prisma.Decimal
+    }
+    choices: Array<{
+      optionId: string
+      selectedChoice: string
+    }>
+  }>
+}
+
 function generateConfirmationEmail(
   campaign: Campaign,
-  tickets: TicketWithOrders[],
-  amount: number
+  amount: number,
+  tickets: Ticket[]
 ): string {
   const formatDate = (date: Date) =>
     new Date(date).toLocaleDateString("en-GB", {

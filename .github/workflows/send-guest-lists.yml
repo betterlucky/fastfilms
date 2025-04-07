@@ -1,0 +1,30 @@
+name: Send Guest Lists
+
+on:
+  schedule:
+    # Run at 6 AM UTC every day
+    - cron: '0 6 * * *'
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  send-guest-lists:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Guest Lists
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms-staging.vercel.app/api/cron/send-guest-lists" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          
+          # Split response into body and status code
+          body=$(echo "$response" | head -n -1)
+          status_code=$(echo "$response" | tail -n 1)
+          
+          if [ "$status_code" -ne 200 ]; then
+            echo "Error: Failed to send guest lists"
+            echo "Status code: $status_code"
+            echo "Response: $body"
+            exit 1
+          fi
+          
+          echo "Guest lists sent successfully" 

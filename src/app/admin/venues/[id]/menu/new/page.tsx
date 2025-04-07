@@ -4,12 +4,13 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import MenuItemForm from "../MenuItemForm"
+import { notFound } from "next/navigation"
 
 export default async function NewMenuItemPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user || session.user.role !== "ADMIN") {
-    redirect("/")
+  if (!session?.user?.isAdmin) {
+    return notFound()
   }
 
   const venue = await prisma.venue.findUnique({

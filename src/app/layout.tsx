@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -6,11 +6,19 @@ import { Nav } from "@/components/nav";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Toaster as SonnerToaster } from "sonner";
 
 const inter = Inter({ 
   subsets: ["latin"],
   variable: '--font-inter',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "FastFilms - Community Cinema Crowdfunding",
@@ -33,12 +41,6 @@ export const metadata: Metadata = {
     locale: 'en_GB',
     type: 'website',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
 };
 
 export default function RootLayout({
@@ -56,13 +58,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen flex-col">
-            <Nav />
-            <main className="flex-1 px-4 py-4 sm:px-6 lg:px-8 md:ml-64">
-              {children}
-            </main>
-          </div>
-          <Toaster />
+          <Providers>
+            <div className="relative flex min-h-screen flex-col">
+              <Nav />
+              <main className="flex-1 px-4 py-4 sm:px-6 lg:px-8 pt-20">
+                {children}
+              </main>
+            </div>
+            <Toaster />
+            <SonnerToaster />
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

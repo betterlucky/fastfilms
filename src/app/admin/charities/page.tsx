@@ -1,24 +1,52 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { redirect } from "next/navigation"
+'use client'
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
 
-export default async function CharitiesPage() {
-  const session = await getServerSession(authOptions)
+interface Charity {
+  id: string
+  name: string
+  description: string | null
+  url: string | null
+  logoPath: string | null
+}
 
-  if (!session?.user || session.user.role !== "ADMIN") {
-    redirect("/")
+export default function CharitiesPage() {
+  const router = useRouter()
+  const [charities, setCharities] = useState<Charity[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchCharities() {
+      try {
+        const response = await fetch('/api/admin/charities')
+        if (!response.ok) {
+          throw new Error('Failed to fetch charities')
+        }
+        const data = await response.json()
+        setCharities(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Something went wrong')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCharities()
+  }, [])
+
+  if (isLoading) {
+    return <div>Loading...</div>
   }
 
-  const charities = await prisma.charity.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  })
+  if (error) {
+    return <div className="text-red-500">{error}</div>
+  }
 
   return (
     <div className="container mx-auto py-8">
@@ -43,13 +71,13 @@ export default async function CharitiesPage() {
                 <div className="flex items-center gap-2">
                   <Button 
                     variant="outline"
-                    onClick={() => window.location.href = `/admin/charities/${charity.id}/edit`}
+                    onClick={() => router.push(`/admin/charities/${charity.id}/edit`)}
                   >
                     Edit
                   </Button>
                   <Button 
                     variant="destructive"
-                    onClick={() => window.location.href = `/admin/charities/${charity.id}/delete`}
+                    onClick={() => router.push(`/admin/charities/${charity.id}/delete`)}
                   >
                     Delete
                   </Button>

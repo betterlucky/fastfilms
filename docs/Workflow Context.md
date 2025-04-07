@@ -67,7 +67,7 @@ Web-based crowdfunding platform for organizing cinema screenings with the follow
 - Backend: Next.js API routes, Prisma, PostgreSQL
 - Authentication: NextAuth.js
 - Payments: Stripe
-- Email: Resend.com/SendGrid
+- Email: Gmail
 - Deployment: Vercel
 
 If more information would help the process, please always ask me for what you need

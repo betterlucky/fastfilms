@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TicketIcon } from "lucide-react";
 
 interface Ticket {
   id: string;
@@ -19,6 +20,7 @@ export default function TicketsPage() {
   const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -28,25 +30,65 @@ export default function TicketsPage() {
           throw new Error('Failed to fetch tickets');
         }
         const data = await response.json();
-        setTickets(data);
+        setTickets(data || []);
       } catch (err) {
-        setError('Failed to load tickets');
+        setError('Something went wrong while loading your tickets. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchTickets();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="bg-white py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Loading...</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Error
-          </h2>
-          <p className="mt-2 text-lg leading-8 text-gray-600">
-            {error}
-          </p>
+      <div className="bg-white py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Something went wrong</h2>
+            <p className="mt-2 text-lg leading-8 text-gray-600">
+              {error}
+            </p>
+            <div className="mt-10">
+              <Button onClick={() => router.push('/campaigns')}>
+                Browse Campaigns
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (tickets.length === 0) {
+    return (
+      <div className="bg-white py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <TicketIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">No tickets yet</h2>
+            <p className="mt-2 text-lg leading-8 text-gray-600">
+              You haven't booked any tickets yet. Check out our upcoming screenings!
+            </p>
+            <div className="mt-10">
+              <Button onClick={() => router.push('/campaigns')}>
+                Browse Campaigns
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );

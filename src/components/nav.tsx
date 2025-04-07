@@ -1,13 +1,27 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 
 export function Nav() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  const isAdmin = session?.user?.role === "ADMIN";
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: "/" });
+  };
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   return (
     <>
@@ -32,99 +46,78 @@ export function Nav() {
       </div>
 
       {/* Mobile menu */}
-      <div
-        className={`fixed inset-0 z-10 bg-white transition-transform duration-300 ease-in-out md:hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex h-full flex-col pt-16">
-          <div className="flex-1 space-y-1 overflow-y-auto p-4">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                router.push("/campaigns");
-                setIsOpen(false);
-              }}
-              className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            >
-              Campaigns
-            </Button>
+      {isOpen && (
+        <div className="fixed inset-0 z-10 bg-white transition-transform duration-300 ease-in-out md:hidden">
+          <div className="flex h-full flex-col pt-16">
+            <div className="flex-1 space-y-1 overflow-y-auto p-4">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  router.push("/campaigns");
+                  setIsOpen(false);
+                }}
+                className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              >
+                Campaigns
+              </Button>
 
-            <Button
-              variant="ghost"
-              onClick={() => {
-                router.push("/tickets");
-                setIsOpen(false);
-              }}
-              className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            >
-              My Tickets
-            </Button>
+              {status === "authenticated" && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    router.push("/tickets");
+                    setIsOpen(false);
+                  }}
+                  className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  My Tickets
+                </Button>
+              )}
 
-            <Button
-              variant="ghost"
-              onClick={() => {
-                router.push("/campaigns/new");
-                setIsOpen(false);
-              }}
-              className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            >
-              Create Campaign
-            </Button>
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    router.push("/admin");
+                    setIsOpen(false);
+                  }}
+                  className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  Admin Dashboard
+                </Button>
+              )}
+            </div>
 
-            <Button
-              variant="ghost"
-              onClick={() => {
-                router.push("/admin/venues");
-                setIsOpen(false);
-              }}
-              className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            >
-              Venues
-            </Button>
-
-            <Button
-              variant="ghost"
-              onClick={() => {
-                router.push("/admin/charities");
-                setIsOpen(false);
-              }}
-              className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            >
-              Charities
-            </Button>
-
-            <Button
-              variant="ghost"
-              onClick={() => {
-                router.push("/admin/users");
-                setIsOpen(false);
-              }}
-              className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            >
-              Users
-            </Button>
-          </div>
-
-          <div className="shrink-0 border-t border-gray-200 p-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                router.push("/auth/signout");
-                setIsOpen(false);
-              }}
-              className="w-full"
-            >
-              Sign Out
-            </Button>
+            <div className="shrink-0 border-t border-gray-200 p-4">
+              {status === "authenticated" ? (
+                <Button
+                  variant="ghost"
+                  onClick={handleSignOut}
+                  className="w-full text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  Log Out
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    router.push("/login");
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  Log In
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Desktop sidebar */}
-      <nav className="fixed inset-y-0 left-0 z-10 hidden w-64 bg-white shadow-soft md:block">
-        <div className="flex h-full flex-col">
-          <div className="flex h-16 shrink-0 items-center px-4">
+      {/* Desktop navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-10 hidden h-16 bg-white shadow-sm md:block">
+        <div className="flex h-full items-center justify-between px-4">
+          <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               onClick={() => router.push("/")}
@@ -132,69 +125,51 @@ export function Nav() {
             >
               FastFilms
             </Button>
-          </div>
-
-          <div className="flex flex-1 flex-col overflow-y-auto">
-            <div className="flex-1 space-y-1 p-4">
+            <div className="flex space-x-2">
               <Button
                 variant="ghost"
                 onClick={() => router.push("/campaigns")}
-                className="flex w-full items-center rounded-md p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               >
                 Campaigns
               </Button>
-
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/tickets")}
-                className="flex w-full items-center rounded-md p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                My Tickets
-              </Button>
-
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/campaigns/new")}
-                className="flex w-full items-center rounded-md p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                Create Campaign
-              </Button>
-
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/admin/venues")}
-                className="flex w-full items-center rounded-md p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                Venues
-              </Button>
-
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/admin/charities")}
-                className="flex w-full items-center rounded-md p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                Charities
-              </Button>
-
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/admin/users")}
-                className="flex w-full items-center rounded-md p-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                Users
-              </Button>
-            </div>
-
-            <div className="shrink-0 border-t border-gray-200 p-4">
-              <Button
-                variant="outline"
-                onClick={() => router.push("/auth/signout")}
-                className="w-full"
-              >
-                Sign Out
-              </Button>
+              {status === "authenticated" && (
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/tickets")}
+                  className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  My Tickets
+                </Button>
+              )}
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/admin")}
+                  className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  Admin Dashboard
+                </Button>
+              )}
             </div>
           </div>
+          {status === "authenticated" ? (
+            <Button
+              variant="ghost"
+              onClick={handleSignOut}
+              className="text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            >
+              Log Out
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/login")}
+              className="text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            >
+              Log In
+            </Button>
+          )}
         </div>
       </nav>
     </>

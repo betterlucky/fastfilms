@@ -37,6 +37,7 @@ function ResetPasswordForm() {
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isLoading) return // Prevent double submission
     setError(null)
     setSuccess(null)
     setIsLoading(true)
@@ -61,14 +62,11 @@ function ResetPasswordForm() {
       }
 
       setSuccess(data.message)
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        router.push("/login")
-      }, 3000)
+      // Redirect to login after successful password reset
+      router.push("/login?passwordReset=true")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
-    } finally {
-      setIsLoading(false)
+      setIsLoading(false) // Only reset loading on error
     }
   }
 
@@ -109,7 +107,7 @@ function ResetPasswordForm() {
                 autoComplete="new-password"
                 required
                 minLength={8}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="block w-full rounded-md border-2 border-gray-300 bg-white py-2 px-3 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
           </div>
@@ -118,7 +116,7 @@ function ResetPasswordForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
             >
               {isLoading ? "Resetting..." : "Reset password"}
             </button>

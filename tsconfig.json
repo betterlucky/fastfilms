@@ -23,7 +23,7 @@
     },
     "baseUrl": ".",
     "typeRoots": ["./src/types", "./node_modules/@types"],
-    "types": ["react-datepicker"]
+    "types": ["react-datepicker", "node"]
   },
   "include": [
     "next-env.d.ts",

@@ -14,11 +14,11 @@ export async function POST(request: Request) {
       )
     }
 
-    const { name, address, city, postcode } = await request.json()
+    const { name, address, city, postcode, url, phone, contactEmail } = await request.json()
 
     if (!name || !address || !city || !postcode) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "All required fields must be provided" },
         { status: 400 }
       )
     }
@@ -29,6 +29,9 @@ export async function POST(request: Request) {
         address,
         city,
         postcode,
+        url,
+        phone,
+        contactEmail,
       },
     })
 

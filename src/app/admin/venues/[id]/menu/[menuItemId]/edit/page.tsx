@@ -4,33 +4,36 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import MenuItemForm from "../../MenuItemForm"
+import { notFound } from "next/navigation"
 
 export default async function EditMenuItemPage({ params }: { params: { id: string; menuItemId: string } }) {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user || session.user.role !== "ADMIN") {
-    redirect("/")
+  if (!session?.user?.isAdmin) {
+    return notFound()
   }
 
-  const [venue, menuItem] = await Promise.all([
-    prisma.venue.findUnique({
-      where: { id: params.id },
-    }),
-    prisma.menuItem.findUnique({
-      where: { id: params.menuItemId },
-      include: {
-        options: {
-          include: {
-            choices: true,
+  const venue = await prisma.venue.findUnique({
+    where: { id: params.id },
+    include: {
+      menuItems: {
+        where: { id: params.menuItemId },
+        include: {
+          options: {
+            include: {
+              choices: true,
+            },
           },
         },
       },
-    }),
-  ])
+    },
+  })
 
-  if (!venue || !menuItem || menuItem.venueId !== venue.id) {
+  if (!venue || !venue.menuItems.length) {
     redirect("/admin/venues")
   }
+
+  const menuItem = venue.menuItems[0]
 
   return (
     <div className="space-y-8">

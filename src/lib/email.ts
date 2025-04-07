@@ -159,4 +159,86 @@ export function generatePasswordResetEmail(token: string, baseUrl: string) {
       </body>
     </html>
   `
+}
+
+export function generateVenueGuestListEmail(data: {
+  movieTitle: string
+  venueName: string
+  screeningDate: Date
+  screeningTime: string
+  totalTickets: number
+  guestList: Array<{
+    name: string
+    email: string
+    ticketCount: number
+    foodOrders: Array<{
+      itemName: string
+      quantity: number
+      options: Array<{
+        optionName: string
+        choice: string
+      }>
+    }>
+  }>
+}) {
+  const { movieTitle, venueName, screeningDate, screeningTime, totalTickets, guestList } = data
+
+  const formatGuestList = guestList.map(guest => `
+    <div style="margin-bottom: 16px; padding: 12px; background-color: #f9fafb; border-radius: 8px;">
+      <p style="margin: 0 0 8px 0;"><strong>${guest.name}</strong> (${guest.email})</p>
+      <p style="margin: 0 0 8px 0;">Tickets: ${guest.ticketCount}</p>
+      ${guest.foodOrders.length > 0 ? `
+        <p style="margin: 0 0 8px 0;"><strong>Food Orders:</strong></p>
+        <ul style="margin: 0; padding-left: 20px;">
+          ${guest.foodOrders.map(order => `
+            <li>
+              ${order.quantity}x ${order.itemName}
+              ${order.options.length > 0 ? `
+                <ul style="margin: 0; padding-left: 20px;">
+                  ${order.options.map(opt => `<li>${opt.optionName}: ${opt.choice}</li>`).join('')}
+                </ul>
+              ` : ''}
+            </li>
+          `).join('')}
+        </ul>
+      ` : '<p style="margin: 0;">No food orders</p>'}
+    </div>
+  `).join('')
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Guest List and Food Orders - ${movieTitle}</title>
+      </head>
+      <body style="font-family: sans-serif; line-height: 1.5; color: #1f2937;">
+        <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #4f46e5; margin-bottom: 24px;">Guest List and Food Orders</h1>
+          
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+            <h2 style="margin: 0 0 16px 0; color: #111827;">${movieTitle}</h2>
+            <p style="margin: 8px 0;"><strong>Venue:</strong> ${venueName}</p>
+            <p style="margin: 8px 0;"><strong>Date:</strong> ${screeningDate.toLocaleDateString("en-GB", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}</p>
+            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningTime}</p>
+            <p style="margin: 8px 0;"><strong>Total Tickets:</strong> ${totalTickets}</p>
+          </div>
+
+          <h2 style="margin: 24px 0 16px 0;">Guest List</h2>
+          ${formatGuestList}
+
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px;">
+              This is an automated email from FastFilms. Please contact us at support@fastfilms.example.com if you have any questions.
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
 } 

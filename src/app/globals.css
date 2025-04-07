@@ -5,6 +5,10 @@
 :root {
   --background: #f9fafb;
   --foreground: #1f2937;
+  --input-background: #ffffff;
+  --input-foreground: #1f2937;
+  --select-trigger-background: #ffffff;
+  --select-content-background: #ffffff;
 }
 
 body {
@@ -16,6 +20,19 @@ body {
 }
 
 @layer base {
+  input, textarea, select {
+    background-color: var(--input-background) !important;
+    color: var(--input-foreground) !important;
+  }
+
+  [role="combobox"] {
+    background-color: var(--select-trigger-background) !important;
+  }
+
+  [role="listbox"] {
+    background-color: var(--select-content-background) !important;
+  }
+
   h1 {
     @apply text-4xl font-bold tracking-tight text-gray-900 mb-6;
   }

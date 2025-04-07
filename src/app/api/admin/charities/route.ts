@@ -51,16 +51,11 @@ export async function GET() {
     return new NextResponse("Unauthorized", { status: 401 })
   }
 
-  try {
-    const charities = await prisma.charity.findMany({
-      orderBy: {
-        name: "asc",
-      },
-    })
+  const charities = await prisma.charity.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  })
 
-    return NextResponse.json(charities)
-  } catch (error) {
-    console.error("Error fetching charities:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
-  }
+  return NextResponse.json(charities)
 } 

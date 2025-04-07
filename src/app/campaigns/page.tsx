@@ -1,12 +1,7 @@
-'use client'
-
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { PlusIcon, CalendarIcon } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { CalendarIcon } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { getCampaigns } from "@/lib/campaigns";
 
 interface Campaign {
@@ -38,12 +33,6 @@ export default async function CampaignsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Campaigns</h1>
-        <Button asChild>
-          <Link href="/admin/campaigns/new">
-            <PlusIcon className="size-4 mr-2" />
-            New Campaign
-          </Link>
-        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

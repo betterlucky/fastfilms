@@ -2,7 +2,13 @@ import { Decimal } from "@prisma/client/runtime/library"
 
 export interface OrderChoice {
   optionId: string
-  selectedChoice: string
+  selectedChoiceId: string
+  option?: {
+    name: string
+  }
+  selectedChoice?: {
+    name: string
+  }
 }
 
 export interface OrderWithMenuItem {
@@ -33,15 +39,21 @@ export interface TicketWithOrders {
   userId: string
   campaignId: string
   orders: OrderWithMenuItem[]
+  user?: {
+    name: string | null
+    email: string
+  }
   campaign: {
     id: string
     title: string
     description: string
     movieTitle: string
     screeningDate: Date
+    screeningTime: string
     venue: {
       id: string
       name: string
+      contactEmail: string | null
     }
   }
 }

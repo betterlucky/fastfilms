@@ -59,58 +59,60 @@ model VerificationToken {
 }
 
 model Charity {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
   description String?
   logoPath    String?
   url         String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   campaigns   Campaign[]
 }
 
 model Campaign {
-  id              String    @id @default(cuid())
-  title           String
-  description     String
-  movieTitle      String
-  tmdbId          String?
-  posterPath      String?
-  screeningDate   DateTime
-  screeningTime   String
-  deadlineDate    DateTime
-  fundingTarget   Float
-  currentFunding  Float     @default(0)
-  ticketCap       Int
-  currentTickets  Int       @default(0)
-  status          String    @default("ACTIVE")
-  isFeatured      Boolean   @default(false)
-  customBlurb     String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  venueId         String
-  venue           Venue     @relation(fields: [venueId], references: [id])
-  screenId        String?
-  screen          Screen?   @relation(fields: [screenId], references: [id])
-  tickets         Ticket[]
-  charityId       String?
-  charity         Charity?  @relation(fields: [charityId], references: [id])
-  comments        Comment[]
-  contributions   Contribution[]
-  menuItems       CampaignMenuItem[]
+  id             String             @id @default(cuid())
+  title          String
+  description    String
+  movieTitle     String
+  venueId        String
+  screeningDate  DateTime
+  ticketCap      Int
+  currentTickets Int                @default(0)
+  fundingTarget  Float
+  currentFunding Float              @default(0)
+  deadlineDate   DateTime
+  isFeatured     Boolean            @default(false)
+  isTest         Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  posterPath     String?
+  screenId       String?
+  screeningTime  String
+  charityId      String?
+  customBlurb    String?
+  tmdbId         String?
+  status         String             @default("ACTIVE")
+  charity        Charity?           @relation(fields: [charityId], references: [id])
+  screen         Screen?            @relation(fields: [screenId], references: [id])
+  venue          Venue              @relation(fields: [venueId], references: [id])
+  menuItems      CampaignMenuItem[]
+  comments       Comment[]
+  contributions  Contribution[]
+  tickets        Ticket[]
 }
 
 model Venue {
-  id        String     @id @default(cuid())
-  name      String
-  address   String
-  city      String
-  postcode  String
-  phone     String?
-  url       String?
-  campaigns Campaign[]
-  menuItems MenuItem[]
-  screens   Screen[]
+  id           String     @id @default(cuid())
+  name         String
+  address      String
+  city         String
+  postcode     String
+  phone        String?
+  url          String?
+  contactEmail String?
+  campaigns    Campaign[]
+  menuItems    MenuItem[]
+  screens      Screen[]
 }
 
 model Screen {
@@ -129,11 +131,11 @@ model MenuItem {
   name        String
   description String
   price       Decimal
-  category    String             // e.g., "Food", "Drink", "Combo"
-  isActive    Boolean            @default(true)
   venueId     String
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+  category    String
+  isActive    Boolean            @default(true)
   campaigns   CampaignMenuItem[]
   venue       Venue              @relation(fields: [venueId], references: [id])
   options     MenuItemOption[]
@@ -143,17 +145,17 @@ model MenuItem {
 }
 
 model MenuItemOption {
-  id          String                 @id @default(cuid())
-  name        String                 // e.g., "Popcorn Type", "Drink Choice"
-  description String?
-  order       Int                    @default(0)
-  minChoices  Int                    @default(1)
-  maxChoices  Int                    @default(1)
-  menuItemId  String
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  menuItem    MenuItem               @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-  choices     MenuItemOptionChoice[]
+  id           String                 @id @default(cuid())
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  name         String
+  menuItemId   String
+  description  String?
+  maxChoices   Int                    @default(1)
+  minChoices   Int                    @default(1)
+  order        Int                    @default(0)
+  menuItem     MenuItem               @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  choices      MenuItemOptionChoice[]
   orderChoices OrderChoice[]
 
   @@index([menuItemId])
@@ -162,7 +164,7 @@ model MenuItemOption {
 
 model MenuItemOptionChoice {
   id              String         @id @default(cuid())
-  name            String         // e.g., "Sweet", "Salty", "Pepsi Max"
+  name            String
   priceAdjustment Decimal        @default(0)
   optionId        String
   createdAt       DateTime       @default(now())
@@ -188,27 +190,27 @@ model Ticket {
 }
 
 model Order {
-  id         String   @id @default(cuid())
+  id         String        @id @default(cuid())
   ticketId   String
   menuItemId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
   quantity   Int
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
-  ticket     Ticket   @relation(fields: [ticketId], references: [id])
+  menuItem   MenuItem      @relation(fields: [menuItemId], references: [id])
+  ticket     Ticket        @relation(fields: [ticketId], references: [id])
   choices    OrderChoice[]
 }
 
 model OrderChoice {
-  id                String   @id @default(cuid())
-  orderId           String
-  optionId          String
-  selectedChoiceId  String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  order             Order    @relation(fields: [orderId], references: [id])
-  option            MenuItemOption @relation(fields: [optionId], references: [id])
-  selectedChoice    MenuItemOptionChoice @relation(fields: [selectedChoiceId], references: [id])
+  id               String               @id @default(cuid())
+  orderId          String
+  optionId         String
+  selectedChoiceId String
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  option           MenuItemOption       @relation(fields: [optionId], references: [id])
+  order            Order                @relation(fields: [orderId], references: [id])
+  selectedChoice   MenuItemOptionChoice @relation(fields: [selectedChoiceId], references: [id])
 }
 
 model Comment {
