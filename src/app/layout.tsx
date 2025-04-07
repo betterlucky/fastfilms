@@ -33,6 +33,12 @@ export const metadata: Metadata = {
     locale: 'en_GB',
     type: 'website',
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
@@ -52,7 +58,7 @@ export default function RootLayout({
         >
           <div className="relative flex min-h-screen flex-col">
             <Nav />
-            <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
+            <main className="flex-1 px-4 py-4 sm:px-6 lg:px-8 md:ml-64">
               {children}
             </main>
           </div>
