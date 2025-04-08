@@ -24,6 +24,7 @@ interface Campaign {
   progress: number
   screeningDate: Date
   deadlineDate: Date
+  isTest: boolean
 }
 
 export default async function CampaignsPage() {
@@ -43,13 +44,20 @@ export default async function CampaignsPage() {
                 <CardTitle>{campaign.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">{campaign.description}</p>
-                <div className="mt-4 flex items-center text-sm text-gray-500">
-                  <CalendarIcon className="mr-2 size-4" />
-                  <span>
-                    {new Date(campaign.screeningDate).toLocaleDateString()} -{' '}
-                    {new Date(campaign.deadlineDate).toLocaleDateString()}
-                  </span>
+                <div className="relative">
+                  {campaign.isTest && (
+                    <div className="absolute -right-6 -top-6 z-10 rotate-45 bg-red-500 px-12 py-2 text-sm font-semibold text-white shadow-md">
+                      TEST CAMPAIGN
+                    </div>
+                  )}
+                  <p className="text-gray-600">{campaign.description}</p>
+                  <div className="mt-4 flex items-center text-sm text-gray-500">
+                    <CalendarIcon className="mr-2 size-4" />
+                    <span>
+                      {new Date(campaign.screeningDate).toLocaleDateString()} -{' '}
+                      {new Date(campaign.deadlineDate).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

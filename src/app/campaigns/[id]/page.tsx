@@ -31,6 +31,7 @@ export default async function CampaignPage({
       screenId: true,
       charityId: true,
       venueId: true,
+      isTest: true,
       venue: {
         select: {
           id: true,

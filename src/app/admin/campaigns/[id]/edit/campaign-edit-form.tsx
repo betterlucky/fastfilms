@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { Campaign, Venue, Charity, MenuItem, Screen } from '@prisma/client'
+import { Loader2 } from 'lucide-react'
 
 interface CampaignEditFormProps {
   campaign: Campaign & {
@@ -109,7 +110,7 @@ export function CampaignEditForm({
     <form onSubmit={onSubmit} className="space-y-8">
       <div className="space-y-4">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium">
+          <label htmlFor="title" className="block font-medium text-sm">
             Campaign Title
           </label>
           <Input
@@ -121,7 +122,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium">
+          <label htmlFor="description" className="block font-medium text-sm">
             Description
           </label>
           <Textarea
@@ -133,7 +134,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="movieTitle" className="block text-sm font-medium">
+          <label htmlFor="movieTitle" className="block font-medium text-sm">
             Movie Title
           </label>
           <Input
@@ -145,7 +146,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="customBlurb" className="block text-sm font-medium">
+          <label htmlFor="customBlurb" className="block font-medium text-sm">
             Custom Blurb
           </label>
           <Textarea
@@ -156,7 +157,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="posterPath" className="block text-sm font-medium">
+          <label htmlFor="posterPath" className="block font-medium text-sm">
             Poster Image URL
           </label>
           <div className="space-y-2">
@@ -181,7 +182,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="venue" className="block text-sm font-medium">
+          <label htmlFor="venue" className="block font-medium text-sm">
             Venue
           </label>
           <Select
@@ -203,7 +204,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="screen" className="block text-sm font-medium">
+          <label htmlFor="screen" className="block font-medium text-sm">
             Screen
           </label>
           <Select
@@ -226,7 +227,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="screeningDate" className="block text-sm font-medium">
+          <label htmlFor="screeningDate" className="block font-medium text-sm">
             Screening Date & Time
           </label>
           <div className="flex gap-4">
@@ -252,7 +253,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="deadlineDate" className="block text-sm font-medium">
+          <label htmlFor="deadlineDate" className="block font-medium text-sm">
             Campaign Deadline
           </label>
           <DatePicker
@@ -266,7 +267,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="ticketCap" className="block text-sm font-medium">
+          <label htmlFor="ticketCap" className="block font-medium text-sm">
             Ticket Cap
           </label>
           <Input
@@ -280,7 +281,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="fundingTarget" className="block text-sm font-medium">
+          <label htmlFor="fundingTarget" className="block font-medium text-sm">
             Funding Target (£)
           </label>
           <Input
@@ -295,7 +296,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label htmlFor="charity" className="block text-sm font-medium">
+          <label htmlFor="charity" className="block font-medium text-sm">
             Charity
           </label>
           <Select name="charityId" defaultValue={campaign.charityId || 'none'}>
@@ -314,7 +315,7 @@ export function CampaignEditForm({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium">Menu Items</label>
+          <label className="mb-2 block font-medium text-sm">Menu Items</label>
           {currentVenue?.menuItems.length === 0 ? (
             <p className="text-sm text-gray-500">
               No menu items available for this venue.
@@ -376,16 +377,24 @@ export function CampaignEditForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-4">
+      <div className="flex items-center justify-end gap-4">
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push('/admin/campaigns')}
+          onClick={() => router.back()}
+          className="w-32"
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        <Button type="submit" className="w-32" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save"
+          )}
         </Button>
       </div>
     </form>

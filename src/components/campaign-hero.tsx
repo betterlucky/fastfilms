@@ -37,6 +37,7 @@ interface Campaign {
     capacity: number
   } | null
   hasScreenAllocated: boolean
+  isTest: boolean
 }
 
 interface CampaignHeroProps {
@@ -75,7 +76,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
-                {campaign.title.toLowerCase().includes('test') && (
+                {campaign.isTest && (
                   <div className="absolute -right-6 -top-6 z-10 rotate-45 bg-red-500 px-12 py-2 text-sm font-semibold text-white shadow-md">
                     TEST CAMPAIGN
                   </div>

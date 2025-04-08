@@ -81,7 +81,12 @@ export default async function BookPage({ params }: { params: { id: string } }) {
             <CardContent>
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <div className="space-y-4">
-                  <div>
+                  <div className="relative">
+                    {campaign.isTest && (
+                      <div className="absolute -right-6 -top-6 z-10 rotate-45 bg-red-500 px-12 py-2 text-sm font-semibold text-white shadow-md">
+                        TEST CAMPAIGN
+                      </div>
+                    )}
                     <h2 className="text-lg font-semibold">Screening Details</h2>
                     <p>
                       {formattedDate} at {campaign.screeningTime}

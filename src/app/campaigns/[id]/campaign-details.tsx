@@ -36,6 +36,7 @@ interface CampaignDetailsProps {
       price: number
       category: string
     }[]
+    isTest: boolean
   }
   isAdmin: boolean
   availableScreens: {
@@ -91,8 +92,15 @@ export default function CampaignDetails({
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <h1 className="text-2xl font-bold">{campaign.title}</h1>
-                    <p className="text-gray-500">{campaign.description}</p>
+                    <div className="relative">
+                      {campaign.isTest && (
+                        <div className="absolute -right-6 -top-6 z-10 rotate-45 bg-red-500 px-12 py-2 text-sm font-semibold text-white shadow-md">
+                          TEST CAMPAIGN
+                        </div>
+                      )}
+                      <h1 className="text-2xl font-bold">{campaign.title}</h1>
+                      <p className="text-gray-500">{campaign.description}</p>
+                    </div>
                     <div className="mt-4">
                       <div className="flex flex-col gap-4 md:flex-row">
                         <Button

@@ -26,6 +26,7 @@ export async function getFeaturedCampaign() {
       status: true,
       isFeatured: true,
       posterPath: true,
+      isTest: true,
       venue: {
         select: {
           id: true,
@@ -72,6 +73,7 @@ export async function getFeaturedCampaign() {
         status: true,
         isFeatured: true,
         posterPath: true,
+        isTest: true,
         venue: {
           select: {
             id: true,
@@ -164,6 +166,7 @@ export async function getCampaigns() {
       status: true,
       isFeatured: true,
       posterPath: true,
+      isTest: true,
       venue: {
         select: {
           id: true,
