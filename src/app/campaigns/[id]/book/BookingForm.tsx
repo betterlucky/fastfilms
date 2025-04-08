@@ -192,11 +192,13 @@ export default function BookingForm({
             if (!updatedOptions[option.id]) {
               updatedOptions[option.id] = []
             }
-            // Initialize new slots, auto-selecting single choices if minChoices > 0
+            // Initialize new slots with single choices if available and minChoices > 0
             while (updatedOptions[option.id].length < newQuantity) {
-              updatedOptions[option.id].push(
-                option.choices.length === 1 ? [option.choices[0].id] : []
-              )
+              if (option.choices.length === 1 && option.minChoices > 0) {
+                updatedOptions[option.id].push([option.choices[0].id])
+              } else {
+                updatedOptions[option.id].push([])
+              }
             }
           })
         }

@@ -46,7 +46,7 @@ export default async function CampaignsPage() {
               <CardContent>
                 <div className="relative">
                   {campaign.isTest && (
-                    <div className="absolute -right-6 -top-6 z-10 rotate-45 bg-red-500 px-12 py-2 text-sm font-semibold text-white shadow-md">
+                    <div className="absolute -right-[4.5rem] top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
                       TEST CAMPAIGN
                     </div>
                   )}
