@@ -6,11 +6,7 @@ import { useRouter } from 'next/navigation'
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from '@/components/ui/card'
-import Link from 'next/link'
 import {
   Dialog,
   DialogContent,
@@ -50,6 +46,7 @@ export default function MenuItemList({
   const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<SerializedMenuItem | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const groupedItems = menuItems.reduce(
     (groups, item) => {
@@ -69,11 +66,15 @@ export default function MenuItemList({
         `/api/admin/venues/${venueId}/menu/${itemToDelete.id}`,
         {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
       )
 
       if (!response.ok) {
-        throw new Error('Failed to delete menu item')
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete menu item')
       }
 
       toast({
@@ -81,12 +82,12 @@ export default function MenuItemList({
         description: 'Menu item deleted successfully',
       })
       
-      // Refresh the page to show updated list
+      setDialogOpen(false)
       router.refresh()
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to delete menu item',
+        description: error instanceof Error ? error.message : 'Failed to delete menu item',
         variant: 'destructive',
       })
     } finally {
@@ -146,27 +147,36 @@ export default function MenuItemList({
                     >
                       Edit
                     </Button>
-                    <Dialog open={itemToDelete?.id === item.id} onOpenChange={(open) => !open && setItemToDelete(null)}>
+                    <Dialog open={dialogOpen && itemToDelete?.id === item.id} onOpenChange={(open) => {
+                      setDialogOpen(open)
+                      if (!open) setItemToDelete(null)
+                    }}>
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setItemToDelete(item)}
+                          onClick={() => {
+                            setItemToDelete(item)
+                            setDialogOpen(true)
+                          }}
                         >
                           Delete
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="bg-white">
                         <DialogHeader>
-                          <DialogTitle>Delete Menu Item</DialogTitle>
-                          <DialogDescription>
+                          <DialogTitle className="text-gray-900">Delete Menu Item</DialogTitle>
+                          <DialogDescription className="text-gray-600">
                             Are you sure you want to delete "{item.name}"? This action cannot be undone.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
                           <Button
                             variant="outline"
-                            onClick={() => setItemToDelete(null)}
+                            onClick={() => {
+                              setDialogOpen(false)
+                              setItemToDelete(null)
+                            }}
                             disabled={isDeleting}
                           >
                             Cancel
