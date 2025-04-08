@@ -43,13 +43,17 @@ export default async function CampaignTicketsPage({
               screeningDate: true,
             },
           },
-          orders: {
+          purchase: {
             include: {
-              menuItem: true,
-              choices: {
+              orders: {
                 include: {
-                  option: true,
-                  selectedChoice: true,
+                  menuItem: true,
+                  choices: {
+                    include: {
+                      option: true,
+                      selectedChoice: true,
+                    },
+                  },
                 },
               },
             },
@@ -75,13 +79,13 @@ export default async function CampaignTicketsPage({
   const processedTickets = campaign.tickets.map(ticket => ({
     ...ticket,
     pricePaid: convertDecimal(ticket.pricePaid),
-    orders: ticket.orders.map(order => ({
+    orders: ticket.purchase?.orders.map(order => ({
       ...order,
       menuItem: order.menuItem ? {
         ...order.menuItem,
         price: convertDecimal(order.menuItem.price)
       } : null
-    }))
+    })) || []
   }))
 
   // Calculate ticket statistics

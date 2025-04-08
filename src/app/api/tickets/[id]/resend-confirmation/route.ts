@@ -5,9 +5,47 @@ import { generateTicketConfirmationEmail } from '@/lib/email'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { EmailData } from '@/lib/types'
+import { Prisma } from '@prisma/client'
 
 // Rate limiting: 1 email per 5 minutes
 const RESEND_COOLDOWN = 5 * 60 * 1000 // 5 minutes in milliseconds
+
+// Define the type for our ticket query result
+type TicketWithRelations = Prisma.TicketGetPayload<{
+  include: {
+    campaign: {
+      include: {
+        venue: {
+          select: {
+            id: true
+            name: true
+          }
+        }
+      }
+    }
+    purchase: {
+      include: {
+        orders: {
+          include: {
+            menuItem: true
+            choices: {
+              include: {
+                option: { select: { name: true } }
+                selectedChoice: { select: { name: true } }
+              }
+            }
+          }
+        }
+      }
+    }
+    user: {
+      select: {
+        name: true
+        email: true
+      }
+    }
+  }
+}>
 
 export async function POST(
   request: Request,
@@ -22,7 +60,15 @@ export async function POST(
     // Get the target ticket and find all related tickets in the same transaction
     const targetTicket = await prisma.ticket.findUnique({
       where: { id: params.id },
-      include: { campaign: true }
+      include: {
+        campaign: true,
+        purchase: {
+          select: {
+            id: true,
+            stripePaymentIntentId: true
+          }
+        },
+      }
     })
 
     if (!targetTicket) {
@@ -35,8 +81,8 @@ export async function POST(
         OR: [
           // If it's a Stripe transaction, get all tickets with same payment intent
           {
-            stripePaymentIntentId: targetTicket.stripePaymentIntentId,
-            AND: {
+            purchase: {
+              stripePaymentIntentId: targetTicket.purchase.stripePaymentIntentId,
               NOT: { stripePaymentIntentId: null }
             }
           },
@@ -56,23 +102,6 @@ export async function POST(
         ]
       },
       include: {
-        orders: {
-          include: {
-            menuItem: true,
-            choices: {
-              include: {
-                option: { select: { name: true } },
-                selectedChoice: { select: { name: true } }
-              }
-            }
-          }
-        },
-        user: {
-          select: {
-            name: true,
-            email: true,
-          }
-        },
         campaign: {
           include: {
             venue: {
@@ -82,9 +111,37 @@ export async function POST(
               }
             }
           }
+        },
+        purchase: {
+          include: {
+            orders: {
+              include: {
+                menuItem: true,
+                choices: {
+                  include: {
+                    option: { select: { name: true } },
+                    selectedChoice: { select: { name: true } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        user: {
+          select: {
+            name: true,
+            email: true
+          }
         }
       }
-    })
+    }) as TicketWithRelations[]
+
+    if (!tickets.length) {
+      return NextResponse.json(
+        { error: 'No tickets found for this transaction' },
+        { status: 404 }
+      )
+    }
 
     // Check if user is authorized (either admin or ticket owner)
     if (session.user.role !== 'ADMIN' && tickets[0]?.userId !== session.user.id) {
@@ -112,7 +169,7 @@ export async function POST(
     // Calculate total amount including tickets and food
     const ticketsTotal = tickets.reduce((sum, t) => sum + Number(t.pricePaid), 0)
     const foodTotal = tickets.reduce((sum, t) => 
-      sum + t.orders.reduce((orderSum, o) => 
+      sum + (t.purchase?.orders || []).reduce((orderSum, o) => 
         orderSum + (Number(o.menuItem.price) * o.quantity), 0
       ), 0
     )
@@ -120,21 +177,24 @@ export async function POST(
     // Group food orders by menu item
     const foodOrdersMap = new Map()
     tickets.forEach(ticket => {
-      ticket.orders.forEach(order => {
-        const key = order.menuItem.id
-        if (!foodOrdersMap.has(key)) {
-          foodOrdersMap.set(key, {
-            name: order.menuItem.name,
-            quantity: 0,
-            price: Number(order.menuItem.price) / 100,
-            options: order.choices.map(choice => ({
-              name: choice.option.name,
-              choice: choice.selectedChoice.name
-            }))
-          })
-        }
-        foodOrdersMap.get(key).quantity += order.quantity
-      })
+      if (ticket.purchase) {
+        ticket.purchase.orders.forEach(order => {
+          const key = order.menuItem.id
+          if (!foodOrdersMap.has(key)) {
+            foodOrdersMap.set(key, {
+              name: order.menuItem.name,
+              quantity: 0,
+              price: Number(order.menuItem.price) / 100,
+              options: order.choices.map(choice => ({
+                name: choice.option.name,
+                choice: choice.selectedChoice.name
+              }))
+            })
+          }
+          const item = foodOrdersMap.get(key)
+          item.quantity += order.quantity
+        })
+      }
     })
 
     // Transform ticket data for email
@@ -149,10 +209,19 @@ export async function POST(
       foodOrders: Array.from(foodOrdersMap.values())
     }
 
+    // Ensure we have a valid email address
+    const recipientEmail = tickets[0].user?.email
+    if (!recipientEmail) {
+      return NextResponse.json(
+        { error: 'No email address found for ticket holder' },
+        { status: 400 }
+      )
+    }
+
     // Send email
     const emailHtml = generateTicketConfirmationEmail(emailData)
     await sendEmail({
-      to: tickets[0].user?.email || '',
+      to: recipientEmail,
       subject: `Your tickets for ${tickets[0].campaign.movieTitle}`,
       html: emailHtml,
     })

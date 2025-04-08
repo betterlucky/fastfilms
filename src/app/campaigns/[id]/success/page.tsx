@@ -40,9 +40,13 @@ export default async function SuccessPage({
       userId: session.user.id,
     },
     include: {
-      orders: {
+      purchase: {
         include: {
-          menuItem: true,
+          orders: {
+            include: {
+              menuItem: true,
+            },
+          },
         },
       },
     },
@@ -72,11 +76,11 @@ export default async function SuccessPage({
             <div>
               <h3 className="font-medium">Your Tickets</h3>
               <p className="text-gray-600">{tickets.length} tickets booked</p>
-              {tickets[0].orders.length > 0 && (
+              {tickets[0].purchase?.orders.length > 0 && (
                 <div className="mt-2">
                   <h3 className="font-medium">Pre-ordered Items</h3>
                   <ul className="list-inside list-disc text-gray-600">
-                    {tickets[0].orders.map((order) => (
+                    {tickets[0].purchase.orders.map((order) => (
                       <li key={order.id}>
                         {order.quantity}x {order.menuItem.name}
                       </li>

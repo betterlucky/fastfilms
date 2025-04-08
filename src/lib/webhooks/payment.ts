@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient, Prisma, PurchaseStatus, TicketStatus } from '@prisma/client'
 import { sendEmail } from '@/lib/email'
 import { prisma } from '@/lib/db'
 import { Stripe } from 'stripe'
@@ -26,51 +26,89 @@ export async function handlePaymentSuccess(
 
   try {
     // Update ticket status to confirmed and increment campaign's currentTickets
-    await prisma.$transaction([
-      prisma.ticket.updateMany({
+    await prisma.$transaction(async (tx) => {
+      // First, try to find an existing purchase with this payment intent ID
+      const existingPurchase = await tx.purchase.findFirst({
+        where: {
+          stripePaymentIntentId: paymentIntentId,
+        },
+      });
+
+      if (existingPurchase) {
+        // If purchase exists, update it
+        await tx.purchase.update({
+          where: { id: existingPurchase.id },
+          data: {
+            status: PurchaseStatus.CONFIRMED,
+            totalAmount: amount
+          }
+        });
+      } else {
+        // If no purchase exists, create a new one
+        await tx.purchase.create({
+          data: {
+            stripePaymentIntentId: paymentIntentId,
+            campaignId,
+            userId,
+            status: PurchaseStatus.CONFIRMED,
+            totalAmount: amount,
+            tickets: {
+              connect: ticketIds.map(id => ({ id }))
+            }
+          }
+        });
+      }
+
+      // Update ticket status to confirmed
+      await tx.ticket.updateMany({
         where: { id: { in: ticketIds } },
         data: { 
-          status: 'CONFIRMED',
-          stripePaymentIntentId: paymentIntentId
+          status: TicketStatus.CONFIRMED
         },
-      }),
-      prisma.campaign.update({
+      });
+
+      // Update campaign ticket count
+      await tx.campaign.update({
         where: { id: campaignId },
         data: {
           currentTickets: {
             increment: ticketIds.length,
           },
         },
-      }),
-    ])
+      });
+    });
 
     // Get tickets with orders for the email
     const tickets = await prisma.ticket.findMany({
       where: { id: { in: ticketIds } },
       include: {
-        orders: {
+        purchase: {
           include: {
-            menuItem: {
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                price: true,
-                venueId: true,
-                createdAt: true,
-                updatedAt: true,
-              },
-            },
-            choices: {
+            orders: {
               include: {
-                option: {
+                menuItem: {
                   select: {
+                    id: true,
                     name: true,
+                    description: true,
+                    price: true,
+                    venueId: true,
+                    createdAt: true,
+                    updatedAt: true,
                   },
                 },
-                selectedChoice: {
-                  select: {
-                    name: true,
+                choices: {
+                  include: {
+                    option: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                    selectedChoice: {
+                      select: {
+                        name: true,
+                      },
+                    },
                   },
                 },
               },
@@ -111,10 +149,10 @@ export async function handlePaymentSuccess(
       screeningDate: tickets[0].campaign.screeningDate,
       ticketQuantity: tickets.length,
       totalAmount: amount / 100, // Convert from cents to pounds
-      regularTickets: tickets.filter(t => t.status === 'CONFIRMED').length,
-      pifTickets: tickets.filter(t => t.status === 'PAY_IT_FORWARD').length,
+      regularTickets: tickets.filter(t => t.status === TicketStatus.CONFIRMED).length,
+      pifTickets: tickets.filter(t => t.status === TicketStatus.PAY_IT_FORWARD).length,
       foodOrders: tickets.flatMap(ticket => 
-        ticket.orders.map(order => ({
+        (ticket.purchase?.orders || []).map(order => ({
           name: order.menuItem.name,
           quantity: 1,
           price: Number(order.menuItem.price) / 100,
@@ -174,7 +212,7 @@ interface Campaign {
 
 interface Ticket {
   id: string
-  type: 'REGULAR' | 'PAY_IT_FORWARD'
+  type: TicketStatus
   orders: Array<{
     menuItem: {
       name: string

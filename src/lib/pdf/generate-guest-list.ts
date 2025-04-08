@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf'
-import { Campaign, User, Ticket, Order } from '@prisma/client'
+import { Campaign, User, Ticket, Order, Purchase } from '@prisma/client'
 
 interface GuestListData {
   campaign: Campaign & {
@@ -9,10 +9,12 @@ interface GuestListData {
   }
   tickets: (Ticket & {
     user: Pick<User, 'name' | 'email'>
-    orders: {
-      id: string
-      quantity: number
-    }[]
+    purchase: (Purchase & {
+      orders: {
+        id: string
+        quantity: number
+      }[]
+    }) | null
   })[]
 }
 
@@ -177,7 +179,7 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
 
         doc.text(ticket.user.name || 'Guest', MARGIN + 5, yPos)
         doc.text(ticket.user.email, MARGIN + 80, yPos)
-        if (ticket.orders.length > 0) {
+        if (ticket.purchase?.orders.length > 0) {
           doc.text('Yes - see preorder sheet', MARGIN + 150, yPos)
         }
         yPos += 8

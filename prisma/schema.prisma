@@ -7,6 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  VENUE_ADMIN
+}
+
+enum CampaignStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PurchaseStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REFUNDED
+}
+
+enum TicketStatus {
+  PENDING
+  CONFIRMED
+  PAY_IT_FORWARD
+  CANCELLED
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -34,21 +60,23 @@ model Session {
 }
 
 model User {
-  id            String         @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String?
-  email         String         @unique
+  email         String           @unique
   emailVerified DateTime?
   password      String?
   image         String?
-  role          UserRole       @default(CUSTOMER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  role          UserRole        @default(CUSTOMER)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   accounts      Account[]
   comments      Comment[]
   Contribution  Contribution[]
   sessions      Session[]
   tickets       Ticket[]
   ticketResends TicketResend[]
+  purchases     Purchase[]       // Add relation to purchases
+  purchaseResends PurchaseResend[] // Add relation to purchase resends
 }
 
 model VerificationToken {
@@ -100,6 +128,7 @@ model Campaign {
   comments       Comment[]
   Contribution   Contribution[]
   tickets        Ticket[]
+  purchases      Purchase[]         // Add relation to purchases
 }
 
 model Venue {
@@ -177,18 +206,22 @@ model MenuItemOptionChoice {
 }
 
 model Ticket {
-  id                    String   @id @default(cuid())
-  campaignId            String
-  userId                String
-  pricePaid             Decimal  @db.Decimal(10, 2)
-  status                String
-  stripePaymentIntentId String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  orders                Order[]
-  campaign              Campaign @relation(fields: [campaignId], references: [id])
-  user                  User     @relation(fields: [userId], references: [id])
-  resends               TicketResend[]
+  id          String         @id @default(cuid())
+  purchaseId  String
+  campaignId  String
+  userId      String
+  pricePaid   Decimal       @db.Decimal(10, 2)
+  status      TicketStatus  @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  campaign    Campaign      @relation(fields: [campaignId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
+  purchase    Purchase      @relation(fields: [purchaseId], references: [id])
+  resends     TicketResend[]
+
+  @@index([purchaseId])
+  @@index([campaignId])
+  @@index([userId])
 }
 
 model TicketResend {
@@ -204,15 +237,48 @@ model TicketResend {
 }
 
 model Order {
-  id         String        @id @default(cuid())
-  ticketId   String
-  menuItemId String
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  quantity   Int
-  menuItem   MenuItem      @relation(fields: [menuItemId], references: [id])
-  ticket     Ticket        @relation(fields: [ticketId], references: [id])
-  choices    OrderChoice[]
+  id          String        @id @default(cuid())
+  purchaseId  String
+  menuItemId  String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  quantity    Int
+  menuItem    MenuItem      @relation(fields: [menuItemId], references: [id])
+  purchase    Purchase      @relation(fields: [purchaseId], references: [id])
+  choices     OrderChoice[]
+
+  @@index([purchaseId])
+}
+
+model Purchase {
+  id                    String         @id @default(cuid())
+  campaignId            String
+  userId                String
+  status                PurchaseStatus @default(PENDING)
+  stripePaymentIntentId String?
+  totalAmount           Decimal        @db.Decimal(10, 2)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  orders                Order[]
+  tickets               Ticket[]
+  campaign              Campaign       @relation(fields: [campaignId], references: [id])
+  user                  User           @relation(fields: [userId], references: [id])
+  resends               PurchaseResend[]
+
+  @@index([campaignId])
+  @@index([userId])
+}
+
+model PurchaseResend {
+  id          String   @id @default(cuid())
+  purchaseId  String
+  userId      String
+  createdAt   DateTime @default(now())
+  purchase    Purchase @relation(fields: [purchaseId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([purchaseId])
+  @@index([userId])
 }
 
 model OrderChoice {
@@ -271,16 +337,4 @@ model Contribution {
   createdAt  DateTime @default(now())
   Campaign   Campaign @relation(fields: [campaignId], references: [id])
   User       User     @relation(fields: [userId], references: [id])
-}
-
-enum UserRole {
-  ADMIN
-  CUSTOMER
-}
-
-enum CampaignStatus {
-  ACTIVE
-  COMPLETED
-  CANCELLED
-  FAILED
 }

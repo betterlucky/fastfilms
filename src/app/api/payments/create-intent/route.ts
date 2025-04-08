@@ -6,228 +6,220 @@ import { stripe, formatAmountForStripe } from '@/lib/stripe'
 import { sendEmail } from '@/lib/email'
 import { generateTicketConfirmationEmail } from '@/lib/email'
 import { settings } from '@/config/settings'
+import { Prisma, PurchaseStatus } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 
 interface MenuSelection {
-  quantity: number
-  options: Record<string, string[]>
+  menuItemId: string;
+  quantity: number;
 }
 
 interface RequestBody {
-  campaignId: string
-  quantity: number
-  ticketPrice: number
-  payItForwardTickets: number
-  menuSelections: Record<string, MenuSelection>
+  campaignId: string;
+  numTickets: number;
+  menuSelections?: MenuSelection[];
 }
 
+// Helper function to validate total amount
+const validateTotalAmount = (
+  ticketsTotal: number,
+  foodOrdersTotal: number,
+  calculatedTotal: number,
+  providedTotal: number
+) => {
+  const epsilon = 0.01; // Small difference allowed for floating point calculations
+  if (Math.abs(calculatedTotal - providedTotal) > epsilon) {
+    throw new Error(
+      `Total amount mismatch. Expected: ${calculatedTotal}, Got: ${providedTotal}. ` +
+      `(Tickets: ${ticketsTotal}, Food: ${foodOrdersTotal})`
+    );
+  }
+};
+
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = (await request.json()) as RequestBody;
+  const { campaignId, numTickets, menuSelections = [] } = body;
+
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { campaignId, quantity = 1, ticketPrice, payItForwardTickets, menuSelections } = await request.json() as RequestBody
-
-    if (!campaignId) {
-      return NextResponse.json(
-        { error: 'Campaign ID is required' },
-        { status: 400 }
-      )
-    }
-
     const campaign = await prisma.campaign.findUnique({
       where: { id: campaignId },
       include: {
         venue: true,
       },
-    })
+    });
 
     if (!campaign) {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
-    }
-
-    if (campaign.status !== 'ACTIVE') {
       return NextResponse.json(
-        { error: 'Campaign is not active' },
-        { status: 400 }
-      )
+        { error: "Campaign not found" },
+        { status: 404 }
+      );
     }
 
-    if (campaign.currentTickets + quantity > campaign.ticketCap) {
+    if (campaign.status !== "ACTIVE") {
       return NextResponse.json(
-        { error: 'Not enough tickets available' },
+        { error: "Campaign is not active" },
         { status: 400 }
-      )
+      );
     }
 
-    // Calculate total amount
-    const transactionFee = 0.5
-    const totalAmount = (ticketPrice * quantity) + (payItForwardTickets * 5) + transactionFee
+    const menuItems = await prisma.menuItem.findMany({
+      where: {
+        id: {
+          in: menuSelections.map((selection) => selection.menuItemId),
+        },
+      },
+    });
+
+    const foodOrdersTotal = menuSelections.reduce((total, selection) => {
+      const menuItem = menuItems.find(
+        (item) => item.id === selection.menuItemId
+      );
+      return total + Number(menuItem?.price || 0) * selection.quantity;
+    }, 0);
+
+    const ticketsTotal = numTickets * Number(campaign.fundingTarget);
+    const totalAmount = ticketsTotal + foodOrdersTotal;
+
+    // Validate the calculated total
+    validateTotalAmount(ticketsTotal, foodOrdersTotal, totalAmount, totalAmount);
 
     if (campaign.isTest) {
-      // For test campaigns, create tickets directly without Stripe
-      const regularTickets = await Promise.all(
-        Array.from({ length: quantity }).map(() =>
-          prisma.ticket.create({
-            data: {
-              campaignId,
-              userId: session.user.id,
-              pricePaid: ticketPrice,
-              status: 'CONFIRMED',
+      const purchase = await prisma.$transaction(async (tx) => {
+        const newPurchase = await tx.purchase.create({
+          data: {
+            userId: session.user.id,
+            campaignId: campaign.id,
+            totalAmount: new Prisma.Decimal(0),
+            status: PurchaseStatus.CONFIRMED,
+            tickets: {
+              create: Array(numTickets).fill({
+                userId: session.user.id,
+                campaignId: campaign.id,
+                status: "CONFIRMED",
+                pricePaid: new Prisma.Decimal(0),
+              }),
             },
-          })
-        )
-      )
-
-      // Create pay-it-forward tickets if any
-      const pifTickets = await Promise.all(
-        Array.from({ length: payItForwardTickets }).map(() =>
-          prisma.ticket.create({
-            data: {
-              campaignId,
-              userId: session.user.id,
-              pricePaid: settings.minimumTicketPrice,
-              status: 'PAY_IT_FORWARD',
-            },
-          })
-        )
-      )
-
-      // Create menu item orders if provided
-      if (menuSelections) {
-        for (const ticket of regularTickets) {
-          for (const [menuItemId, selection] of Object.entries(menuSelections)) {
-            if (selection.quantity > 0) {
-              await prisma.order.create({
-                data: {
-                  ticketId: ticket.id,
-                  menuItemId,
-                  quantity: selection.quantity,
+            orders: menuSelections.length > 0 ? {
+              create: menuSelections.map((selection) => ({
+                menuItemId: selection.menuItemId,
+                quantity: selection.quantity,
+              })),
+            } : undefined,
+          },
+          include: {
+            tickets: true,
+            orders: {
+              include: {
+                menuItem: true,
+                choices: {
+                  include: {
+                    option: true,
+                    selectedChoice: true,
+                  },
                 },
-              })
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        });
 
-      // Calculate food orders total
-      let foodOrdersTotal = 0
-      if (menuSelections) {
-        for (const [menuItemId, selection] of Object.entries(menuSelections)) {
-          const menuItem = await prisma.menuItem.findUnique({
-            where: { id: menuItemId },
-            select: { price: true }
-          })
-          if (menuItem) {
-            foodOrdersTotal += Number(menuItem.price) * selection.quantity
-          }
-        }
-      }
+        await tx.campaign.update({
+          where: { id: campaign.id },
+          data: {
+            currentTickets: {
+              increment: numTickets,
+            },
+          },
+        });
 
-      // Send confirmation email
+        return newPurchase;
+      });
+
+      // Generate and send confirmation email
       const emailData = {
         movieTitle: campaign.movieTitle,
         venueName: campaign.venue.name,
         screeningDate: campaign.screeningDate,
-        ticketQuantity: quantity + pifTickets.length,
-        totalAmount: totalAmount + (foodOrdersTotal / 100), // Add food orders to total
-        regularTickets: quantity,
-        pifTickets: pifTickets.length,
-        foodOrders: menuSelections ? await Promise.all(
-          Object.entries(menuSelections).map(async ([menuItemId, selection]) => {
-            const menuItem = await prisma.menuItem.findUnique({
-              where: { id: menuItemId },
-              select: { name: true, price: true }
-            })
-            return {
-              name: menuItem?.name || 'Unknown Item',
-              quantity: selection.quantity,
-              price: Number(menuItem?.price || 0) / 100,
-              options: []
-            }
-          })
-        ) : []
-      }
+        ticketQuantity: numTickets,
+        totalAmount: 0,
+        regularTickets: numTickets,
+        pifTickets: 0,
+        foodOrders: purchase.orders.map(order => ({
+          name: order.menuItem.name,
+          quantity: order.quantity,
+          price: Number(order.menuItem.price) / 100,
+          options: order.choices.map(choice => ({
+            name: choice.option.name,
+            choice: choice.selectedChoice.name
+          }))
+        }))
+      };
 
-      const emailHtml = generateTicketConfirmationEmail(emailData)
+      const emailHtml = generateTicketConfirmationEmail(emailData);
       await sendEmail({
         to: session.user.email || '',
         subject: `Your tickets for ${campaign.movieTitle}`,
         html: emailHtml,
-      })
-
-      // Update campaign ticket count and funding
-      await prisma.campaign.update({
-        where: { id: campaignId },
-        data: {
-          currentTickets: {
-            increment: quantity + pifTickets.length,
-          },
-          currentFunding: {
-            increment: (ticketPrice * quantity) + (settings.minimumTicketPrice * pifTickets.length),
-          },
-        },
-      })
+      });
 
       return NextResponse.json({
-        clientSecret: 'test_mode',
-        ticketIds: [...regularTickets, ...pifTickets].map((ticket) => ticket.id),
-      })
-    } else {
-      // For real campaigns, use Stripe
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: formatAmountForStripe(totalAmount, 'GBP'),
-        currency: 'gbp',
-        metadata: {
-          campaignId,
-          userId: session.user.id,
-          quantity: quantity.toString(),
-          payItForwardTickets: payItForwardTickets.toString(),
-        },
-      })
-
-      // Create pending ticket(s)
-      const regularTickets = await Promise.all(
-        Array.from({ length: quantity }).map(() =>
-          prisma.ticket.create({
-            data: {
-              campaignId,
-              userId: session.user.id,
-              pricePaid: ticketPrice,
-              status: 'PENDING',
-              stripePaymentIntentId: paymentIntent.id,
-            },
-          })
-        )
-      )
-
-      // Create pending pay-it-forward tickets
-      const pifTickets = await Promise.all(
-        Array.from({ length: payItForwardTickets }).map(() =>
-          prisma.ticket.create({
-            data: {
-              campaignId,
-              userId: session.user.id,
-              pricePaid: settings.minimumTicketPrice,
-              status: 'PAY_IT_FORWARD',
-              stripePaymentIntentId: paymentIntent.id,
-            },
-          })
-        )
-      )
-
-      return NextResponse.json({
-        clientSecret: paymentIntent.client_secret,
-        ticketIds: [...regularTickets, ...pifTickets].map((ticket) => ticket.id),
-      })
+        success: true,
+        purchase,
+      });
     }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: formatAmountForStripe(totalAmount, 'usd'),
+      currency: "usd",
+      metadata: {
+        userId: session.user.id,
+        campaignId: campaign.id,
+        numTickets,
+        menuSelections: JSON.stringify(menuSelections),
+      },
+    });
+
+    const purchase = await prisma.purchase.create({
+      data: {
+        userId: session.user.id,
+        campaignId: campaign.id,
+        totalAmount: new Prisma.Decimal(totalAmount),
+        status: PurchaseStatus.PENDING,
+        stripePaymentIntentId: paymentIntent.id,
+        tickets: {
+          create: Array(numTickets).fill({
+            userId: session.user.id,
+            campaignId: campaign.id,
+            status: "PENDING",
+            pricePaid: new Prisma.Decimal(campaign.fundingTarget),
+          }),
+        },
+        orders: menuSelections.length > 0 ? {
+          create: menuSelections.map((selection) => ({
+            menuItemId: selection.menuItemId,
+            quantity: selection.quantity,
+          })),
+        } : undefined,
+      },
+      include: {
+        tickets: true,
+        orders: true,
+      },
+    });
+
+    return NextResponse.json({
+      clientSecret: paymentIntent.client_secret,
+      purchase,
+    });
   } catch (error) {
-    console.error('Error creating payment intent:', error)
+    console.error("Error creating payment intent:", error);
     return NextResponse.json(
-      { error: 'Failed to create payment' },
+      { error: error instanceof Error ? error.message : "Failed to create payment intent" },
       { status: 500 }
-    )
+    );
   }
 }

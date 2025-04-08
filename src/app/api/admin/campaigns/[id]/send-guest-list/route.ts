@@ -1,16 +1,14 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
+import { generateGuestListPDF, generatePreordersPDF } from '@/lib/pdf/generate-guest-list'
 import nodemailer from 'nodemailer'
-import {
-  generateGuestListPDF,
-  generatePreordersPDF,
-} from '@/lib/pdf/generate-guest-list'
+import { Campaign, Order, Ticket, TicketStatus } from '@prisma/client'
 
 // Create a transporter using Gmail SMTP
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // use SSL
   auth: {
     user: process.env.CONTACT_EMAIL,
     pass: process.env.EMAIL_HOST_PASSWORD,
@@ -19,10 +17,9 @@ const transporter = nodemailer.createTransport({
 
 // Helper function to format date in UK format
 function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
   })
 }
@@ -31,12 +28,6 @@ export async function POST(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.isAdmin) {
-    return new NextResponse('Unauthorized', { status: 401 })
-  }
-
   try {
     const campaign = await prisma.campaign.findUnique({
       where: { id: params.id },
@@ -49,7 +40,7 @@ export async function POST(
         },
         tickets: {
           where: {
-            status: 'CONFIRMED',
+            status: TicketStatus.CONFIRMED,
           },
           include: {
             user: {
@@ -58,10 +49,31 @@ export async function POST(
                 email: true,
               },
             },
-            orders: {
-              select: {
-                id: true,
-                quantity: true,
+            purchase: {
+              include: {
+                orders: {
+                  include: {
+                    menuItem: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                    choices: {
+                      include: {
+                        option: {
+                          select: {
+                            name: true,
+                          },
+                        },
+                        selectedChoice: {
+                          select: {
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -73,65 +85,44 @@ export async function POST(
       return new NextResponse('Campaign not found', { status: 404 })
     }
 
-    if (!campaign.venue.contactEmail) {
+    if (!campaign.venue?.contactEmail) {
       return new NextResponse('Venue contact email not set', { status: 400 })
     }
 
-    // Get all orders with their details
-    const orders = await prisma.order.findMany({
-      where: {
-        ticketId: {
-          in: campaign.tickets.map((t) => t.id),
-        },
-      },
-      include: {
-        ticket: {
-          include: {
-            user: {
-              select: {
-                name: true,
-                email: true,
-              },
-            },
-          },
-        },
-        menuItem: {
-          select: {
-            name: true,
-          },
-        },
-        choices: {
-          include: {
-            option: {
-              select: {
-                name: true,
-              },
-            },
-            selectedChoice: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-      },
-    })
-
-    // Transform orders to match the expected type
-    const transformedOrders = orders.map((order) => ({
-      ...order,
-      user: order.ticket.user,
+    // Transform tickets to include orders from their purchases
+    const ticketsWithOrders = campaign.tickets.map(ticket => ({
+      ...ticket,
+      orders: ticket.purchase?.orders.map(order => ({
+        id: order.id,
+        quantity: order.quantity,
+      })) || [],
     }))
+
+    // Transform orders for preorder PDF
+    const allOrders = campaign.tickets.flatMap(ticket => 
+      ticket.purchase?.orders.map(order => ({
+        ...order,
+        user: ticket.user,
+        menuItem: order.menuItem,
+        choices: order.choices,
+      })) || []
+    )
 
     // Generate PDFs
     const guestListPDF = await generateGuestListPDF({
-      campaign,
-      tickets: campaign.tickets,
+      campaign: {
+        ...campaign,
+        venue: campaign.venue,
+      },
+      tickets: ticketsWithOrders,
     })
 
     const preordersPDF = await generatePreordersPDF({
-      campaign,
-      orders: transformedOrders,
+      campaign: {
+        ...campaign,
+        venue: campaign.venue,
+      },
+      orders: allOrders,
     })
 
     // Send email with PDF attachments

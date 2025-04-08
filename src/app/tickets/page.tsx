@@ -16,7 +16,11 @@ interface Ticket {
     }
   }
   screeningDate: string
-  stripePaymentIntentId: string
+  purchase: {
+    stripePaymentIntentId: string | null
+  } | null
+  createdAt: string
+  userId: string
 }
 
 interface GroupedTickets {
@@ -44,9 +48,19 @@ export default function TicketsPage() {
         }
         const tickets: Ticket[] = await response.json()
         
-        // Group tickets by transaction (stripePaymentIntentId)
+        // Group tickets by transaction (stripePaymentIntentId) or creation time for test tickets
         const grouped = tickets.reduce((acc: GroupedTickets, ticket) => {
-          const key = ticket.stripePaymentIntentId || ticket.id // Use ticket ID as fallback for test tickets
+          let key: string
+          
+          if (ticket.purchase?.stripePaymentIntentId) {
+            // For regular tickets, group by payment intent ID
+            key = ticket.purchase.stripePaymentIntentId
+          } else {
+            // For test tickets, group by campaignId + userId + createdAt (rounded to nearest second)
+            const createdAtSeconds = Math.floor(new Date(ticket.createdAt).getTime() / 1000)
+            key = `${ticket.campaign.id}_${ticket.userId}_${createdAtSeconds}`
+          }
+
           if (!acc[key]) {
             acc[key] = {
               movieTitle: ticket.campaign.movieTitle,

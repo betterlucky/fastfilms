@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
 import { generateVenueGuestListEmail } from '@/lib/email'
+import { PrismaClient, TicketStatus } from '@prisma/client'
 
 export async function sendGuestListsForToday(): Promise<{
   guestListsSent: number
@@ -29,7 +30,7 @@ export async function sendGuestListsForToday(): Promise<{
           },
         },
         tickets: {
-          where: { status: 'CONFIRMED' },
+          where: { status: TicketStatus.CONFIRMED },
           include: {
             user: {
               select: {
@@ -37,26 +38,30 @@ export async function sendGuestListsForToday(): Promise<{
                 email: true,
               },
             },
-            orders: {
+            purchase: {
               include: {
-                menuItem: {
-                  select: {
-                    id: true,
-                    name: true,
-                    description: true,
-                    price: true,
-                  },
-                },
-                choices: {
+                orders: {
                   include: {
-                    option: {
+                    menuItem: {
                       select: {
+                        id: true,
                         name: true,
+                        description: true,
+                        price: true,
                       },
                     },
-                    selectedChoice: {
-                      select: {
-                        name: true,
+                    choices: {
+                      include: {
+                        option: {
+                          select: {
+                            name: true,
+                          },
+                        },
+                        selectedChoice: {
+                          select: {
+                            name: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -78,10 +83,12 @@ export async function sendGuestListsForToday(): Promise<{
       const guestList = campaign.tickets.reduce(
         (acc, ticket) => {
           const existingGuest = acc.find((g) => g.email === ticket.user.email)
+          const ticketOrders = ticket.purchase?.orders || []
+
           if (existingGuest) {
             existingGuest.ticketCount += 1
             existingGuest.foodOrders.push(
-              ...ticket.orders.map((order) => ({
+              ...ticketOrders.map((order) => ({
                 itemName: order.menuItem.name,
                 quantity: order.quantity,
                 options: order.choices.map((choice) => ({
@@ -95,7 +102,7 @@ export async function sendGuestListsForToday(): Promise<{
               name: ticket.user.name || 'Guest',
               email: ticket.user.email,
               ticketCount: 1,
-              foodOrders: ticket.orders.map((order) => ({
+              foodOrders: ticketOrders.map((order) => ({
                 itemName: order.menuItem.name,
                 quantity: order.quantity,
                 options: order.choices.map((choice) => ({

@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { TicketStatus } from '@prisma/client'
 
 export async function GET() {
   try {
@@ -14,7 +15,7 @@ export async function GET() {
     const tickets = await prisma.ticket.findMany({
       where: {
         userId: session.user.id,
-        status: 'CONFIRMED',
+        status: TicketStatus.CONFIRMED,
       },
       include: {
         campaign: {
@@ -30,6 +31,7 @@ export async function GET() {
             },
           },
         },
+        purchase: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -45,7 +47,7 @@ export async function GET() {
       return {
         ...ticket,
         screeningDate: screeningDate.toISOString(),
-        stripePaymentIntentId: ticket.stripePaymentIntentId || null
+        stripePaymentIntentId: ticket.purchase?.stripePaymentIntentId || null
       }
     })
 
@@ -83,17 +85,28 @@ export async function POST(request: Request) {
         campaignId,
         userId: session.user.id,
         pricePaid: 0, // Set price to 0 for test mode
-        status: campaign.isTest ? 'CONFIRMED' : 'PENDING',
+        status: campaign.isTest ? TicketStatus.CONFIRMED : TicketStatus.PENDING,
       }),
     })
 
     // Create menu item orders if provided
     if (menuItems && menuItems.length > 0) {
+      // First create a purchase record
+      const purchase = await prisma.purchase.create({
+        data: {
+          campaignId,
+          userId: session.user.id,
+          status: campaign.isTest ? TicketStatus.CONFIRMED : TicketStatus.PENDING,
+          totalAmount: 0, // Set to 0 for test mode
+        }
+      })
+
+      // Get the created tickets and link them to the purchase
       const createdTickets = await prisma.ticket.findMany({
         where: {
           campaignId,
           userId: session.user.id,
-          status: campaign.isTest ? 'CONFIRMED' : 'PENDING',
+          status: campaign.isTest ? TicketStatus.CONFIRMED : TicketStatus.PENDING,
         },
         orderBy: {
           createdAt: 'desc',
@@ -101,16 +114,27 @@ export async function POST(request: Request) {
         take: quantity,
       })
 
-      for (const ticket of createdTickets) {
-        for (const item of menuItems) {
-          await prisma.order.create({
-            data: {
-              ticketId: ticket.id,
-              menuItemId: item.id,
-              quantity: item.quantity,
-            },
-          })
+      // Update tickets with purchaseId
+      await prisma.ticket.updateMany({
+        where: {
+          id: {
+            in: createdTickets.map(t => t.id)
+          }
+        },
+        data: {
+          purchaseId: purchase.id
         }
+      })
+
+      // Create orders linked to the purchase
+      for (const item of menuItems) {
+        await prisma.order.create({
+          data: {
+            purchaseId: purchase.id,
+            menuItemId: item.id,
+            quantity: item.quantity,
+          },
+        })
       }
     }
 

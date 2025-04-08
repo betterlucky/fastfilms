@@ -129,7 +129,7 @@ export async function DELETE(
       // 3. Delete Order records associated with campaign tickets
       await tx.order.deleteMany({
         where: {
-          ticket: {
+          purchase: {
             campaignId: params.id,
           },
         },

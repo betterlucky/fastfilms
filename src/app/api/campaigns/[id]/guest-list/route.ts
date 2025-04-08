@@ -34,26 +34,30 @@ export async function POST(
                 email: true,
               },
             },
-            orders: {
+            purchase: {
               include: {
-                menuItem: {
-                  select: {
-                    id: true,
-                    name: true,
-                    description: true,
-                    price: true,
-                  },
-                },
-                choices: {
+                orders: {
                   include: {
-                    option: {
+                    menuItem: {
                       select: {
+                        id: true,
                         name: true,
+                        description: true,
+                        price: true,
                       },
                     },
-                    selectedChoice: {
-                      select: {
-                        name: true,
+                    choices: {
+                      include: {
+                        option: {
+                          select: {
+                            name: true,
+                          },
+                        },
+                        selectedChoice: {
+                          select: {
+                            name: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -69,7 +73,7 @@ export async function POST(
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
     }
 
-    if (!campaign.venue.contactEmail) {
+    if (!campaign.venue?.contactEmail) {
       return NextResponse.json(
         { error: 'Venue contact email not set' },
         { status: 400 }
@@ -80,10 +84,12 @@ export async function POST(
     const guestList = campaign.tickets.reduce(
       (acc, ticket) => {
         const existingGuest = acc.find((g) => g.email === ticket.user.email)
+        const ticketOrders = ticket.purchase?.orders || []
+
         if (existingGuest) {
           existingGuest.ticketCount += 1
           existingGuest.foodOrders.push(
-            ...ticket.orders.map((order) => ({
+            ...ticketOrders.map((order) => ({
               itemName: order.menuItem.name,
               quantity: order.quantity,
               options: order.choices.map((choice) => ({
@@ -97,7 +103,7 @@ export async function POST(
             name: ticket.user.name || 'Guest',
             email: ticket.user.email,
             ticketCount: 1,
-            foodOrders: ticket.orders.map((order) => ({
+            foodOrders: ticketOrders.map((order) => ({
               itemName: order.menuItem.name,
               quantity: order.quantity,
               options: order.choices.map((choice) => ({
