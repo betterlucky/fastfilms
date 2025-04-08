@@ -40,7 +40,7 @@ export function Nav() {
             onClick={() => setIsOpen(!isOpen)}
             className="p-2"
           >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
           </Button>
         </div>
       </div>
@@ -115,7 +115,7 @@ export function Nav() {
       )}
 
       {/* Desktop navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-10 hidden h-16 bg-white shadow-sm md:block">
+      <nav className="fixed top-0 inset-x-0 z-10 hidden h-16 bg-white shadow-sm md:block">
         <div className="flex h-full items-center justify-between px-4">
           <div className="flex items-center space-x-4">
             <Button

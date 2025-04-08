@@ -83,7 +83,7 @@ export async function DELETE(
   }
 
   try {
-    // Check if campaign exists and has any confirmed tickets
+    // First check if campaign exists and has any active tickets
     const campaign = await prisma.campaign.findUnique({
       where: { id: params.id },
       include: {
@@ -91,7 +91,9 @@ export async function DELETE(
           select: {
             tickets: {
               where: {
-                status: "CONFIRMED"
+                status: {
+                  not: "CANCELLED"
+                }
               }
             }
           }
@@ -105,14 +107,46 @@ export async function DELETE(
 
     if (campaign._count.tickets > 0) {
       return new NextResponse(
-        "Cannot delete campaign with confirmed tickets",
+        "Cannot delete campaign with active tickets. Please handle ticket transfers or refunds first.",
         { status: 400 }
       )
     }
 
-    // Delete the campaign
-    await prisma.campaign.delete({
-      where: { id: params.id }
+    // If no active tickets, proceed with deletion in correct order
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete CampaignMenuItem records
+      await tx.campaignMenuItem.deleteMany({
+        where: { campaignId: params.id }
+      })
+
+      // 2. Delete Comment records (including nested replies)
+      await tx.comment.deleteMany({
+        where: { campaignId: params.id }
+      })
+
+      // 3. Delete Order records associated with campaign tickets
+      await tx.order.deleteMany({
+        where: {
+          ticket: {
+            campaignId: params.id
+          }
+        }
+      })
+
+      // 4. Delete Ticket records (should only be cancelled ones at this point)
+      await tx.ticket.deleteMany({
+        where: { campaignId: params.id }
+      })
+
+      // 5. Delete Contribution records
+      await tx.contribution.deleteMany({
+        where: { campaignId: params.id }
+      })
+
+      // 6. Finally delete the campaign
+      await tx.campaign.delete({
+        where: { id: params.id }
+      })
     })
 
     return new NextResponse(null, { status: 204 })
