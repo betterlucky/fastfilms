@@ -29,7 +29,10 @@ export async function handlePaymentSuccess(
     await prisma.$transaction([
       prisma.ticket.updateMany({
         where: { id: { in: ticketIds } },
-        data: { status: 'CONFIRMED' },
+        data: { 
+          status: 'CONFIRMED',
+          stripePaymentIntentId: paymentIntentId
+        },
       }),
       prisma.campaign.update({
         where: { id: campaignId },

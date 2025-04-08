@@ -112,13 +112,43 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Calculate food orders total
+      let foodOrdersTotal = 0
+      if (menuSelections) {
+        for (const [menuItemId, selection] of Object.entries(menuSelections)) {
+          const menuItem = await prisma.menuItem.findUnique({
+            where: { id: menuItemId },
+            select: { price: true }
+          })
+          if (menuItem) {
+            foodOrdersTotal += Number(menuItem.price) * selection.quantity
+          }
+        }
+      }
+
       // Send confirmation email
       const emailData = {
         movieTitle: campaign.movieTitle,
         venueName: campaign.venue.name,
         screeningDate: campaign.screeningDate,
         ticketQuantity: quantity + pifTickets.length,
-        totalAmount: totalAmount,
+        totalAmount: totalAmount + (foodOrdersTotal / 100), // Add food orders to total
+        regularTickets: quantity,
+        pifTickets: pifTickets.length,
+        foodOrders: menuSelections ? await Promise.all(
+          Object.entries(menuSelections).map(async ([menuItemId, selection]) => {
+            const menuItem = await prisma.menuItem.findUnique({
+              where: { id: menuItemId },
+              select: { name: true, price: true }
+            })
+            return {
+              name: menuItem?.name || 'Unknown Item',
+              quantity: selection.quantity,
+              price: Number(menuItem?.price || 0) / 100,
+              options: []
+            }
+          })
+        ) : []
       }
 
       const emailHtml = generateTicketConfirmationEmail(emailData)
