@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { formatPrice } from './utils'
 
 // Create a transporter using Gmail SMTP with secure settings
 const transporter = nodemailer.createTransport({
@@ -277,4 +278,114 @@ export function generateVenueGuestListEmail(data: {
       </body>
     </html>
   `
+}
+
+interface OrderItem {
+  quantity: number
+  menuItem: {
+    name: string
+    price: number
+  }
+  choices?: Array<{
+    option: {
+      name: string
+    }
+    selectedChoice: {
+      name: string
+    }
+  }>
+}
+
+export function generateScreenConfirmationEmail(
+  campaignTitle: string,
+  venueName: string,
+  screenName: string,
+  screeningDate: Date,
+  screeningTime: string,
+  ticketCount: number,
+  orders: OrderItem[] = []
+) {
+  const formattedDate = new Date(screeningDate).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+
+  let ordersList = ''
+  if (orders.length > 0) {
+    ordersList = `
+      <div style="margin-top: 24px;">
+        <h2 style="margin: 0 0 16px 0; color: #111827;">Your Pre-orders</h2>
+        <ul style="list-style-type: none; padding: 0; margin: 0;">
+          ${orders.map(order => 
+            `<li>${order.quantity}x ${order.menuItem.name} (${formatPrice(order.menuItem.price * order.quantity)})</li>`
+          ).join('')}
+        </ul>
+      </div>
+    `
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Screening Confirmed: ${campaignTitle}</title>
+      </head>
+      <body style="font-family: sans-serif; line-height: 1.5; color: #1f2937;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #4f46e5; margin-bottom: 24px;">Great News! Screening Confirmed</h1>
+          
+          <p>The screening of "${campaignTitle}" has been funded and will go ahead as planned.</p>
+          
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
+            <h2 style="margin: 0 0 16px 0; color: #111827;">${campaignTitle}</h2>
+            <p style="margin: 8px 0;"><strong>Venue:</strong> ${venueName}</p>
+            <p style="margin: 8px 0;"><strong>Screen:</strong> ${screenName}</p>
+            <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
+            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningTime}</p>
+            <p style="margin: 8px 0;"><strong>Your Tickets:</strong> ${ticketCount}</p>
+          </div>
+          
+          ${ordersList}
+
+          <p style="margin-top: 24px;">We look forward to seeing you there!</p>
+          
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px;">
+              If you have any questions about your booking, please contact us at support@fastfilms.example.com
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+export async function sendScreenConfirmationEmail(
+  to: string,
+  campaignTitle: string,
+  venueName: string,
+  screenName: string,
+  screeningDate: Date,
+  screeningTime: string,
+  ticketCount: number,
+  orders: OrderItem[] = []
+) {
+  const html = generateScreenConfirmationEmail(
+    campaignTitle,
+    venueName,
+    screenName,
+    screeningDate,
+    screeningTime,
+    ticketCount,
+    orders
+  )
+
+  await sendEmail({
+    to,
+    subject: `Screening Confirmed: ${campaignTitle}`,
+    html
+  })
 }

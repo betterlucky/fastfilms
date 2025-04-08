@@ -86,10 +86,10 @@ export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
           Allocate
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white">
         <DialogHeader>
-          <DialogTitle>Allocate Pay It Forward Ticket</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Allocate Pay It Forward Ticket</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Enter the email address of the user you want to allocate this ticket
             to. The ticket is for {ticket.campaign.movieTitle} on{' '}
             {new Date(ticket.campaign.screeningDate).toLocaleDateString()}.
@@ -98,7 +98,7 @@ export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
+              <Label htmlFor="email" className="text-right text-gray-700">
                 Email
               </Label>
               <Input
@@ -106,13 +106,13 @@ export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="col-span-3"
+                className="col-span-3 bg-white text-gray-900"
                 required
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="bg-primary text-white hover:bg-primary/90">
               {isLoading ? 'Allocating...' : 'Allocate Ticket'}
             </Button>
           </DialogFooter>

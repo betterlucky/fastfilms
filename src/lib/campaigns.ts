@@ -143,14 +143,19 @@ export function calculateTimeLeft(deadlineDate: Date): { days: number } {
   return { days: Math.max(days, 0) }
 }
 
-export async function getCampaigns() {
+export async function getCampaigns(includeFeatured: boolean = false) {
   const campaigns = await prisma.campaign.findMany({
     where: {
       status: 'ACTIVE',
       deadlineDate: {
         gt: new Date(),
-      },
+      }
     },
+    orderBy: [
+      {
+        screeningDate: 'asc',
+      }
+    ],
     select: {
       id: true,
       title: true,
@@ -183,7 +188,16 @@ export async function getCampaigns() {
     },
   })
 
-  return campaigns.map((campaign) => ({
+  // Filter out duplicates by title and screeningDate
+  const uniqueCampaigns = campaigns.reduce((acc, current) => {
+    const key = `${current.title}-${current.screeningDate.toISOString()}`
+    if (!acc.has(key)) {
+      acc.set(key, current)
+    }
+    return acc
+  }, new Map())
+
+  return Array.from(uniqueCampaigns.values()).map((campaign) => ({
     ...campaign,
     formattedTarget: formatPrice(campaign.fundingTarget),
     formattedCurrent: formatPrice(campaign.currentFunding),

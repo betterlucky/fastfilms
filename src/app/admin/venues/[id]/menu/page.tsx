@@ -40,6 +40,19 @@ export default async function VenueMenuPage({
     redirect('/admin/venues')
   }
 
+  // Convert Decimal values to numbers
+  const serializedMenuItems = venue.menuItems.map(item => ({
+    ...item,
+    price: Number(item.price),
+    options: item.options.map(option => ({
+      ...option,
+      choices: option.choices.map(choice => ({
+        ...choice,
+        priceAdjustment: Number(choice.priceAdjustment)
+      }))
+    }))
+  }))
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -56,7 +69,7 @@ export default async function VenueMenuPage({
           <CardTitle>Menu Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <MenuItemList venueId={venue.id} menuItems={venue.menuItems} />
+          <MenuItemList venueId={venue.id} menuItems={serializedMenuItems} />
         </CardContent>
       </Card>
     </div>

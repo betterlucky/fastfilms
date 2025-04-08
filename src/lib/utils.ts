@@ -27,8 +27,7 @@ export function formatDateTime(date: Date): string {
 
 export function calculateProgress(current: number, target: number): number {
   if (target <= 0) return 0
-  const progress = (current / target) * 100
-  return Math.min(Math.max(progress, 0), 100)
+  return (current / target) * 100
 }
 
 export function calculateTimeLeft(deadlineDate: Date): { days: number } {

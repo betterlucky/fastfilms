@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { DataTable } from '@/components/ui/data-table'
 import { columns } from './columns'
+import { Decimal } from '@prisma/client/runtime/library'
+
+// Helper function to convert Decimal to number
+const convertDecimal = (value: Decimal | null | undefined) => {
+  if (!value) return 0
+  return Number(value)
+}
 
 export default async function CampaignTicketsPage({
   params: { id },
@@ -27,6 +34,13 @@ export default async function CampaignTicketsPage({
             select: {
               name: true,
               email: true,
+            },
+          },
+          campaign: {
+            select: {
+              title: true,
+              movieTitle: true,
+              screeningDate: true,
             },
           },
           orders: {
@@ -57,16 +71,29 @@ export default async function CampaignTicketsPage({
     redirect('/admin/campaigns')
   }
 
+  // Convert Decimal values to numbers in tickets and orders
+  const processedTickets = campaign.tickets.map(ticket => ({
+    ...ticket,
+    pricePaid: convertDecimal(ticket.pricePaid),
+    orders: ticket.orders.map(order => ({
+      ...order,
+      menuItem: order.menuItem ? {
+        ...order.menuItem,
+        price: convertDecimal(order.menuItem.price)
+      } : null
+    }))
+  }))
+
   // Calculate ticket statistics
   const totalTickets = campaign._count.tickets
-  const totalRevenue = campaign.tickets.reduce(
-    (sum, ticket) => sum + Number(ticket.pricePaid),
+  const totalRevenue = processedTickets.reduce(
+    (sum, ticket) => sum + ticket.pricePaid,
     0
   )
-  const payItForwardTickets = campaign.tickets.filter(
+  const payItForwardTickets = processedTickets.filter(
     (ticket) => ticket.status === 'PAY_IT_FORWARD'
   ).length
-  const standardTickets = campaign.tickets.filter(
+  const standardTickets = processedTickets.filter(
     (ticket) => ticket.status === 'CONFIRMED'
   ).length
 
@@ -133,7 +160,7 @@ export default async function CampaignTicketsPage({
             <CardTitle>Ticket Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTable columns={columns} data={campaign.tickets} />
+            <DataTable columns={columns} data={processedTickets} />
           </CardContent>
         </Card>
       </div>

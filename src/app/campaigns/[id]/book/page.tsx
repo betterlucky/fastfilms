@@ -106,10 +106,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
 
                   <BookingForm
                     campaignId={campaign.id}
-                    maxTickets={Math.min(
-                      10,
-                      campaign.ticketCap - campaign.currentTickets
-                    )}
+                    maxTickets={campaign.ticketCap - campaign.currentTickets}
                     charity={campaign.charity}
                     menuItems={formattedMenuItems}
                   />

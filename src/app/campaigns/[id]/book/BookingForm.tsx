@@ -87,7 +87,7 @@ export default function BookingForm({
   const router = useRouter()
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'ADMIN'
-  const [quantity, setQuantity] = useState(1)
+  const [quantity, setQuantity] = useState(0)
   const [ticketPrice, setTicketPrice] = useState(
     isAdmin ? 0.01 : settings.minimumTicketPrice
   )
@@ -316,6 +316,18 @@ export default function BookingForm({
     e.preventDefault()
     setError(null)
 
+    // Validate that at least one ticket type is selected
+    if (quantity === 0 && payItForwardTickets === 0) {
+      setError('Please select at least one ticket type')
+      return
+    }
+
+    // Validate ticket quantity
+    if (quantity > maxTickets) {
+      setError(`Maximum ${maxTickets} tickets allowed per booking`)
+      return
+    }
+
     // Validate menu selections before proceeding
     if (!validateMenuSelections()) {
       setError('Please select all required options for your menu items')
@@ -345,9 +357,15 @@ export default function BookingForm({
         throw new Error(data.error || 'Failed to create payment')
       }
 
-      router.push(
-        `/payment?clientSecret=${data.clientSecret}&ticketIds=${data.ticketIds.join(',')}`
-      )
+      // For test campaigns, redirect to success page
+      if (data.clientSecret === 'test_mode') {
+        router.push(`/campaigns/${campaignId}/success?ticketIds=${data.ticketIds.join(',')}`)
+      } else {
+        // For real campaigns, redirect to payment page
+        router.push(
+          `/payment?clientSecret=${data.clientSecret}&ticketIds=${data.ticketIds.join(',')}`
+        )
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -384,28 +402,35 @@ export default function BookingForm({
             htmlFor="quantity"
             className="block text-sm font-medium text-gray-700"
           >
-            Number of Tickets
+            Number of Regular Tickets
           </label>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Number of Tickets</p>
+              <p className="font-medium">Number of Regular Tickets</p>
               <p className="text-sm text-gray-500">
-                Minimum £5.00 per ticket + £0.50 transaction fee
+                {isAdmin
+                  ? 'Admin testing mode: £0.01 tickets available'
+                  : 'From £5.00 per ticket + £0.50 transaction fee'}
               </p>
-              {isAdmin && (
-                <p className="text-sm text-yellow-600">
-                  Admin testing mode: £0.01 tickets available
-                </p>
-              )}
+              <p className="text-sm text-gray-500">
+                Maximum {maxTickets} tickets per booking
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
                 name="quantity"
-                min="1"
-                max={maxTickets}
+                min="0"
                 value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value))}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value)
+                  if (value > maxTickets) {
+                    setError(`Maximum ${maxTickets} tickets allowed per booking`)
+                  } else {
+                    setError(null)
+                  }
+                  setQuantity(value)
+                }}
                 className="w-20"
               />
             </div>
@@ -417,11 +442,11 @@ export default function BookingForm({
             htmlFor="ticketPrice"
             className="block text-sm font-medium text-gray-700"
           >
-            Price per Ticket
+            Price per Regular Ticket
           </label>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Price per Ticket</p>
+              <p className="font-medium">Price per Regular Ticket</p>
               <p className="text-sm text-gray-500">
                 {isAdmin
                   ? 'Minimum £0.01 (Admin testing mode)'

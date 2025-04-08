@@ -18,7 +18,11 @@ export async function GET() {
       },
       include: {
         campaign: {
-          include: {
+          select: {
+            id: true,
+            movieTitle: true,
+            screeningDate: true,
+            screeningTime: true,
             venue: {
               select: {
                 name: true,
@@ -32,7 +36,19 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json(tickets)
+    // Transform the data to combine date and time
+    const transformedTickets = tickets.map(ticket => {
+      const screeningDate = new Date(ticket.campaign.screeningDate)
+      const [hours, minutes] = ticket.campaign.screeningTime.split(':')
+      screeningDate.setHours(parseInt(hours), parseInt(minutes))
+
+      return {
+        ...ticket,
+        screeningDate: screeningDate.toISOString()
+      }
+    })
+
+    return NextResponse.json(transformedTickets)
   } catch (error) {
     console.error('Error fetching tickets:', error)
     // Even on error, return empty array to show "no tickets" state

@@ -4,6 +4,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Progress } from '@/components/ui/progress'
+import { cn } from '@/lib/utils'
+import { CalendarIcon, Clock, Users, Ticket } from 'lucide-react'
 
 interface CampaignDetailsProps {
   campaign: {
@@ -37,6 +40,8 @@ interface CampaignDetailsProps {
       category: string
     }[]
     isTest: boolean
+    currentFunding: string
+    fundingTarget: string
   }
   isAdmin: boolean
   availableScreens: {
@@ -124,6 +129,71 @@ export default function CampaignDetails({
                           </p>
                         </div>
                       )}
+                    </div>
+
+                    {/* Progress Indicators */}
+                    <div className="mt-6 space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Funding Progress</span>
+                          <span>£{Number(campaign.currentFunding).toFixed(2)} of £{Number(campaign.fundingTarget).toFixed(2)}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <Progress 
+                            value={(Number(campaign.currentFunding) / Number(campaign.fundingTarget)) * 100} 
+                            className={cn("h-2", {
+                              "bg-green-100": Number(campaign.currentFunding) >= Number(campaign.fundingTarget) && campaign.currentTickets < campaign.ticketCap,
+                              "bg-red-100": campaign.currentTickets >= campaign.ticketCap
+                            })}
+                            indicatorClassName={cn({
+                              "bg-green-500": Number(campaign.currentFunding) >= Number(campaign.fundingTarget) && campaign.currentTickets < campaign.ticketCap,
+                              "bg-red-500": campaign.currentTickets >= campaign.ticketCap,
+                              "bg-primary": Number(campaign.currentFunding) < Number(campaign.fundingTarget)
+                            })}
+                          />
+                          {Number(campaign.currentFunding) >= Number(campaign.fundingTarget) && (
+                            <p className={cn("text-sm font-medium", {
+                              "text-green-600": campaign.currentTickets < campaign.ticketCap,
+                              "text-red-600": campaign.currentTickets >= campaign.ticketCap
+                            })}>
+                              {campaign.currentTickets >= campaign.ticketCap 
+                                ? "Screening SOLD OUT!" 
+                                : "Screening funded! Tickets still available"}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center text-gray-500">
+                          <CalendarIcon className="mr-2 size-4" />
+                          <span>Screening: {new Date(campaign.screeningDate).toLocaleDateString('en-GB', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long'
+                          })}</span>
+                        </div>
+                        <div className="flex items-center text-gray-500">
+                          <Clock className="mr-2 size-4" />
+                          <span>Deadline: {new Date(campaign.deadlineDate).toLocaleDateString('en-GB', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long'
+                          })}</span>
+                        </div>
+                        <div className="flex items-center text-gray-500">
+                          <Users className="mr-2 size-4" />
+                          {campaign.screen ? (
+                            <span>{campaign.ticketCap - campaign.currentTickets} tickets remaining</span>
+                          ) : (
+                            <span>{campaign.currentTickets} tickets sold</span>
+                          )}
+                        </div>
+                        <div className="flex items-center text-gray-500">
+                          <Ticket className="mr-2 size-4" />
+                          <span>From £5 + £0.50 fee</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   {campaign.posterPath && (

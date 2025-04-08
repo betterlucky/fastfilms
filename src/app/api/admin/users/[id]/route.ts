@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { UserRole } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 const userSchema = z.object({
   name: z.string().min(1),
@@ -32,8 +32,8 @@ export async function PATCH(
       data: {
         name: body.name,
         email: body.email,
-        role: body.isAdmin ? UserRole.ADMIN : UserRole.USER,
-      },
+        role: body.isAdmin ? 'ADMIN' : 'CUSTOMER',
+      } as Prisma.UserUpdateInput,
     })
 
     return NextResponse.json(user)

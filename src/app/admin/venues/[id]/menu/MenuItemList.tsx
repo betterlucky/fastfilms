@@ -12,15 +12,23 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 
-interface MenuItemWithOptions extends MenuItem {
-  options: (MenuItemOption & {
-    choices: MenuItemOptionChoice[]
-  })[]
+// Type for serialized menu items with numbers instead of Decimal
+interface SerializedMenuItemOptionChoice extends Omit<MenuItemOptionChoice, 'priceAdjustment'> {
+  priceAdjustment: number
+}
+
+interface SerializedMenuItemOption extends Omit<MenuItemOption, 'choices'> {
+  choices: SerializedMenuItemOptionChoice[]
+}
+
+interface SerializedMenuItem extends Omit<MenuItem, 'price'> {
+  price: number
+  options: SerializedMenuItemOption[]
 }
 
 interface MenuItemListProps {
   venueId: string
-  menuItems: MenuItemWithOptions[]
+  menuItems: SerializedMenuItem[]
 }
 
 export default function MenuItemList({
@@ -30,14 +38,11 @@ export default function MenuItemList({
   const router = useRouter()
   const groupedItems = menuItems.reduce(
     (groups, item) => {
-      const category = item.category || 'Uncategorized'
-      if (!groups[category]) {
-        groups[category] = []
-      }
-      groups[category].push(item)
-      return groups
+      const group = groups[item.category] || []
+      group.push(item)
+      return { ...groups, [item.category]: group }
     },
-    {} as Record<string, MenuItemWithOptions[]>
+    {} as Record<string, SerializedMenuItem[]>
   )
 
   return (
@@ -52,7 +57,9 @@ export default function MenuItemList({
       </div>
       {Object.entries(groupedItems).map(([category, items]) => (
         <div key={category}>
-          <h2 className="mb-4 text-2xl font-bold">{category}</h2>
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">
+            {category}
+          </h3>
           <div className="grid gap-4">
             {items.map((item) => (
               <Card key={item.id}>
@@ -75,11 +82,10 @@ export default function MenuItemList({
                             {option.choices.map((choice) => (
                               <li key={choice.id}>
                                 {choice.name}
-                                {Number(choice.priceAdjustment) > 0 && (
+                                {choice.priceAdjustment > 0 && (
                                   <span className="text-green-600">
                                     {' '}
-                                    (+£
-                                    {Number(choice.priceAdjustment).toFixed(2)})
+                                    (+£{choice.priceAdjustment.toFixed(2)})
                                   </span>
                                 )}
                               </li>
@@ -95,9 +101,7 @@ export default function MenuItemList({
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        router.push(
-                          `/admin/venues/${venueId}/menu/${item.id}/edit`
-                        )
+                        router.push(`/admin/venues/${venueId}/menu/${item.id}/edit`)
                       }
                     >
                       Edit
