@@ -85,7 +85,7 @@ export const columns: ColumnDef<any>[] = [
           ) : (
             <ResetTicketDialog ticket={ticket} />
           )}
-          <ResendConfirmationButton ticketId={ticket.id} />
+          <ResendConfirmationButton ticketIds={[ticket.id]} />
         </div>
       )
     },
