@@ -232,6 +232,18 @@ export default function BookingForm({
       const updatedSelections = [...currentSelections]
       updatedSelections[index] = choiceIds
 
+      // For radio buttons, ensure we have a valid selection
+      const option = menuItems
+        .find((item) => item.id === menuItemId)
+        ?.options.find((opt) => opt.id === optionId)
+      
+      if (option?.minChoices === 0) {
+        // For radio buttons, 'none' is a valid selection
+        if (choiceIds.length === 0 || choiceIds[0] === 'none') {
+          updatedSelections[index] = []
+        }
+      }
+
       return {
         ...prev,
         [menuItemId]: {
@@ -247,6 +259,7 @@ export default function BookingForm({
 
   const validateMenuSelections = () => {
     const newValidation: MenuValidation = {}
+    let isValid = true
 
     Object.entries(menuSelections).forEach(([menuItemId, selection]) => {
       if (selection.quantity > 0) {
@@ -255,10 +268,18 @@ export default function BookingForm({
 
         const optionValidation: OptionValidation = {}
         menuItem.options.forEach((option) => {
+          // Check each quantity's selections
           const allSelectionsValid = Array.from({
             length: selection.quantity,
           }).every((_, index) => {
             const selectedChoices = selection.options[option.id]?.[index] || []
+            
+            // For radio buttons (minChoices === 0), any selection including 'none' is valid
+            if (option.minChoices === 0) {
+              return true
+            }
+            
+            // For required selections (minChoices > 0)
             return (
               selectedChoices.length >= option.minChoices &&
               selectedChoices.length <= option.maxChoices
@@ -273,6 +294,10 @@ export default function BookingForm({
                 : `Please select between ${option.minChoices} and ${option.maxChoices} ${option.name.toLowerCase()} for each item`
               : null,
           }
+
+          if (!allSelectionsValid) {
+            isValid = false
+          }
         })
 
         newValidation[menuItemId] = optionValidation
@@ -280,9 +305,7 @@ export default function BookingForm({
     })
 
     setValidation(newValidation)
-    return Object.values(newValidation).every((itemValidation) =>
-      Object.values(itemValidation).every((v) => v.isValid)
-    )
+    return isValid
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
