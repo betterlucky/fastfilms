@@ -34,18 +34,17 @@ model Session {
 }
 
 model User {
-  id            String         @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String         @unique
+  email         String?   @unique
   emailVerified DateTime?
   password      String?
   image         String?
-  role          UserRole       @default(CUSTOMER)
+  role          String    @default("USER")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   accounts      Account[]
   comments      Comment[]
-  contributions Contribution[]
   sessions      Session[]
   tickets       Ticket[]
 }
@@ -97,7 +96,6 @@ model Campaign {
   venue          Venue              @relation(fields: [venueId], references: [id])
   menuItems      CampaignMenuItem[]
   comments       Comment[]
-  contributions  Contribution[]
   tickets        Ticket[]
 }
 
@@ -225,16 +223,6 @@ model Comment {
   parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies    Comment[] @relation("CommentReplies")
   user       User      @relation(fields: [userId], references: [id])
-}
-
-model Contribution {
-  id         String   @id @default(cuid())
-  amount     Decimal
-  campaignId String
-  userId     String
-  createdAt  DateTime @default(now())
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
 }
 
 model CampaignMenuItem {

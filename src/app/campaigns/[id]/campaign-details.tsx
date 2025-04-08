@@ -15,8 +15,6 @@ interface CampaignDetailsProps {
     screeningTime: string
     ticketCap: number
     currentTickets: number
-    fundingTarget: string
-    currentFunding: string
     customBlurb: string | null
     posterPath: string | null
     deadlineDate: Date
@@ -148,14 +146,6 @@ export default function CampaignDetails({
                 <div>
                   <h2 className="text-lg font-semibold">Campaign Details</h2>
                   <dl className="mt-2 grid grid-cols-2 gap-4">
-                    <div>
-                      <dt className="text-gray-500">Target Funding</dt>
-                      <dd>£{campaign.fundingTarget}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-gray-500">Current Funding</dt>
-                      <dd>£{campaign.currentFunding}</dd>
-                    </div>
                     <div>
                       <dt className="text-gray-500">Tickets Sold</dt>
                       <dd>{campaign.currentTickets}</dd>

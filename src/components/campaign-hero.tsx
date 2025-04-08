@@ -19,16 +19,13 @@ interface Campaign {
   description: string
   posterPath: string | null
   posterUrl: string | null
-  fundingTarget: string
-  currentFunding: string
+  fundingTarget: number
+  currentFunding: number
   currentTickets: number
   ticketCap: number
   screeningDate: Date
   deadlineDate: Date
-  formattedTarget: string
-  formattedCurrent: string
   formattedDate: string
-  progress: number
   timeLeft: { days: number }
   venue: {
     name: string
@@ -77,20 +74,27 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
               <CardDescription>{campaign.title}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {campaign.posterUrl ? (
-                <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
-                  <Image
-                    src={campaign.posterUrl}
-                    alt={campaign.movieTitle}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-video items-center justify-center rounded-lg bg-gray-200">
-                  <span className="text-gray-500">No poster available</span>
-                </div>
-              )}
+              <div className="relative">
+                {campaign.title.toLowerCase().includes('test') && (
+                  <div className="absolute -right-6 -top-6 z-10 rotate-45 bg-red-500 px-12 py-2 text-sm font-semibold text-white shadow-md">
+                    TEST CAMPAIGN
+                  </div>
+                )}
+                {(campaign.posterUrl || campaign.posterPath) ? (
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
+                    <Image
+                      src={campaign.posterUrl || `https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
+                      alt={campaign.movieTitle}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex aspect-[2/3] items-center justify-center rounded-lg bg-gray-200">
+                    <span className="text-gray-500">No poster available</span>
+                  </div>
+                )}
+              </div>
               <div className="space-y-2">
                 <p className="text-gray-600">{campaign.description}</p>
                 <div className="space-y-2 pt-4">
@@ -99,7 +103,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                       Cinema: {campaign.venue.name}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {campaign.currentTickets} tickets sold
+                      £{campaign.currentFunding.toFixed(2)} raised
                     </p>
                   </div>
                   <div className="flex items-center justify-between">
@@ -112,37 +116,38 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-500">
-                      Target: {campaign.formattedTarget}
+                      Target: £{campaign.fundingTarget.toFixed(2)}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Current: {campaign.formattedCurrent}
+                      {Math.round((campaign.currentFunding / campaign.fundingTarget) * 100)}% funded
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">
-                      Progress: {campaign.progress}%
-                    </p>
                     <div className="h-2.5 w-full rounded-full bg-gray-200">
                       <div
                         className={`h-2.5 rounded-full ${
-                          campaign.progress >= 100
-                            ? campaign.currentTickets >= campaign.ticketCap
+                          campaign.currentFunding >= campaign.fundingTarget
+                            ? campaign.hasScreenAllocated && campaign.currentTickets >= campaign.ticketCap
                               ? 'bg-red-500'
                               : 'bg-green-500'
                             : 'bg-primary'
                         }`}
                         style={{
-                          width: `${Math.min(campaign.progress, 100)}%`,
+                          width: `${Math.min((campaign.currentFunding / campaign.fundingTarget) * 100, 100)}%`,
                         }}
                       />
                     </div>
-                    {campaign.progress >= 100 && (
+                    {campaign.currentFunding >= campaign.fundingTarget && (
                       <p
-                        className={`text-sm font-medium ${campaign.currentTickets >= campaign.ticketCap ? 'text-red-500' : 'text-green-500'}`}
+                        className={`text-sm font-medium ${
+                          campaign.hasScreenAllocated && campaign.currentTickets >= campaign.ticketCap
+                            ? 'text-red-500'
+                            : 'text-green-500'
+                        }`}
                       >
-                        {campaign.currentTickets >= campaign.ticketCap
+                        {campaign.hasScreenAllocated && campaign.currentTickets >= campaign.ticketCap
                           ? 'SOLD OUT'
-                          : 'Show confirmed, tickets still available'}
+                          : 'Screening funded, tickets available'}
                       </p>
                     )}
                   </div>
