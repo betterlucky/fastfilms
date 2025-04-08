@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface Campaign {
   id: string
-  name: string
+  title: string
   screeningDate: string
   venue: {
     name: string
@@ -82,7 +82,7 @@ export function SendCampaignGuestList() {
             <SelectContent>
               {campaigns.map((campaign) => (
                 <SelectItem key={campaign.id} value={campaign.id}>
-                  {campaign.name} - {new Date(campaign.screeningDate).toLocaleDateString()}
+                  {campaign.title} - {new Date(campaign.screeningDate).toLocaleDateString()}
                 </SelectItem>
               ))}
             </SelectContent>

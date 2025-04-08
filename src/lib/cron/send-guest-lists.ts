@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db"
 import { sendEmail } from "@/lib/email"
 import { generateVenueGuestListEmail } from "@/lib/email"
 
-export async function sendGuestListsForToday() {
+export async function sendGuestListsForToday(): Promise<{ guestListsSent: number }> {
   try {
     // Get all campaigns screening today
     const today = new Date()
@@ -66,8 +66,11 @@ export async function sendGuestListsForToday() {
       },
     })
 
+    let guestListsSent = 0
+
     for (const campaign of campaigns) {
-      if (!campaign.venue.contactEmail) continue
+      // Check if venue has any contact emails
+      if (!campaign.venue.contactEmail?.length) continue
 
       // Group tickets by user to create guest list
       const guestList = campaign.tickets.reduce((acc, ticket) => {
@@ -126,8 +129,13 @@ export async function sendGuestListsForToday() {
         subject: `Guest List and Food Orders - ${campaign.movieTitle}`,
         html: emailHtml,
       })
+
+      guestListsSent++
     }
+
+    return { guestListsSent }
   } catch (error) {
     console.error("Error sending guest lists:", error)
+    throw error
   }
 } 

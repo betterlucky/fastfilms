@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { X } from "lucide-react"
 
 const venueSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -24,30 +25,31 @@ const venueSchema = z.object({
   postcode: z.string().min(1, "Postcode is required"),
   phone: z.string().optional(),
   url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  contactEmail: z.string().email("Must be a valid email").optional().or(z.literal("")),
+  contactEmail: z.array(z.string().email("Must be a valid email")).default([]),
 })
 
 type VenueFormValues = z.infer<typeof venueSchema>
 
 interface VenueFormProps {
-  initialData?: VenueFormValues
+  initialData?: Partial<VenueFormValues>
   venueId?: string
 }
 
 export function VenueForm({ initialData, venueId }: VenueFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [newEmail, setNewEmail] = useState("")
 
   const form = useForm<VenueFormValues>({
     resolver: zodResolver(venueSchema),
-    defaultValues: initialData || {
-      name: "",
-      address: "",
-      city: "",
-      postcode: "",
-      phone: "",
-      url: "",
-      contactEmail: "",
+    defaultValues: {
+      name: initialData?.name || "",
+      address: initialData?.address || "",
+      city: initialData?.city || "",
+      postcode: initialData?.postcode || "",
+      phone: initialData?.phone || "",
+      url: initialData?.url || "",
+      contactEmail: initialData?.contactEmail || [],
     },
   })
 
@@ -78,6 +80,24 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleAddEmail = () => {
+    if (!newEmail) return
+
+    const emails = form.getValues("contactEmail")
+    if (!emails.includes(newEmail)) {
+      form.setValue("contactEmail", [...emails, newEmail])
+      setNewEmail("")
+    }
+  }
+
+  const handleRemoveEmail = (emailToRemove: string) => {
+    const emails = form.getValues("contactEmail")
+    form.setValue(
+      "contactEmail",
+      emails.filter((email) => email !== emailToRemove)
+    )
   }
 
   return (
@@ -168,19 +188,52 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="contactEmail"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="contact@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="md:col-span-2">
+            <FormField
+              control={form.control}
+              name="contactEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Emails</FormLabel>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        placeholder="Add email address"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleAddEmail}
+                        disabled={!newEmail}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {field.value.map((email) => (
+                        <div
+                          key={email}
+                          className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded"
+                        >
+                          <span className="text-sm">{email}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEmail(email)}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end">

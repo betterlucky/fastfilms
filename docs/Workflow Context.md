@@ -63,12 +63,13 @@ Web-based crowdfunding platform for organizing cinema screenings with the follow
 [Previous database schema from earlier response]
 
 ## Tech Stack
-- Frontend: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
+- Frontend: Next.js 14, TypeScript, Tailwind CSS 3, shadcn/ui
 - Backend: Next.js API routes, Prisma, PostgreSQL
 - Authentication: NextAuth.js
 - Payments: Stripe
 - Email: Gmail
 - Deployment: Vercel
+- Cron jobs via Github actions
 
 If more information would help the process, please always ask me for what you need
 

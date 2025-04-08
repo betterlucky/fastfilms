@@ -109,7 +109,7 @@ model Venue {
   postcode     String
   phone        String?
   url          String?
-  contactEmail String?
+  contactEmail String[]   // PostgreSQL array type
   campaigns    Campaign[]
   menuItems    MenuItem[]
   screens      Screen[]

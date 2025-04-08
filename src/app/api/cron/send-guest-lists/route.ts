@@ -19,12 +19,26 @@ export async function GET(request: Request) {
     }
 
     console.log("Starting guest list sending process...")
-    await sendGuestListsForToday()
-    console.log("Guest lists sent successfully")
+    const result = await sendGuestListsForToday()
     
-    return new NextResponse("Guest lists sent successfully", { status: 200 })
+    if (result.guestListsSent === 0) {
+      console.log("No screenings found for today, no guest lists needed")
+      return new NextResponse("No guest lists needed to be sent today", { status: 204 })
+    }
+    
+    console.log(`Successfully sent ${result.guestListsSent} guest list(s)`)
+    return new NextResponse(
+      JSON.stringify({ 
+        message: `Successfully sent ${result.guestListsSent} guest list(s)`,
+        guestListsSent: result.guestListsSent 
+      }), 
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    )
   } catch (error) {
     console.error("Error in cron job:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return new NextResponse(
+      JSON.stringify({ error: "Internal Server Error", details: error instanceof Error ? error.message : "Unknown error" }), 
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
   }
 } 

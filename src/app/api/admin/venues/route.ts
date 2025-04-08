@@ -11,7 +11,7 @@ const venueSchema = z.object({
   postcode: z.string().min(1),
   phone: z.string().optional(),
   url: z.string().url().optional().or(z.literal("")),
-  contactEmail: z.string().email().optional().or(z.literal("")),
+  contactEmail: z.array(z.string().email()).default([]),
 })
 
 export async function POST(request: Request) {
@@ -24,19 +24,17 @@ export async function POST(request: Request) {
     const json = await request.json()
     const body = venueSchema.parse(json)
 
-    // Ensure required fields are present
-    const venueData = {
-      name: body.name,
-      address: body.address,
-      city: body.city,
-      postcode: body.postcode,
-      phone: body.phone || null,
-      url: body.url || null,
-      contactEmail: body.contactEmail || null,
-    }
-
+    // Create venue with all fields
     const venue = await prisma.venue.create({
-      data: venueData,
+      data: {
+        name: body.name,
+        address: body.address,
+        city: body.city,
+        postcode: body.postcode,
+        phone: body.phone || null,
+        url: body.url || null,
+        contactEmail: body.contactEmail,
+      },
     })
 
     return NextResponse.json(venue)

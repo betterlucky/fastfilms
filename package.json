@@ -10,7 +10,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node -P tsconfig.scripts.json scripts/create-admin.ts",
+    "seed": "ts-node -P tsconfig.scripts.json scripts/create-admin.ts && ts-node -P tsconfig.scripts.json scripts/seed-test-data.ts",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "jspdf": "^3.0.1",
     "lucide-react": "^0.331.0",
     "next": "^14.2.27",
     "next-auth": "^4.24.6",
@@ -68,6 +69,6 @@
     "typescript": "^5"
   },
   "prisma": {
-    "seed": "ts-node -P tsconfig.scripts.json scripts/create-admin.ts"
+    "seed": "ts-node -P tsconfig.scripts.json scripts/create-admin.ts && ts-node -P tsconfig.scripts.json scripts/seed-test-data.ts"
   }
 }

@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 })
 
 interface SendEmailOptions {
-  to: string
+  to: string | string[]  // Allow either a single email or an array of emails
   subject: string
   html: string
 }
@@ -27,9 +27,12 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
     // Verify the connection configuration
     await transporter.verify()
     
+    // Convert single email to array for consistent handling
+    const recipients = Array.isArray(to) ? to : [to]
+    
     await transporter.sendMail({
       from: `FastFilms <${process.env.CONTACT_EMAIL}>`,
-      to,
+      to: recipients.join(", "),  // Join multiple emails with commas
       subject,
       html,
     })

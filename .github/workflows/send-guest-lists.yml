@@ -20,11 +20,20 @@ jobs:
           body=$(echo "$response" | head -n -1)
           status_code=$(echo "$response" | tail -n 1)
           
-          if [ "$status_code" -ne 200 ]; then
-            echo "Error: Failed to send guest lists"
+          # Log the response for debugging
+          echo "Response body: $body"
+          echo "Status code: $status_code"
+          
+          if [ "$status_code" -eq 200 ]; then
+            echo "✅ Guest lists processed successfully"
+            echo "$body"
+            exit 0
+          elif [ "$status_code" -eq 204 ]; then
+            echo "✅ No guest lists needed to be sent today"
+            exit 0
+          else
+            echo "❌ Error: Failed to send guest lists"
             echo "Status code: $status_code"
             echo "Response: $body"
             exit 1
-          fi
-          
-          echo "Guest lists sent successfully" 
+          fi 

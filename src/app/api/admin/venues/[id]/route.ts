@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { Prisma } from "@prisma/client"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
@@ -11,7 +12,7 @@ const venueSchema = z.object({
   postcode: z.string().min(1),
   phone: z.string().optional(),
   url: z.string().url().optional().or(z.literal("")),
-  contactEmail: z.string().email().optional().or(z.literal("")),
+  contactEmail: z.array(z.string().email()).default([]),
 })
 
 export async function GET(
@@ -42,25 +43,28 @@ export async function PATCH(
   }
 
   try {
-    const body = await request.json()
-    const { name, address, city, postcode, phone, url, contactEmail } = body
+    const json = await request.json()
+    const body = venueSchema.parse(json)
 
     const venue = await prisma.venue.update({
       where: { id: params.id },
       data: {
-        name,
-        address,
-        city,
-        postcode,
-        phone,
-        url,
-        contactEmail,
-      },
+        name: body.name,
+        address: body.address,
+        city: body.city,
+        postcode: body.postcode,
+        phone: body.phone || null,
+        url: body.url || null,
+        contactEmail: body.contactEmail || [],
+      } as unknown as Prisma.VenueUpdateInput,
     })
 
     return NextResponse.json(venue)
   } catch (error) {
     console.error("Error updating venue:", error)
+    if (error instanceof z.ZodError) {
+      return new NextResponse("Invalid request data", { status: 400 })
+    }
     return new NextResponse("Internal Server Error", { status: 500 })
   }
 }

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { SendGuestListButton } from "@/components/admin/send-guest-list-button"
+import { SendCampaignGuestList } from "@/components/admin/send-campaign-guest-list"
 import { prisma } from "@/lib/db"
 import Link from "next/link"
 
@@ -85,7 +85,7 @@ export default async function AdminDashboard() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <SendGuestListButton />
+            <SendCampaignGuestList />
           </CardContent>
         </Card>
 
