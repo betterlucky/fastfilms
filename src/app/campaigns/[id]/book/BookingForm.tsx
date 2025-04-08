@@ -274,9 +274,11 @@ export default function BookingForm({
           }).every((_, index) => {
             const selectedChoices = selection.options[option.id]?.[index] || []
             
-            // For radio buttons (minChoices === 0), any selection including 'none' is valid
+            // For radio buttons (minChoices === 0), require either 'none' or a valid choice
             if (option.minChoices === 0) {
-              return true
+              const hasValidSelection = selectedChoices.length === 1 || 
+                (selectedChoices.length === 0 && option.choices.length === 1);
+              return hasValidSelection;
             }
             
             // For required selections (minChoices > 0)
@@ -289,7 +291,9 @@ export default function BookingForm({
           optionValidation[option.id] = {
             isValid: allSelectionsValid,
             message: !allSelectionsValid
-              ? option.minChoices === option.maxChoices
+              ? option.minChoices === 0
+                ? `Please select an option for ${option.name.toLowerCase()}`
+                : option.minChoices === option.maxChoices
                 ? `Please select exactly ${option.minChoices} ${option.name.toLowerCase()} for each item`
                 : `Please select between ${option.minChoices} and ${option.maxChoices} ${option.name.toLowerCase()} for each item`
               : null,
