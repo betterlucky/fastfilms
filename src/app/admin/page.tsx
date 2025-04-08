@@ -38,16 +38,16 @@ export default async function AdminDashboard() {
   ])
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+    <div className="container py-8 mx-auto">
+      <h1 className="mb-8 font-bold text-3xl">Admin Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 mb-8 gap-4 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle>Active Campaigns</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{campaigns}</p>
+            <p className="font-bold text-2xl">{campaigns}</p>
           </CardContent>
         </Card>
         
@@ -56,7 +56,7 @@ export default async function AdminDashboard() {
             <CardTitle>Venues</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{venues}</p>
+            <p className="font-bold text-2xl">{venues}</p>
           </CardContent>
         </Card>
         
@@ -65,7 +65,7 @@ export default async function AdminDashboard() {
             <CardTitle>Charities</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{charities}</p>
+            <p className="font-bold text-2xl">{charities}</p>
           </CardContent>
         </Card>
         
@@ -74,12 +74,12 @@ export default async function AdminDashboard() {
             <CardTitle>Upcoming Tickets</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{tickets}</p>
+            <p className="font-bold text-2xl">{tickets}</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 mb-8 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
@@ -144,14 +144,14 @@ export default async function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 mt-8 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>User Management</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <p className="text-2xl font-bold">{users}</p>
+            <div className="justify-between items-center flex">
+              <p className="font-bold text-2xl">{users}</p>
               <span className="text-sm text-muted-foreground">Total Users</span>
             </div>
             <Button variant="outline" className="w-full" asChild>

@@ -90,8 +90,8 @@ export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid py-4 gap-4">
+            <div className="items-center grid grid-cols-4 gap-4">
               <Label htmlFor="email" className="text-right">
                 Email
               </Label>

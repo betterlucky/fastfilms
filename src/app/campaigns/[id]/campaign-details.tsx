@@ -80,7 +80,7 @@ export default function CampaignDetails({
   })
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
         <div className="grid gap-8">
           <Card>
@@ -88,20 +88,20 @@ export default function CampaignDetails({
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h1 className="text-2xl font-bold">{campaign.title}</h1>
+                    <h1 className="font-bold text-2xl">{campaign.title}</h1>
                     <p className="text-gray-500">{campaign.description}</p>
                     <div className="mt-4">
                       <div className="flex flex-col md:flex-row gap-4">
                         <Button 
                           size="lg" 
-                          className="w-full md:w-auto"
+                          className="md:w-auto w-full"
                           onClick={() => window.location.href = `/campaigns/${campaign.id}/book`}
                         >
                           Book Tickets
                         </Button>
                       </div>
                       {campaign.charityId && (
-                        <div className="mt-4 flex items-center gap-2 p-4 bg-green-50 rounded-lg">
+                        <div className="items-center flex p-4 mt-4 gap-2 bg-green-50 rounded-lg">
                           <p className="text-sm text-green-700">
                             Proudly supporting {charities.find(c => c.id === campaign.charityId)?.name}
                           </p>
@@ -110,7 +110,7 @@ export default function CampaignDetails({
                     </div>
                   </div>
                   {campaign.posterPath && (
-                    <div className="aspect-[2/3] relative rounded-lg overflow-hidden">
+                    <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
                       <Image
                         src={`https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
                         alt={campaign.movieTitle}
@@ -125,14 +125,14 @@ export default function CampaignDetails({
 
                 {campaign.customBlurb && (
                   <div>
-                    <h2 className="text-lg font-semibold">Additional Information</h2>
+                    <h2 className="font-semibold text-lg">Additional Information</h2>
                     <p>{campaign.customBlurb}</p>
                   </div>
                 )}
 
                 <div>
-                  <h2 className="text-lg font-semibold">Campaign Details</h2>
-                  <dl className="grid grid-cols-2 gap-4 mt-2">
+                  <h2 className="font-semibold text-lg">Campaign Details</h2>
+                  <dl className="grid grid-cols-2 mt-2 gap-4">
                     <div>
                       <dt className="text-gray-500">Target Funding</dt>
                       <dd>£{campaign.fundingTarget}</dd>

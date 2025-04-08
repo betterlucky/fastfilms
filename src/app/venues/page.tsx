@@ -28,12 +28,12 @@ export default async function VenuesPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
         <div className="grid gap-8">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="justify-between items-center flex">
                 <CardTitle>Venues</CardTitle>
                 <Link href="/venues/new">
                   <Button>Create New Venue</Button>
@@ -48,7 +48,7 @@ export default async function VenuesPage() {
                       <input type="hidden" name="venueId" value={venue.id} />
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor={`name-${venue.id}`} className="block text-sm font-medium text-gray-700">
+                          <label htmlFor={`name-${venue.id}`} className="block font-medium text-sm text-gray-700">
                             Venue Name
                           </label>
                           <Input
@@ -61,7 +61,7 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`address-${venue.id}`} className="block text-sm font-medium text-gray-700">
+                          <label htmlFor={`address-${venue.id}`} className="block font-medium text-sm text-gray-700">
                             Address
                           </label>
                           <Input
@@ -74,7 +74,7 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`city-${venue.id}`} className="block text-sm font-medium text-gray-700">
+                          <label htmlFor={`city-${venue.id}`} className="block font-medium text-sm text-gray-700">
                             City
                           </label>
                           <Input
@@ -87,7 +87,7 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`postcode-${venue.id}`} className="block text-sm font-medium text-gray-700">
+                          <label htmlFor={`postcode-${venue.id}`} className="block font-medium text-sm text-gray-700">
                             Postcode
                           </label>
                           <Input
@@ -100,7 +100,7 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`url-${venue.id}`} className="block text-sm font-medium text-gray-700">
+                          <label htmlFor={`url-${venue.id}`} className="block font-medium text-sm text-gray-700">
                             Website
                           </label>
                           <Input
@@ -112,7 +112,7 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`phone-${venue.id}`} className="block text-sm font-medium text-gray-700">
+                          <label htmlFor={`phone-${venue.id}`} className="block font-medium text-sm text-gray-700">
                             Phone Number
                           </label>
                           <Input
@@ -124,7 +124,7 @@ export default async function VenuesPage() {
                           />
                         </div>
                       </div>
-                      <div className="flex justify-between items-center">
+                      <div className="justify-between items-center flex">
                         <div className="text-sm text-gray-500">
                           {venue.screens.length} screen{venue.screens.length !== 1 ? 's' : ''}
                         </div>

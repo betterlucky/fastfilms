@@ -215,15 +215,15 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
                       {field.value.map((email) => (
                         <div
                           key={email}
-                          className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded"
+                          className="items-center flex px-2 py-1 gap-1 bg-gray-100 rounded"
                         >
                           <span className="text-sm">{email}</span>
                           <button
                             type="button"
                             onClick={() => handleRemoveEmail(email)}
-                            className="text-gray-500 hover:text-gray-700"
+                            className="hover:text-gray-700 text-gray-500"
                           >
-                            <X className="h-4 w-4" />
+                            <X className="size-4" />
                           </button>
                         </div>
                       ))}
@@ -236,7 +236,7 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="justify-end flex">
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Saving..." : venueId ? "Update Venue" : "Create Venue"}
           </Button>

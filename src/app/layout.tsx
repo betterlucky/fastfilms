@@ -59,9 +59,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-            <div className="relative flex min-h-screen flex-col">
+            <div className="relative flex flex-col min-h-screen">
               <Nav />
-              <main className="flex-1 p-4 sm:px-6 lg:px-8 pt-20">
+              <main className="flex-1 p-4 pt-20 sm:px-6 lg:px-8">
                 {children}
               </main>
             </div>

@@ -64,49 +64,49 @@ export default async function CampaignTicketsPage({
   const standardTickets = campaign.tickets.filter(ticket => ticket.status === 'CONFIRMED').length
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container py-10 mx-auto">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Campaign Tickets</h1>
+        <div className="justify-between items-center flex mb-6">
+          <h1 className="font-bold text-3xl">Campaign Tickets</h1>
           <Button variant="outline" asChild>
             <Link href="/admin/campaigns">Back to Campaigns</Link>
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 mb-6 gap-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
+            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Total Tickets</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalTickets}</div>
+              <div className="font-bold text-2xl">{totalTickets}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">£{totalRevenue.toFixed(2)}</div>
+              <div className="font-bold text-2xl">£{totalRevenue.toFixed(2)}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Standard Tickets</CardTitle>
+            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Standard Tickets</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{standardTickets}</div>
+              <div className="font-bold text-2xl">{standardTickets}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pay It Forward</CardTitle>
+            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Pay It Forward</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{payItForwardTickets}</div>
+              <div className="font-bold text-2xl">{payItForwardTickets}</div>
             </CardContent>
           </Card>
         </div>

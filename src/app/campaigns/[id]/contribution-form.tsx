@@ -48,11 +48,11 @@ export function ContributionForm({ campaignId, minAmount }: ContributionFormProp
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="amount" className="block font-medium text-sm text-gray-700">
           Contribution Amount (£)
         </label>
         <div className="relative mt-1">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">£</span>
+          <span className="absolute inset-y-0 left-0 items-center flex pl-3 text-gray-500">£</span>
           <Input
             type="number"
             id="amount"
@@ -60,7 +60,7 @@ export function ContributionForm({ campaignId, minAmount }: ContributionFormProp
             onChange={(e) => setAmount(e.target.value)}
             min={minAmount}
             step="0.01"
-            className="block w-full rounded-md border-0 pl-7 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block pl-7 w-full border-0 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
         </div>
         <p className="mt-1 text-sm text-gray-500">
@@ -76,7 +76,7 @@ export function ContributionForm({ campaignId, minAmount }: ContributionFormProp
 
       <Button
         type="submit"
-        className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        className="px-3.5 py-2.5 w-full hover:bg-indigo-500 font-semibold text-sm text-white bg-indigo-600 rounded-md shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
         Contribute
       </Button>

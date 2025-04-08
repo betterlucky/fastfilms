@@ -10,14 +10,14 @@ export function Header() {
 
   return (
     <header className="relative z-10 bg-white shadow-soft">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
-            <div className="flex shrink-0 items-center">
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="items-center justify-between flex h-16">
+          <div className="items-center flex">
+            <div className="shrink-0 items-center flex">
               <Button 
                 variant="ghost" 
                 onClick={() => router.push("/")}
-                className="text-xl font-bold text-indigo-600"
+                className="font-bold text-xl text-indigo-600"
               >
                 FastFilms
               </Button>
@@ -27,7 +27,7 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 onClick={() => router.push("/campaigns")}
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-600 hover:text-gray-900"
+                className="inline-flex items-center px-1 pt-1 hover:text-gray-900 font-medium text-sm text-gray-600"
               >
                 Campaigns
               </Button>
@@ -37,7 +37,7 @@ export function Header() {
                   <Button 
                     variant="ghost" 
                     onClick={() => router.push("/tickets")}
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-600 hover:text-gray-900"
+                    className="inline-flex items-center px-1 pt-1 hover:text-gray-900 font-medium text-sm text-gray-600"
                   >
                     My Tickets
                   </Button>
@@ -45,7 +45,7 @@ export function Header() {
                   <Button 
                     variant="ghost" 
                     onClick={() => router.push("/campaigns/new")}
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-600 hover:text-gray-900"
+                    className="inline-flex items-center px-1 pt-1 hover:text-gray-900 font-medium text-sm text-gray-600"
                   >
                     Create Campaign
                   </Button>
@@ -53,7 +53,7 @@ export function Header() {
                   <Button 
                     variant="ghost" 
                     onClick={() => router.push("/admin/venues")}
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-600 hover:text-gray-900"
+                    className="inline-flex items-center px-1 pt-1 hover:text-gray-900 font-medium text-sm text-gray-600"
                   >
                     Venues
                   </Button>
@@ -61,7 +61,7 @@ export function Header() {
                   <Button 
                     variant="ghost" 
                     onClick={() => router.push("/admin/charities")}
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-600 hover:text-gray-900"
+                    className="inline-flex items-center px-1 pt-1 hover:text-gray-900 font-medium text-sm text-gray-600"
                   >
                     Charities
                   </Button>
@@ -69,7 +69,7 @@ export function Header() {
                   <Button 
                     variant="ghost" 
                     onClick={() => router.push("/admin/users")}
-                    className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-600 hover:text-gray-900"
+                    className="inline-flex items-center px-1 pt-1 hover:text-gray-900 font-medium text-sm text-gray-600"
                   >
                     Users
                   </Button>
@@ -80,9 +80,9 @@ export function Header() {
 
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {status === "loading" ? (
-              <div className="size-8 animate-pulse rounded-full bg-gray-200" />
+              <div className="animate-pulse size-8 bg-gray-200 rounded-full" />
             ) : session ? (
-              <div className="flex items-center space-x-4">
+              <div className="items-center flex space-x-4">
                 <span className="text-sm text-gray-600">
                   {session.user?.email}
                 </span>

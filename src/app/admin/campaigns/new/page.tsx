@@ -4,6 +4,14 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { prisma } from "@/lib/db"
 import { CampaignForm } from "./campaign-form"
+import { MenuItem, Screen, Venue } from "@prisma/client"
+
+// Create a type for the serialized menu item where price is a number
+type SerializedMenuItem = Omit<MenuItem, 'price'> & { price: number }
+type SerializedVenue = Omit<Venue, 'menuItems'> & {
+  screens: Screen[]
+  menuItems: SerializedMenuItem[]
+}
 
 export default async function NewCampaignPage() {
   const session = await getServerSession(authOptions)
@@ -15,12 +23,28 @@ export default async function NewCampaignPage() {
   const venues = await prisma.venue.findMany({
     include: {
       screens: true,
-      menuItems: true,
+      menuItems: {
+        where: {
+          isActive: true
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      },
     },
     orderBy: {
       name: 'asc',
     },
   })
+
+  // Serialize Decimal objects to numbers for client components
+  const serializedVenues: SerializedVenue[] = venues.map(venue => ({
+    ...venue,
+    menuItems: venue.menuItems.map(item => ({
+      ...item,
+      price: item.price.toNumber() // Convert Decimal to number for client-side use
+    }))
+  }))
 
   const charities = await prisma.charity.findMany({
     orderBy: {
@@ -29,14 +53,14 @@ export default async function NewCampaignPage() {
   })
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">Create New Campaign</h1>
+    <div className="container py-10 mx-auto">
+      <h1 className="mb-8 font-bold text-3xl">Create New Campaign</h1>
       <Card>
         <CardHeader>
           <CardTitle>Campaign Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <CampaignForm venues={venues} charities={charities} />
+          <CampaignForm venues={serializedVenues} charities={charities} />
         </CardContent>
       </Card>
     </div>

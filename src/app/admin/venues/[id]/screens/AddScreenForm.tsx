@@ -80,7 +80,7 @@ export default function AddScreenForm({ venueId }: AddScreenFormProps) {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
+            <div className="p-4 bg-red-50 rounded-md">
               <div className="text-sm text-red-700">{error}</div>
             </div>
           )}

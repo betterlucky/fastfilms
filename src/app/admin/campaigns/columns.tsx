@@ -17,10 +17,10 @@ export const columns: ColumnDef<Campaign & {
     cell: ({ row }) => {
       const campaign = row.original
       return (
-        <div className="flex items-center space-x-2">
+        <div className="items-center flex space-x-2">
           <span>{campaign.title}</span>
           {campaign.isTest && (
-            <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+            <span className="px-2 py-1 font-medium text-xs text-yellow-800 bg-yellow-100 rounded-full">
               Test Mode
             </span>
           )}

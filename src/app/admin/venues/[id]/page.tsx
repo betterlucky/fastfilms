@@ -26,9 +26,9 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{venue.name}</h1>
+    <div className="container py-6 mx-auto">
+      <div className="justify-between items-center flex mb-6">
+        <h1 className="font-bold text-3xl">{venue.name}</h1>
         <Button asChild>
           <Link href={`/admin/venues/${venue.id}/edit`}>Edit Venue</Link>
         </Button>
@@ -60,7 +60,7 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
             <CardTitle>Screens</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-between items-center mb-4">
+            <div className="justify-between items-center flex mb-4">
               <p className="text-sm text-muted-foreground">
                 {venue.screens.length} screen{venue.screens.length !== 1 ? "s" : ""}
               </p>
@@ -76,7 +76,7 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
             <CardTitle>Campaigns</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-between items-center mb-4">
+            <div className="justify-between items-center flex mb-4">
               <p className="text-sm text-muted-foreground">
                 {venue.campaigns.length} campaign{venue.campaigns.length !== 1 ? "s" : ""}
               </p>

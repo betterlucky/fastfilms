@@ -38,12 +38,12 @@ export default async function VenueMenuPage({ params }: { params: { id: string }
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
         <div className="grid gap-8">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="justify-between items-center flex">
                 <CardTitle>Menu Items for {venue.name}</CardTitle>
                 <Link href={`/venues/${venue.id}/menu/new`}>
                   <Button>Add New Menu Item</Button>

@@ -14,9 +14,9 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      <div className="justify-center flex flex-1 flex-col px-6 py-12 min-h-full lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+          <h2 className="mt-10 font-bold text-center text-2xl text-gray-900 leading-9 tracking-tight">
             Invalid Reset Link
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -25,7 +25,7 @@ function ResetPasswordForm() {
           <div className="mt-6 text-center">
             <Link
               href="/forgot-password"
-              className="font-semibold text-indigo-600 hover:text-indigo-500"
+              className="hover:text-indigo-500 font-semibold text-indigo-600"
             >
               Request new reset link
             </Link>
@@ -71,9 +71,9 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="justify-center flex flex-1 flex-col px-6 py-12 min-h-full lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+        <h2 className="mt-10 font-bold text-center text-2xl text-gray-900 leading-9 tracking-tight">
           Set new password
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
@@ -83,20 +83,20 @@ function ResetPasswordForm() {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         {success && (
-          <div className="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg">
+          <div className="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">
             {success}
           </div>
         )}
 
         {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+          <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
             {error}
           </div>
         )}
 
         <form className="space-y-6" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+            <label htmlFor="password" className="block font-medium text-sm text-gray-900 leading-6">
               New password
             </label>
             <div className="mt-2">
@@ -107,7 +107,7 @@ function ResetPasswordForm() {
                 autoComplete="new-password"
                 required
                 minLength={8}
-                className="block w-full rounded-md border-2 border-gray-300 bg-white py-2 px-3 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                className="block py-2 px-3 placeholder:text-gray-400 w-full text-gray-900 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
           </div>
@@ -116,7 +116,7 @@ function ResetPasswordForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+              className="justify-center flex px-3 py-2 w-full hover:bg-indigo-500 font-semibold text-sm text-white leading-6 bg-indigo-600 rounded-md shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
             >
               {isLoading ? "Resetting..." : "Reset password"}
             </button>

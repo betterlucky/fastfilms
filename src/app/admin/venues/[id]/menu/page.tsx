@@ -38,8 +38,8 @@ export default async function VenueMenuPage({ params }: { params: { id: string }
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Menu Items for {venue.name}</h1>
+      <div className="justify-between items-center flex">
+        <h1 className="font-bold text-3xl">Menu Items for {venue.name}</h1>
         <Button asChild>
           <Link href={`/admin/venues/${venue.id}/menu/new`}>Add New Menu Item</Link>
         </Button>

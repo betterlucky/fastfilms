@@ -86,9 +86,9 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Edit Charity</h1>
+    <div className="container py-8 mx-auto">
+      <div className="justify-between items-center flex mb-8">
+        <h1 className="font-bold text-3xl">Edit Charity</h1>
         <div className="flex gap-2">
           <Button 
             variant="destructive" 
@@ -113,7 +113,7 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">
+              <label htmlFor="name" className="block mb-1 font-medium text-sm">
                 Name
               </label>
               <Input
@@ -125,7 +125,7 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium mb-1">
+              <label htmlFor="description" className="block mb-1 font-medium text-sm">
                 Description
               </label>
               <Textarea
@@ -136,7 +136,7 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
             </div>
 
             <div>
-              <label htmlFor="url" className="block text-sm font-medium mb-1">
+              <label htmlFor="url" className="block mb-1 font-medium text-sm">
                 Website URL
               </label>
               <Input
@@ -148,12 +148,12 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
             </div>
 
             <div>
-              <label htmlFor="logo" className="block text-sm font-medium mb-1">
+              <label htmlFor="logo" className="block mb-1 font-medium text-sm">
                 Logo
               </label>
               {charity.logoPath && (
                 <div className="mb-2">
-                  <div className="relative w-20 h-20">
+                  <div className="relative size-20">
                     <Image
                       src={charity.logoPath}
                       alt={`${charity.name} logo`}
@@ -161,7 +161,7 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
                       className="object-contain"
                     />
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-gray-500">
                     Upload a new logo to replace the existing one
                   </p>
                 </div>
@@ -180,7 +180,7 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="justify-end flex">
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save Changes"}
               </Button>

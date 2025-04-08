@@ -208,7 +208,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                   required
                 />
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="items-center flex space-x-2">
                 <Switch
                   id="isActive"
                   checked={formData.isActive}
@@ -224,18 +224,18 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Options</h3>
+            <div className="justify-between items-center flex">
+              <h3 className="font-semibold text-lg">Options</h3>
               <Button type="button" onClick={addOption} variant="outline" size="sm">
-                <PlusIcon className="size-4 mr-2" />
+                <PlusIcon className="mr-2 size-4" />
                 Add Option
               </Button>
             </div>
 
             {formData.options.map((option, optionIndex) => (
-              <div key={optionIndex} className="border rounded-lg p-4 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-4 flex-1">
+              <div key={optionIndex} className="space-y-4 p-4 border rounded-lg">
+                <div className="justify-between items-start flex">
+                  <div className="flex-1 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Option Name</Label>
@@ -281,7 +281,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="justify-between items-center flex">
                     <h4 className="font-medium">Choices</h4>
                     <Button
                       type="button"
@@ -289,19 +289,19 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                       variant="outline"
                       size="sm"
                     >
-                      <PlusIcon className="size-4 mr-2" />
+                      <PlusIcon className="mr-2 size-4" />
                       Add Choice
                     </Button>
                   </div>
 
                   <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
+                    <div className="items-center flex gap-2">
                       <TrashIcon className="size-4 text-red-500" />
-                      <span className="text-sm font-medium">Delete</span>
+                      <span className="font-medium text-sm">Delete</span>
                     </div>
                     <div className="grid gap-4">
                       {option.choices.map((choice, choiceIndex) => (
-                        <div key={choiceIndex} className="flex items-center gap-2">
+                        <div key={choiceIndex} className="items-center flex gap-2">
                           <Input
                             placeholder="Choice name"
                             value={choice.name}
@@ -342,7 +342,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
         </div>
       )}
 
-      <div className="flex justify-end space-x-4">
+      <div className="justify-end flex space-x-4">
         <Button
           type="button"
           variant="outline"

@@ -23,7 +23,7 @@ export default async function NewMenuItemPage({ params }: { params: { id: string
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Add Menu Item for {venue.name}</h1>
+      <h1 className="font-bold text-3xl">Add Menu Item for {venue.name}</h1>
 
       <Card>
         <CardHeader>

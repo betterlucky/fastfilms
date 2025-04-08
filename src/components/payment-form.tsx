@@ -52,7 +52,7 @@ function CheckoutForm({ clientSecret, ticketIds }: { clientSecret: string, ticke
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-8 max-w-md w-full">
       <PaymentElement />
       {error && (
         <div className="text-sm text-red-600">
@@ -62,7 +62,7 @@ function CheckoutForm({ clientSecret, ticketIds }: { clientSecret: string, ticke
       <button
         type="submit"
         disabled={!stripe || isProcessing}
-        className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+        className="px-3.5 py-2.5 w-full hover:bg-indigo-500 font-semibold text-sm text-white bg-indigo-600 rounded-md shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
       >
         {isProcessing ? "Processing..." : "Pay now"}
       </button>

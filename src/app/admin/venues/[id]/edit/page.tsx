@@ -30,8 +30,8 @@ export default async function EditVenuePage({
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">Edit Venue</h1>
+    <div className="container py-10 mx-auto">
+      <h1 className="mb-8 font-bold text-3xl">Edit Venue</h1>
       <VenueForm initialData={venue} venueId={venue.id} />
     </div>
   )

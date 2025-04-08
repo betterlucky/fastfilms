@@ -54,7 +54,7 @@ export function UserForm({ user }: UserFormProps) {
     <form onSubmit={onSubmit} className="space-y-8">
       <div className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium">Name</label>
+          <label htmlFor="name" className="block font-medium text-sm">Name</label>
           <Input
             id="name"
             name="name"
@@ -64,7 +64,7 @@ export function UserForm({ user }: UserFormProps) {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">Email</label>
+          <label htmlFor="email" className="block font-medium text-sm">Email</label>
           <Input
             id="email"
             name="email"
@@ -74,7 +74,7 @@ export function UserForm({ user }: UserFormProps) {
           />
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="items-center flex space-x-2">
           <Checkbox
             id="isAdmin"
             checked={isAdmin}
@@ -82,14 +82,14 @@ export function UserForm({ user }: UserFormProps) {
           />
           <label
             htmlFor="isAdmin"
-            className="text-sm font-medium leading-none"
+            className="font-medium text-sm leading-none"
           >
             Admin User
           </label>
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="justify-end flex">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>

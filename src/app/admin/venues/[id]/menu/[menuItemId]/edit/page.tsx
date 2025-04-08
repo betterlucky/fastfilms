@@ -37,7 +37,7 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Edit Menu Item for {venue.name}</h1>
+      <h1 className="font-bold text-3xl">Edit Menu Item for {venue.name}</h1>
 
       <Card>
         <CardHeader>

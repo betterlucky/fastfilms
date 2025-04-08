@@ -307,10 +307,10 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="quantity" className="block font-medium text-sm text-gray-700">
             Number of Tickets
           </label>
-          <div className="flex items-center justify-between">
+          <div className="items-center justify-between flex">
             <div>
               <p className="font-medium">Number of Tickets</p>
               <p className="text-sm text-gray-500">Minimum £5.00 per ticket + £0.50 transaction fee</p>
@@ -318,7 +318,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                 <p className="text-sm text-yellow-600">Admin testing mode: £0.01 tickets available</p>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="items-center flex gap-2">
               <Input
                 type="number"
                 name="quantity"
@@ -333,17 +333,17 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
         </div>
 
         <div>
-          <label htmlFor="ticketPrice" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="ticketPrice" className="block font-medium text-sm text-gray-700">
             Price per Ticket
           </label>
-          <div className="flex items-center justify-between">
+          <div className="items-center justify-between flex">
             <div>
               <p className="font-medium">Price per Ticket</p>
               <p className="text-sm text-gray-500">
                 {isAdmin ? "Minimum £0.01 (Admin testing mode)" : "Minimum £5.00"}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="items-center flex gap-2">
               <span className="text-gray-500">£</span>
               <Input
                 type="number"
@@ -359,9 +359,9 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
         </div>
 
         {charity && (
-          <div className="flex items-center gap-2 p-4 bg-green-50 rounded-lg">
+          <div className="items-center flex p-4 gap-2 bg-green-50 rounded-lg">
             {charity.logoPath && (
-              <div className="relative w-12 h-12">
+              <div className="relative size-12">
                 <Image
                   src={charity.logoPath}
                   alt={`${charity.name} logo`}
@@ -374,27 +374,27 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
         )}
 
         <div>
-          <h2 className="text-lg font-semibold">Pay It Forward</h2>
-          <p className="text-sm text-gray-500 mb-2">
+          <h2 className="font-semibold text-lg">Pay It Forward</h2>
+          <p className="mb-2 text-sm text-gray-500">
             Have you been on the receiving end of a random act of kindness recently? Or perhaps just having a good month? Here's a chance to pay it forward and buy tickets for someone that might otherwise miss out.
           </p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="mb-4 text-sm text-gray-500">
             If you feel you can't afford to buy tickets, then give us an email at{" "}
             <a 
               href="mailto:classicsbackonscreen+PIF@gmail.com" 
-              className="text-blue-600 hover:text-blue-800 hover:underline"
+              className="hover:text-blue-800 hover:underline text-blue-600"
             >
               classicsbackonscreen+PIF@gmail.com
             </a>{" "}
             and we'll put you on the waiting list for any tickets donated this way, no questions asked.
           </p>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="items-center justify-between flex">
               <div>
                 <p className="font-medium">Number of Pay it Forward Tickets</p>
                 <p className="text-sm text-gray-500">£{settings.minimumTicketPrice.toFixed(2)} per ticket</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="items-center flex gap-2">
                 <Input
                   type="number"
                   name="payItForwardTickets"
@@ -410,15 +410,15 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
 
         {menuItems.length > 0 && (
           <div className="mt-6">
-            <h2 className="text-lg font-semibold mb-4">Food & Drinks</h2>
+            <h2 className="mb-4 font-semibold text-lg">Food & Drinks</h2>
             <div className="space-y-6">
               {Object.entries(groupedMenuItems).map(([category, items]) => (
                 <Card key={category} className="p-4">
-                  <h3 className="font-medium mb-3">{category}</h3>
+                  <h3 className="mb-3 font-medium">{category}</h3>
                   <div className="space-y-4">
                     {items.map((item) => (
                       <div key={item.id} className="space-y-2">
-                        <div className="flex items-center justify-between">
+                        <div className="items-center justify-between flex">
                           <div>
                             <p className="font-medium">{item.name}</p>
                             {item.description && (
@@ -436,15 +436,15 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                         </div>
 
                         {(menuSelections[item.id]?.quantity || 0) > 0 && (
-                          <div className="ml-4 space-y-4">
+                          <div className="space-y-4 ml-4">
                             {Array.from({ length: menuSelections[item.id].quantity }).map((_, index) => (
-                              <div key={index} className="space-y-2 border-l-2 border-gray-200 pl-4">
-                                <p className="text-sm font-medium text-gray-500">Item {index + 1}</p>
+                              <div key={index} className="space-y-2 pl-4 border-l-2 border-gray-200">
+                                <p className="font-medium text-sm text-gray-500">Item {index + 1}</p>
                                 {item.options.map(option => (
                                   <div key={option.id} className="space-y-2">
                                     {option.minChoices === 0 ? (
                                       <div className="mt-4">
-                                        <p className="text-sm font-medium">{option.name}</p>
+                                        <p className="font-medium text-sm">{option.name}</p>
                                         <RadioGroup
                                           className="mt-1.5"
                                           value={menuSelections[item.id]?.options[option.id]?.[index]?.[0] || "none"}
@@ -458,7 +458,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                           }}
                                         >
                                           <div className="space-y-1.5">
-                                            <div className="flex items-center space-x-2">
+                                            <div className="items-center flex space-x-2">
                                               <RadioGroupItem value="none" id={`${item.id}-${option.id}-${index}-none`} />
                                               <label
                                                 htmlFor={`${item.id}-${option.id}-${index}-none`}
@@ -468,7 +468,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                               </label>
                                             </div>
                                             {option.choices.map(choice => (
-                                              <div key={choice.id} className="flex items-center space-x-2">
+                                              <div key={choice.id} className="items-center flex space-x-2">
                                                 <RadioGroupItem 
                                                   value={choice.id} 
                                                   id={`${item.id}-${option.id}-${index}-${choice.id}`}
@@ -487,11 +487,11 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                       </div>
                                     ) : option.choices.length > 1 ? (
                                       <div className="space-y-1">
-                                        <div className="flex items-center justify-between">
-                                          <p className="text-sm font-medium">
+                                        <div className="items-center justify-between flex">
+                                          <p className="font-medium text-sm">
                                             {option.name}
                                             {option.minChoices > 0 && (
-                                              <span className="text-red-500 ml-1">*</span>
+                                              <span className="ml-1 text-red-500">*</span>
                                             )}
                                           </p>
                                           <p className="text-xs text-gray-500">
@@ -520,7 +520,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                               <SelectItem 
                                                 key={choice.id} 
                                                 value={choice.id}
-                                                className="bg-white hover:bg-gray-100"
+                                                className="hover:bg-gray-100 bg-white"
                                               >
                                                 {choice.name}
                                                 {choice.priceAdjustment > 0 && ` (+£${choice.priceAdjustment.toFixed(2)})`}
@@ -531,7 +531,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                       </div>
                                     ) : (
                                       <div className="space-y-1">
-                                        <p className="text-sm font-medium">
+                                        <p className="font-medium text-sm">
                                           {option.name}
                                         </p>
                                       </div>
@@ -539,7 +539,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
                                   </div>
                                 ))}
                                 {validation[item.id] && Object.values(validation[item.id]).some(v => !v.isValid) && (
-                                  <div className="flex items-center gap-2 text-xs text-red-500 mt-1">
+                                  <div className="items-center flex mt-1 gap-2 text-xs text-red-500">
                                     <AlertCircle className="size-4" />
                                     <span>Please complete all required selections for each item</span>
                                   </div>
@@ -557,28 +557,28 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
           </div>
         )}
 
-        <div className="border-t pt-4">
-          <div className="flex justify-between text-sm text-gray-500">
+        <div className="pt-4 border-t">
+          <div className="justify-between flex text-sm text-gray-500">
             <span>Tickets Subtotal</span>
             <span>£{totals.subtotal.toFixed(2)}</span>
           </div>
           {payItForwardTickets > 0 && (
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="justify-between flex text-sm text-gray-500">
               <span>Pay It Forward Tickets</span>
               <span>£{(payItForwardTickets * settings.minimumTicketPrice).toFixed(2)}</span>
             </div>
           )}
           {totals.menuTotal > 0 && (
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="justify-between flex text-sm text-gray-500">
               <span>Menu Items Total</span>
               <span>£{totals.menuTotal.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between text-sm text-gray-500">
+          <div className="justify-between flex text-sm text-gray-500">
             <span>Transaction Fee</span>
             <span>£{settings.transactionFee.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between font-medium mt-2">
+          <div className="justify-between flex mt-2 font-medium">
             <span>Total</span>
             <span>£{totals.grandTotal.toFixed(2)}</span>
           </div>
@@ -586,7 +586,7 @@ export default function BookingForm({ campaignId, maxTickets, charity, menuItems
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-4">
+        <div className="p-4 bg-red-50 rounded-md">
           <div className="text-sm text-red-700">{error}</div>
         </div>
       )}

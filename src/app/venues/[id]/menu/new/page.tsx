@@ -23,7 +23,7 @@ export default async function NewMenuItemPage({ params }: { params: { id: string
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
         <div className="grid gap-8">
           <Card>
@@ -31,8 +31,8 @@ export default async function NewMenuItemPage({ params }: { params: { id: string
               <CardTitle>Add Menu Item for {venue.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">New Menu Item</h1>
+              <div className="justify-between items-center flex mb-8">
+                <h1 className="font-bold text-3xl">New Menu Item</h1>
                 <Button 
                   variant="outline"
                   onClick={() => window.location.href = `/venues/${params.id}/menu`}

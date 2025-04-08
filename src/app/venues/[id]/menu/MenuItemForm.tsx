@@ -232,7 +232,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                   required
                 />
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="items-center flex space-x-2">
                 <Switch
                   id="isActive"
                   checked={formData.isActive}
@@ -248,19 +248,19 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Options</h3>
+            <div className="justify-between items-center flex">
+              <h3 className="font-semibold text-lg">Options</h3>
               <Button type="button" onClick={addOption} variant="outline" size="sm">
-                <PlusIcon className="h-4 w-4 mr-2" />
+                <PlusIcon className="mr-2 size-4" />
                 Add Option
               </Button>
             </div>
 
             {formData.options.map((option, optionIndex) => (
-              <div key={optionIndex} className="border rounded-lg p-4 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-4 flex-1">
-                    <div className="flex items-center gap-2">
+              <div key={optionIndex} className="space-y-4 p-4 border rounded-lg">
+                <div className="justify-between items-start flex">
+                  <div className="flex-1 space-y-4">
+                    <div className="items-center flex gap-2">
                       <div className="flex-1">
                         <Label>Option Name</Label>
                         <Input
@@ -269,7 +269,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                           required
                         />
                       </div>
-                      <div className="flex flex-col gap-1 pt-6">
+                      <div className="flex flex-col pt-6 gap-1">
                         <Button
                           type="button"
                           variant="ghost"
@@ -277,7 +277,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                           onClick={() => moveOption(optionIndex, optionIndex - 1)}
                           disabled={optionIndex === 0}
                         >
-                          <ArrowUpIcon className="h-4 w-4" />
+                          <ArrowUpIcon className="size-4" />
                         </Button>
                         <Button
                           type="button"
@@ -286,7 +286,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                           onClick={() => moveOption(optionIndex, optionIndex + 1)}
                           disabled={optionIndex === formData.options.length - 1}
                         >
-                          <ArrowDownIcon className="h-4 w-4" />
+                          <ArrowDownIcon className="size-4" />
                         </Button>
                       </div>
                       <Button
@@ -295,7 +295,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                         size="sm"
                         onClick={() => removeOption(optionIndex)}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="size-4" />
                       </Button>
                     </div>
 
@@ -325,7 +325,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="justify-between items-center flex">
                     <h4 className="font-medium">Choices</h4>
                     <Button
                       type="button"
@@ -333,13 +333,13 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                       variant="outline"
                       size="sm"
                     >
-                      <PlusIcon className="h-4 w-4 mr-2" />
+                      <PlusIcon className="mr-2 size-4" />
                       Add Choice
                     </Button>
                   </div>
 
                   {option.choices.map((choice, choiceIndex) => (
-                    <div key={choiceIndex} className="flex items-center space-x-2">
+                    <div key={choiceIndex} className="items-center flex space-x-2">
                       <Input
                         placeholder="Choice name"
                         value={choice.name}
@@ -361,7 +361,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                         size="sm"
                         onClick={() => removeChoice(optionIndex, choiceIndex)}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="size-4" />
                       </Button>
                     </div>
                   ))}
@@ -378,7 +378,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
         </div>
       )}
 
-      <div className="flex justify-end space-x-4">
+      <div className="justify-end flex space-x-4">
         <Button
           type="button"
           variant="outline"

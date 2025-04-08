@@ -10,7 +10,7 @@ export default async function Home() {
   const campaign = await getFeaturedCampaign();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between">
+    <main className="items-center justify-between flex flex-col min-h-screen">
       {campaign ? (
         <CampaignHero campaign={campaign} />
       ) : (

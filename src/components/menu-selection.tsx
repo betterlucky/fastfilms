@@ -80,31 +80,31 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
   }, {} as Record<string, MenuItemWithOptions[]>)
 
   return (
-    <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl">
+    <div className="ring-1 ring-gray-900/5 bg-white shadow-sm sm:rounded-xl">
       <div className="px-4 py-6 sm:p-8">
         <div className="space-y-8">
           {Object.entries(groupedItems).map(([category, items]) => (
             <div key={category}>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="mb-4 font-semibold text-lg text-gray-900">
                 {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}s
               </h3>
               <div className="space-y-4">
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-gray-50 p-4 rounded-lg"
+                    className="p-4 bg-gray-50 rounded-lg"
                   >
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="items-center justify-between flex mb-4">
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">
+                        <h4 className="font-medium text-sm text-gray-900">
                           {item.name}
                         </h4>
                         <p className="text-sm text-gray-500">{item.description}</p>
-                        <p className="text-sm font-medium text-gray-900 mt-1">
+                        <p className="mt-1 font-medium text-sm text-gray-900">
                           £{Number(item.price).toFixed(2)}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="items-center flex space-x-2">
                         <button
                           type="button"
                           onClick={() =>
@@ -113,7 +113,7 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                               Math.max(0, (quantities[item.id] || 0) - 1)
                             )
                           }
-                          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                          className="ring-1 ring-inset ring-gray-300 px-2.5 py-1.5 hover:bg-gray-50 font-semibold text-sm text-gray-900 bg-white rounded-md shadow-sm"
                         >
                           -
                         </button>
@@ -128,7 +128,7 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                               (quantities[item.id] || 0) + 1
                             )
                           }
-                          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                          className="ring-1 ring-inset ring-gray-300 px-2.5 py-1.5 hover:bg-gray-50 font-semibold text-sm text-gray-900 bg-white rounded-md shadow-sm"
                         >
                           +
                         </button>
@@ -136,13 +136,13 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                     </div>
 
                     {quantities[item.id] > 0 && item.options.length > 0 && (
-                      <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
+                      <div className="space-y-4 pt-4 mt-4 border-t border-gray-200">
                         {item.options.map((option) => (
                           <div key={option.id}>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block mb-1 font-medium text-sm text-gray-700">
                               {option.name}
                               {option.minChoices > 0 && (
-                                <span className="text-red-500 ml-1">*</span>
+                                <span className="ml-1 text-red-500">*</span>
                               )}
                             </label>
                             <select
@@ -156,7 +156,7 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                                   e.target.value
                                 )
                               }
-                              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="ring-1 ring-inset ring-gray-300 block py-1.5 pl-3 pr-10 w-full text-gray-900 border-0 rounded-md focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             >
                               {option.choices.map((choice) => (
                                 <option key={choice.id} value={choice.id}>

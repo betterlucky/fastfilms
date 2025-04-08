@@ -17,17 +17,17 @@ export default async function CharitiesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Charities</h1>
+      <div className="items-center justify-between flex">
+        <h1 className="font-bold text-3xl">Charities</h1>
         <Button asChild>
           <Link href="/admin/charities/new">
-            <PlusIcon className="size-4 mr-2" />
+            <PlusIcon className="mr-2 size-4" />
             New Charity
           </Link>
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid md:grid-cols-2 gap-6 lg:grid-cols-3">
         {charities.map((charity) => (
           <Card key={charity.id} className="overflow-hidden">
             <div className="aspect-video relative">
@@ -39,7 +39,7 @@ export default async function CharitiesPage() {
                   className="object-cover"
                 />
               ) : (
-                <div className="flex items-center justify-center h-full bg-gray-100">
+                <div className="items-center justify-center flex h-full bg-gray-100">
                   <BuildingIcon className="size-12 text-gray-400" />
                 </div>
               )}
@@ -49,7 +49,7 @@ export default async function CharitiesPage() {
               <CardDescription>{charity.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <div className="items-center flex space-x-2 text-sm text-muted-foreground">
                 <BuildingIcon className="size-4" />
                 <span>Charity</span>
               </div>

@@ -21,9 +21,9 @@ export default async function UsersPage() {
   })
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Users</h1>
+    <div className="container py-10 mx-auto">
+      <div className="justify-between items-center flex mb-8">
+        <h1 className="font-bold text-3xl">Users</h1>
       </div>
 
       <Card>
@@ -35,11 +35,11 @@ export default async function UsersPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-4 px-6">Name</th>
-                  <th className="text-left py-4 px-6">Email</th>
-                  <th className="text-left py-4 px-6">Role</th>
-                  <th className="text-left py-4 px-6">Joined</th>
-                  <th className="text-left py-4 px-6">Actions</th>
+                  <th className="py-4 px-6 text-left">Name</th>
+                  <th className="py-4 px-6 text-left">Email</th>
+                  <th className="py-4 px-6 text-left">Role</th>
+                  <th className="py-4 px-6 text-left">Joined</th>
+                  <th className="py-4 px-6 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>

@@ -40,9 +40,9 @@ export default function NewCharityPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Add New Charity</h1>
+    <div className="container py-8 mx-auto">
+      <div className="justify-between items-center flex mb-8">
+        <h1 className="font-bold text-3xl">Add New Charity</h1>
         <Link href="/admin/charities">
           <Button variant="outline">Back to Charities</Button>
         </Link>
@@ -55,7 +55,7 @@ export default function NewCharityPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">
+              <label htmlFor="name" className="block mb-1 font-medium text-sm">
                 Name <span className="text-red-500">*</span>
               </label>
               <Input
@@ -66,7 +66,7 @@ export default function NewCharityPage() {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium mb-1">
+              <label htmlFor="description" className="block mb-1 font-medium text-sm">
                 Description
               </label>
               <Textarea
@@ -76,7 +76,7 @@ export default function NewCharityPage() {
             </div>
 
             <div>
-              <label htmlFor="url" className="block text-sm font-medium mb-1">
+              <label htmlFor="url" className="block mb-1 font-medium text-sm">
                 Website URL
               </label>
               <Input
@@ -88,7 +88,7 @@ export default function NewCharityPage() {
             </div>
 
             <div>
-              <label htmlFor="logoUrl" className="block text-sm font-medium mb-1">
+              <label htmlFor="logoUrl" className="block mb-1 font-medium text-sm">
                 Logo URL
               </label>
               <Input
@@ -97,18 +97,18 @@ export default function NewCharityPage() {
                 type="url"
                 placeholder="https://"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 Enter the URL of the charity's logo image
               </p>
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="p-4 bg-red-50 rounded-md">
                 <div className="text-sm text-red-700">{error}</div>
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="justify-end flex">
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Creating..." : "Create Charity"}
               </Button>

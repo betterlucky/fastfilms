@@ -68,7 +68,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
   }))
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
         <div className="grid gap-8">
           <Card>
@@ -79,7 +79,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-lg font-semibold">Screening Details</h2>
+                    <h2 className="font-semibold text-lg">Screening Details</h2>
                     <p>{formattedDate} at {campaign.screeningTime}</p>
                     <p className="text-gray-500">{campaign.venue.name}</p>
                     <p className="text-gray-500">{campaign.venue.address}, {campaign.venue.city}, {campaign.venue.postcode}</p>
@@ -98,7 +98,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
 
                 <div>
                   {campaign.posterPath && (
-                    <div className="aspect-[2/3] relative rounded-lg overflow-hidden">
+                    <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
                       <Image
                         src={`https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
                         alt={campaign.movieTitle}
@@ -115,7 +115,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
           </Card>
         </div>
       </div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="justify-between items-center flex mb-8">
         <BackButton campaignId={params.id} />
       </div>
     </div>

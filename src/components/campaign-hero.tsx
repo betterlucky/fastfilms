@@ -46,7 +46,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
     <div className="space-y-12">
       {/* Hero Section */}
       <section className="space-y-4 text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+        <h1 className="font-bold text-4xl tracking-tight sm:text-6xl">
           Bring Cinema to Your Community
         </h1>
         <p className="mx-auto max-w-3xl text-xl text-gray-600">
@@ -57,12 +57,12 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
       {/* Featured Campaign Section */}
       <section className="mx-auto max-w-4xl">
         <div
-          className="group block cursor-pointer"
+          className="group cursor-pointer block"
           onClick={() => router.push(`/campaigns/${campaign.id}`)}
         >
-          <Card className="border-2 border-primary transition-transform hover:-translate-y-1 hover:shadow-lg">
+          <Card className="transition-transform hover:-translate-y-1 hover:shadow-lg border-2 border-primary">
             <CardHeader>
-              <CardTitle className="text-3xl group-hover:text-gray-600">{campaign.movieTitle}</CardTitle>
+              <CardTitle className="group-hover:text-gray-600 text-3xl">{campaign.movieTitle}</CardTitle>
               <CardDescription>{campaign.title}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -76,28 +76,28 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                   />
                 </div>
               ) : (
-                <div className="flex aspect-video items-center justify-center rounded-lg bg-gray-200">
+                <div className="aspect-video items-center justify-center flex bg-gray-200 rounded-lg">
                   <span className="text-gray-500">No poster available</span>
                 </div>
               )}
               <div className="space-y-2">
                 <p className="text-gray-600">{campaign.description}</p>
                 <div className="space-y-2 pt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="items-center justify-between flex">
                     <p className="text-sm text-gray-500">Cinema: {campaign.venue.name}</p>
                     <p className="text-sm text-gray-500">{campaign.currentTickets} tickets sold</p>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="items-center justify-between flex">
                     <p className="text-sm text-gray-500">Date: {campaign.formattedDate}</p>
                     <p className="text-sm text-gray-500">{campaign.timeLeft.days} days left</p>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="items-center justify-between flex">
                     <p className="text-sm text-gray-500">Target: {campaign.formattedTarget}</p>
                     <p className="text-sm text-gray-500">Current: {campaign.formattedCurrent}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-gray-500">Progress: {campaign.progress}%</p>
-                    <div className="h-2.5 w-full rounded-full bg-gray-200">
+                    <div className="w-full h-2.5 bg-gray-200 rounded-full">
                       <div
                         className={`h-2.5 rounded-full ${
                           campaign.progress >= 100
@@ -120,11 +120,11 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex items-center justify-between">
+            <CardFooter className="items-center justify-between flex">
               <div className="text-sm text-gray-500">
                 Tickets from £5 + £0.50 fee
               </div>
-              <div className="font-semibold text-primary group-hover:text-gray-600">
+              <div className="group-hover:text-gray-600 font-semibold text-primary">
                 Support This Campaign →
               </div>
             </CardFooter>
@@ -133,7 +133,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
       </section>
 
       {/* Features Section */}
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Community Powered</CardTitle>
@@ -167,7 +167,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
 
       {/* Secondary CTA */}
       <section className="space-y-4 text-center">
-        <h2 className="text-3xl font-bold">Want to See More?</h2>
+        <h2 className="font-bold text-3xl">Want to See More?</h2>
         <p className="mx-auto max-w-2xl text-xl text-gray-600">
           Browse our upcoming campaigns and help bring cinema to your community.
         </p>

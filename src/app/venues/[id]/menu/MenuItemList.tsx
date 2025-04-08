@@ -23,8 +23,8 @@ export default function MenuItemList({ venueId, menuItems }: MenuItemListProps) 
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Menu Items</h1>
+      <div className="justify-between items-center flex mb-8">
+        <h1 className="font-bold text-3xl">Menu Items</h1>
         <Button 
           onClick={() => window.location.href = `/venues/${venueId}/menu/new`}
         >
@@ -33,22 +33,22 @@ export default function MenuItemList({ venueId, menuItems }: MenuItemListProps) 
       </div>
       {Object.entries(groupedItems).map(([category, items]) => (
         <div key={category}>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="mb-4 font-semibold text-lg text-gray-900">
             {category}
           </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid md:grid-cols-2 gap-4 lg:grid-cols-3">
             {items.map((item) => (
               <Card key={item.id}>
                 <CardHeader>
                   <CardTitle className="text-lg">{item.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-500 mb-2">{item.description}</p>
-                  <p className="text-sm font-medium mb-4">£{Number(item.price).toFixed(2)}</p>
+                  <p className="mb-2 text-sm text-gray-500">{item.description}</p>
+                  <p className="mb-4 font-medium text-sm">£{Number(item.price).toFixed(2)}</p>
                   
                   {item.options.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Options:</p>
+                      <p className="font-medium text-sm">Options:</p>
                       {item.options.map((option) => (
                         <div key={option.id} className="text-sm text-gray-500">
                           <p>{option.name}</p>
@@ -67,7 +67,7 @@ export default function MenuItemList({ venueId, menuItems }: MenuItemListProps) 
                     </div>
                   )}
 
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex mt-4 gap-2">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/venues/${venueId}/menu/${item.id}/edit`}>
                         Edit

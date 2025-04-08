@@ -49,9 +49,9 @@ export default function CharitiesPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Manage Charities</h1>
+    <div className="container py-8 mx-auto">
+      <div className="justify-between items-center flex mb-8">
+        <h1 className="font-bold text-3xl">Manage Charities</h1>
         <Link href="/admin/charities/new">
           <Button>Add New Charity</Button>
         </Link>
@@ -61,14 +61,14 @@ export default function CharitiesPage() {
         {charities.map((charity) => (
           <Card key={charity.id}>
             <CardHeader>
-              <div className="flex justify-between items-start">
+              <div className="justify-between items-start flex">
                 <div>
                   <CardTitle>{charity.name}</CardTitle>
                   {charity.description && (
-                    <p className="text-gray-500 mt-2">{charity.description}</p>
+                    <p className="mt-2 text-gray-500">{charity.description}</p>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="items-center flex gap-2">
                   <Button 
                     variant="outline"
                     onClick={() => router.push(`/admin/charities/${charity.id}/edit`)}
@@ -85,9 +85,9 @@ export default function CharitiesPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-4">
+              <div className="items-center flex gap-4">
                 {charity.logoPath && (
-                  <div className="relative w-20 h-20">
+                  <div className="relative size-20">
                     <Image
                       src={charity.logoPath}
                       alt={`${charity.name} logo`}
@@ -102,7 +102,7 @@ export default function CharitiesPage() {
                       href={charity.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="hover:underline text-blue-600"
                     >
                       Visit Website
                     </a>

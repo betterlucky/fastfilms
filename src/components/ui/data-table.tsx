@@ -53,7 +53,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className="items-center flex py-4">
         <Input
           placeholder="Filter venues..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -63,7 +63,7 @@ export function DataTable<TData, TValue>({
           className="max-w-sm"
         />
       </div>
-      <div className="rounded-md border">
+      <div className="border rounded-md">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -113,7 +113,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="items-center justify-end flex space-x-2 py-4">
         <Button
           variant="outline"
           size="sm"

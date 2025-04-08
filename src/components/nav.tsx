@@ -26,12 +26,12 @@ export function Nav() {
   return (
     <>
       {/* Mobile menu button */}
-      <div className="fixed top-0 left-0 z-20 w-full bg-white shadow-sm md:hidden">
-        <div className="flex h-16 items-center justify-between px-4">
+      <div className="fixed top-0 left-0 z-20 md:hidden w-full bg-white shadow-sm">
+        <div className="items-center justify-between flex px-4 h-16">
           <Button
             variant="ghost"
             onClick={() => router.push("/")}
-            className="text-xl font-bold text-indigo-600"
+            className="font-bold text-xl text-indigo-600"
           >
             FastFilms
           </Button>
@@ -47,16 +47,16 @@ export function Nav() {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-10 bg-white transition-transform duration-300 ease-in-out md:hidden">
-          <div className="flex h-full flex-col pt-16">
-            <div className="flex-1 space-y-1 overflow-y-auto p-4">
+        <div className="transition-transform fixed inset-0 z-10 duration-300 ease-in-out md:hidden bg-white">
+          <div className="flex flex-col pt-16 h-full">
+            <div className="overflow-y-auto flex-1 space-y-1 p-4">
               <Button
                 variant="ghost"
                 onClick={() => {
                   router.push("/campaigns");
                   setIsOpen(false);
                 }}
-                className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className="items-center flex p-3 w-full hover:bg-gray-50 hover:text-gray-900 font-medium text-base text-gray-600 rounded-md"
               >
                 Campaigns
               </Button>
@@ -68,7 +68,7 @@ export function Nav() {
                     router.push("/tickets");
                     setIsOpen(false);
                   }}
-                  className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="items-center flex p-3 w-full hover:bg-gray-50 hover:text-gray-900 font-medium text-base text-gray-600 rounded-md"
                 >
                   My Tickets
                 </Button>
@@ -81,19 +81,19 @@ export function Nav() {
                     router.push("/admin");
                     setIsOpen(false);
                   }}
-                  className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="items-center flex p-3 w-full hover:bg-gray-50 hover:text-gray-900 font-medium text-base text-gray-600 rounded-md"
                 >
                   Admin Dashboard
                 </Button>
               )}
             </div>
 
-            <div className="shrink-0 border-t border-gray-200 p-4">
+            <div className="shrink-0 p-4 border-t border-gray-200">
               {status === "authenticated" ? (
                 <Button
                   variant="ghost"
                   onClick={handleSignOut}
-                  className="w-full text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="w-full hover:bg-gray-50 hover:text-gray-900 text-gray-600"
                 >
                   Log Out
                 </Button>
@@ -104,7 +104,7 @@ export function Nav() {
                     router.push("/login");
                     setIsOpen(false);
                   }}
-                  className="w-full text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="w-full hover:bg-gray-50 hover:text-gray-900 text-gray-600"
                 >
                   Log In
                 </Button>
@@ -115,13 +115,13 @@ export function Nav() {
       )}
 
       {/* Desktop navbar */}
-      <nav className="fixed top-0 inset-x-0 z-10 hidden h-16 bg-white shadow-sm md:block">
-        <div className="flex h-full items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
+      <nav className="fixed top-0 inset-x-0 z-10 hidden md:block h-16 bg-white shadow-sm">
+        <div className="items-center justify-between flex px-4 h-full">
+          <div className="items-center flex space-x-4">
             <Button
               variant="ghost"
               onClick={() => router.push("/")}
-              className="text-xl font-bold text-indigo-600"
+              className="font-bold text-xl text-indigo-600"
             >
               FastFilms
             </Button>
@@ -129,7 +129,7 @@ export function Nav() {
               <Button
                 variant="ghost"
                 onClick={() => router.push("/campaigns")}
-                className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className="hover:bg-gray-50 hover:text-gray-900 font-medium text-sm text-gray-600"
               >
                 Campaigns
               </Button>
@@ -137,7 +137,7 @@ export function Nav() {
                 <Button
                   variant="ghost"
                   onClick={() => router.push("/tickets")}
-                  className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="hover:bg-gray-50 hover:text-gray-900 font-medium text-sm text-gray-600"
                 >
                   My Tickets
                 </Button>
@@ -146,7 +146,7 @@ export function Nav() {
                 <Button
                   variant="ghost"
                   onClick={() => router.push("/admin")}
-                  className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="hover:bg-gray-50 hover:text-gray-900 font-medium text-sm text-gray-600"
                 >
                   Admin Dashboard
                 </Button>
@@ -157,7 +157,7 @@ export function Nav() {
             <Button
               variant="ghost"
               onClick={handleSignOut}
-              className="text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className="hover:bg-gray-50 hover:text-gray-900 text-gray-600"
             >
               Log Out
             </Button>
@@ -165,7 +165,7 @@ export function Nav() {
             <Button
               variant="ghost"
               onClick={() => router.push("/login")}
-              className="text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className="hover:bg-gray-50 hover:text-gray-900 text-gray-600"
             >
               Log In
             </Button>

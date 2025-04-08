@@ -43,9 +43,9 @@ export default async function CampaignsPage() {
   })
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Campaigns</h1>
+    <div className="container py-10 mx-auto">
+      <div className="justify-between items-center flex mb-6">
+        <h1 className="font-bold text-3xl">Campaigns</h1>
         <Button asChild>
           <Link href="/admin/campaigns/new">Create Campaign</Link>
         </Button>

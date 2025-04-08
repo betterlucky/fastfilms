@@ -50,16 +50,16 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="justify-between items-center flex">
         <div>
-          <h1 className="text-3xl font-bold">{venue.name} - Screens</h1>
+          <h1 className="font-bold text-3xl">{venue.name} - Screens</h1>
           <p className="text-gray-500">{venue.address}, {venue.city}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-xl font-semibold mb-4">Current Screens</h2>
+          <h2 className="mb-4 font-semibold text-xl">Current Screens</h2>
           <div className="space-y-4">
             {screens.map((screen) => (
               <Card key={screen.id}>
@@ -76,7 +76,7 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-4">Add New Screen</h2>
+          <h2 className="mb-4 font-semibold text-xl">Add New Screen</h2>
           <AddScreenForm venueId={params.id} />
         </div>
       </div>

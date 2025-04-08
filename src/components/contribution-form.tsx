@@ -46,14 +46,14 @@ export function ContributionForm({ campaignId, currentFunding, fundingTarget }: 
   }
 
   return (
-    <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+    <div className="ring-1 ring-gray-900/5 md:col-span-2 bg-white shadow-sm sm:rounded-xl">
       <div className="px-4 py-6 sm:p-8">
         <div className="flex flex-col space-y-4">
           <div>
-            <h2 className="text-base font-semibold leading-7 text-gray-900">
+            <h2 className="font-semibold text-base text-gray-900 leading-7">
               Support this Screening
             </h2>
-            <p className="mt-1 text-sm leading-6 text-gray-600">
+            <p className="mt-1 text-sm text-gray-600 leading-6">
               £{remainingAmount.toFixed(2)} still needed to reach the funding target
             </p>
           </div>
@@ -62,12 +62,12 @@ export function ContributionForm({ campaignId, currentFunding, fundingTarget }: 
             <div>
               <label
                 htmlFor="amount"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block font-medium text-sm text-gray-900 leading-6"
               >
                 Contribution Amount
               </label>
               <div className="relative mt-2">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <div className="absolute inset-y-0 left-0 items-center flex pointer-events-none pl-3">
                   <span className="text-gray-500 sm:text-sm">£</span>
                 </div>
                 <input
@@ -79,7 +79,7 @@ export function ContributionForm({ campaignId, currentFunding, fundingTarget }: 
                   required
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 pl-7 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="ring-1 ring-inset ring-gray-300 block py-1.5 pl-7 pr-12 placeholder:text-gray-400 w-full text-gray-900 border-0 rounded-md focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   placeholder="5.00"
                   disabled={isLoading}
                 />
@@ -98,7 +98,7 @@ export function ContributionForm({ campaignId, currentFunding, fundingTarget }: 
             <button
               type="submit"
               disabled={isLoading || !amount || Number(amount) <= 0}
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-2 hover:bg-indigo-500 font-semibold text-sm text-white bg-indigo-600 rounded-md shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Processing..." : "Contribute"}
             </button>

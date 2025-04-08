@@ -66,9 +66,9 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Delete Charity</h1>
+    <div className="container py-8 mx-auto">
+      <div className="items-center justify-between flex mb-8">
+        <h1 className="font-bold text-3xl">Delete Charity</h1>
         <Button 
           variant="outline"
           onClick={() => router.push("/admin/charities")}
@@ -86,7 +86,7 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
             <p>
               Are you sure you want to delete <strong>{charity.name}</strong>?
               {charity.description && (
-                <span className="block text-gray-500 mt-1">{charity.description}</span>
+                <span className="block mt-1 text-gray-500">{charity.description}</span>
               )}
             </p>
             <p className="text-red-500">
@@ -95,7 +95,7 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
             {error && (
               <div className="text-red-500">{error}</div>
             )}
-            <div className="flex justify-end space-x-4">
+            <div className="justify-end flex space-x-4">
               <Button
                 variant="outline"
                 onClick={() => router.push("/admin/charities")}
