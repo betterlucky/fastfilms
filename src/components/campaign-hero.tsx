@@ -56,8 +56,8 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
         </h1>
         <p className="mx-auto max-w-3xl text-xl text-gray-600">
           Support and attend community film screenings across Cornwall. Book
-          tickets, pre-order food and drinks, and help bring cinema to your
-          local area.
+          tickets, pre-order food and drinks, and help bring the films you most want to see to your
+          local cinema.
         </p>
       </section>
 
@@ -176,7 +176,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
           </CardHeader>
           <CardContent>
             <p>
-              Help bring cinema to your area by supporting crowdfunding
+              Help bring films to your area by supporting crowdfunding
               campaigns. Every ticket counts!
             </p>
           </CardContent>
@@ -203,7 +203,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
           <CardContent>
             <p>
               Affordable ticket pricing with a minimum of £5 plus a small
-              transaction fee. Help make cinema accessible to all.
+              transaction fee. Help make cinema accessible to all by Paying It Forward.
             </p>
           </CardContent>
         </Card>
@@ -213,7 +213,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
       <section className="space-y-4 text-center">
         <h2 className="text-3xl font-bold">Want to See More?</h2>
         <p className="mx-auto max-w-2xl text-xl text-gray-600">
-          Browse our upcoming campaigns and help bring cinema to your community.
+          Browse our upcoming campaigns and help bring more classic cinema to your community.
         </p>
         <Button
           variant="outline"
