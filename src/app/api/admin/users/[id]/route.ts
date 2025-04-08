@@ -32,7 +32,7 @@ export async function PATCH(
       data: {
         name: body.name,
         email: body.email,
-        role: body.isAdmin ? UserRole.ADMIN : UserRole.CUSTOMER,
+        role: body.isAdmin ? UserRole.ADMIN : UserRole.USER,
       },
     })
 

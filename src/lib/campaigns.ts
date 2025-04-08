@@ -93,14 +93,12 @@ export async function getFeaturedCampaign() {
 
   return {
     ...campaign,
-    fundingTarget: campaign.fundingTarget.toString(),
-    currentFunding: campaign.currentFunding.toString(),
-    formattedTarget: formatPrice(Number(campaign.fundingTarget)),
-    formattedCurrent: formatPrice(Number(campaign.currentFunding)),
+    formattedTarget: formatPrice(campaign.fundingTarget),
+    formattedCurrent: formatPrice(campaign.currentFunding),
     formattedDate: formatDate(campaign.screeningDate),
     progress: calculateProgress(
-      Number(campaign.currentFunding),
-      Number(campaign.fundingTarget)
+      campaign.currentFunding,
+      campaign.fundingTarget
     ),
     timeLeft: calculateTimeLeft(campaign.deadlineDate),
     posterUrl: campaign.posterPath
@@ -184,14 +182,12 @@ export async function getCampaigns() {
 
   return campaigns.map((campaign) => ({
     ...campaign,
-    fundingTarget: campaign.fundingTarget.toString(),
-    currentFunding: campaign.currentFunding.toString(),
-    formattedTarget: formatPrice(Number(campaign.fundingTarget)),
-    formattedCurrent: formatPrice(Number(campaign.currentFunding)),
+    formattedTarget: formatPrice(campaign.fundingTarget),
+    formattedCurrent: formatPrice(campaign.currentFunding),
     formattedDate: formatDate(campaign.screeningDate),
     progress: calculateProgress(
-      Number(campaign.currentFunding),
-      Number(campaign.fundingTarget)
+      campaign.currentFunding,
+      campaign.fundingTarget
     ),
     timeLeft: calculateTimeLeft(campaign.deadlineDate),
     posterUrl: campaign.posterPath

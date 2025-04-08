@@ -53,15 +53,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Create contribution record
-    await prisma.contribution.create({
-      data: {
-        amount: Number(amount),
-        campaignId: campaignId,
-        userId: session.user.id,
-      },
-    })
-
     return NextResponse.json(updatedCampaign)
   } catch (error) {
     console.error('Error processing contribution:', error)

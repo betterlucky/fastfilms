@@ -140,12 +140,7 @@ export async function DELETE(
         where: { campaignId: params.id },
       })
 
-      // 5. Delete Contribution records
-      await tx.contribution.deleteMany({
-        where: { campaignId: params.id },
-      })
-
-      // 6. Finally delete the campaign
+      // 5. Finally delete the campaign
       await tx.campaign.delete({
         where: { id: params.id },
       })
