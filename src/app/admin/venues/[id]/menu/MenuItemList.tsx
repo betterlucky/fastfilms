@@ -11,6 +11,17 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import Link from 'next/link'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { useState } from 'react'
+import { useToast } from '@/components/ui/use-toast'
 
 // Type for serialized menu items with numbers instead of Decimal
 interface SerializedMenuItemOptionChoice extends Omit<MenuItemOptionChoice, 'priceAdjustment'> {
@@ -36,6 +47,10 @@ export default function MenuItemList({
   menuItems,
 }: MenuItemListProps) {
   const router = useRouter()
+  const { toast } = useToast()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<SerializedMenuItem | null>(null)
+
   const groupedItems = menuItems.reduce(
     (groups, item) => {
       const group = groups[item.category] || []
@@ -44,6 +59,41 @@ export default function MenuItemList({
     },
     {} as Record<string, SerializedMenuItem[]>
   )
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(
+        `/api/admin/venues/${venueId}/menu/${itemToDelete.id}`,
+        {
+          method: 'DELETE',
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to delete menu item')
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Menu item deleted successfully',
+      })
+      
+      // Refresh the page to show updated list
+      router.refresh()
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete menu item',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsDeleting(false)
+      setItemToDelete(null)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -63,38 +113,28 @@ export default function MenuItemList({
           <div className="grid gap-4">
             {items.map((item) => (
               <Card key={item.id}>
-                <CardHeader>
-                  <CardTitle>{item.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">{item.description}</p>
-                  <p className="mt-2 text-lg font-semibold">
-                    £{item.price.toFixed(2)}
-                  </p>
-
-                  {item.options.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Options:</p>
-                      {item.options.map((option) => (
-                        <div key={option.id} className="text-sm text-gray-500">
-                          <p>{option.name}</p>
-                          <ul className="ml-2 list-inside list-disc">
-                            {option.choices.map((choice) => (
-                              <li key={choice.id}>
-                                {choice.name}
-                                {choice.priceAdjustment > 0 && (
-                                  <span className="text-green-600">
-                                    {' '}
-                                    (+£{choice.priceAdjustment.toFixed(2)})
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-semibold">{item.name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {item.description}
+                      </p>
+                      <p className="mt-1 font-medium">
+                        £{item.price.toFixed(2)}
+                      </p>
                     </div>
-                  )}
+                    {item.options.length > 0 && (
+                      <div className="ml-8">
+                        <h5 className="text-sm font-medium">Options:</h5>
+                        <ul className="mt-1 space-y-1 text-sm text-gray-500">
+                          {item.options.map((option) => (
+                            <li key={option.id}>{option.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="mt-4 flex gap-2">
                     <Button
@@ -106,17 +146,41 @@ export default function MenuItemList({
                     >
                       Edit
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        router.push(
-                          `/admin/venues/${venueId}/menu/${item.id}/delete`
-                        )
-                      }
-                    >
-                      Delete
-                    </Button>
+                    <Dialog open={itemToDelete?.id === item.id} onOpenChange={(open) => !open && setItemToDelete(null)}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setItemToDelete(item)}
+                        >
+                          Delete
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Delete Menu Item</DialogTitle>
+                          <DialogDescription>
+                            Are you sure you want to delete "{item.name}"? This action cannot be undone.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setItemToDelete(null)}
+                            disabled={isDeleting}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>
