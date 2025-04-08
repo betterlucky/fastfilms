@@ -19,43 +19,59 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const ticket = await prisma.ticket.findUnique({
+    // Get the target ticket and find all related tickets in the same transaction
+    const targetTicket = await prisma.ticket.findUnique({
       where: { id: params.id },
+      include: { campaign: true }
+    })
+
+    if (!targetTicket) {
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
+    }
+
+    // Get all tickets from the same transaction
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        OR: [
+          // If it's a Stripe transaction, get all tickets with same payment intent
+          {
+            stripePaymentIntentId: targetTicket.stripePaymentIntentId,
+            AND: {
+              NOT: { stripePaymentIntentId: null }
+            }
+          },
+          // If it's a test transaction, get tickets created at the same time
+          {
+            AND: [
+              { campaignId: targetTicket.campaignId },
+              { userId: targetTicket.userId },
+              {
+                createdAt: {
+                  gte: new Date(targetTicket.createdAt.getTime() - 1000), // Within 1 second
+                  lte: new Date(targetTicket.createdAt.getTime() + 1000)
+                }
+              }
+            ]
+          }
+        ]
+      },
       include: {
         orders: {
           include: {
-            menuItem: {
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                price: true,
-                venueId: true,
-                createdAt: true,
-                updatedAt: true,
-              },
-            },
+            menuItem: true,
             choices: {
               include: {
-                option: {
-                  select: {
-                    name: true,
-                  },
-                },
-                selectedChoice: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-          },
+                option: { select: { name: true } },
+                selectedChoice: { select: { name: true } }
+              }
+            }
+          }
         },
         user: {
           select: {
             name: true,
             email: true,
-          },
+          }
         },
         campaign: {
           include: {
@@ -63,25 +79,21 @@ export async function POST(
               select: {
                 id: true,
                 name: true,
-              },
-            },
-          },
-        },
-      },
+              }
+            }
+          }
+        }
+      }
     })
 
-    if (!ticket) {
-      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
-    }
-
     // Check if user is authorized (either admin or ticket owner)
-    if (session.user.role !== 'ADMIN' && ticket.userId !== session.user.id) {
+    if (session.user.role !== 'ADMIN' && tickets[0]?.userId !== session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Check if we have a last resend timestamp
     const lastResend = await prisma.ticketResend.findFirst({
-      where: { ticketId: ticket.id },
+      where: { ticketId: params.id },
       orderBy: { createdAt: 'desc' },
     })
 
@@ -97,40 +109,60 @@ export async function POST(
       }
     }
 
+    // Calculate total amount including tickets and food
+    const ticketsTotal = tickets.reduce((sum, t) => sum + Number(t.pricePaid), 0)
+    const foodTotal = tickets.reduce((sum, t) => 
+      sum + t.orders.reduce((orderSum, o) => 
+        orderSum + (Number(o.menuItem.price) * o.quantity), 0
+      ), 0
+    )
+
+    // Group food orders by menu item
+    const foodOrdersMap = new Map()
+    tickets.forEach(ticket => {
+      ticket.orders.forEach(order => {
+        const key = order.menuItem.id
+        if (!foodOrdersMap.has(key)) {
+          foodOrdersMap.set(key, {
+            name: order.menuItem.name,
+            quantity: 0,
+            price: Number(order.menuItem.price) / 100,
+            options: order.choices.map(choice => ({
+              name: choice.option.name,
+              choice: choice.selectedChoice.name
+            }))
+          })
+        }
+        foodOrdersMap.get(key).quantity += order.quantity
+      })
+    })
+
     // Transform ticket data for email
     const emailData: EmailData = {
-      movieTitle: ticket.campaign.movieTitle,
-      venueName: ticket.campaign.venue.name,
-      screeningDate: ticket.campaign.screeningDate,
-      ticketQuantity: 1,
-      totalAmount: Number(ticket.pricePaid) / 100,
-      regularTickets: ticket.status === 'CONFIRMED' ? 1 : 0,
-      pifTickets: ticket.status === 'PAY_IT_FORWARD' ? 1 : 0,
-      foodOrders: ticket.orders.map(order => ({
-        name: order.menuItem.name,
-        quantity: 1,
-        price: Number(order.menuItem.price) / 100,
-        options: order.choices.map(choice => ({
-          name: choice.option.name,
-          choice: choice.selectedChoice.name
-        }))
-      }))
+      movieTitle: tickets[0].campaign.movieTitle,
+      venueName: tickets[0].campaign.venue.name,
+      screeningDate: tickets[0].campaign.screeningDate,
+      ticketQuantity: tickets.length,
+      totalAmount: (ticketsTotal + foodTotal) / 100,
+      regularTickets: tickets.filter(t => t.status === 'CONFIRMED').length,
+      pifTickets: tickets.filter(t => t.status === 'PAY_IT_FORWARD').length,
+      foodOrders: Array.from(foodOrdersMap.values())
     }
 
     // Send email
     const emailHtml = generateTicketConfirmationEmail(emailData)
     await sendEmail({
-      to: ticket.user?.email || '',
-      subject: `Your ticket for ${ticket.campaign.movieTitle}`,
+      to: tickets[0].user?.email || '',
+      subject: `Your tickets for ${tickets[0].campaign.movieTitle}`,
       html: emailHtml,
     })
 
-    // Record the resend
-    await prisma.ticketResend.create({
-      data: {
-        ticketId: ticket.id,
-        userId: session.user.id,
-      },
+    // Record the resend for all tickets in the group
+    await prisma.ticketResend.createMany({
+      data: tickets.map(t => ({
+        ticketId: t.id,
+        userId: session.user.id
+      }))
     })
 
     return NextResponse.json({ message: 'Confirmation email resent successfully' })
