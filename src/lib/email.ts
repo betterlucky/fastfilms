@@ -49,9 +49,47 @@ export function generateTicketConfirmationEmail(data: {
   screeningDate: Date
   ticketQuantity: number
   totalAmount: number
+  regularTickets?: number
+  pifTickets?: number
+  foodOrders?: Array<{
+    name: string
+    quantity: number
+    price: number
+    options?: Array<{
+      name: string
+      choice: string
+    }>
+  }>
 }) {
-  const { movieTitle, venueName, screeningDate, ticketQuantity, totalAmount } =
-    data
+  const { movieTitle, venueName, screeningDate, ticketQuantity, totalAmount, regularTickets = 0, pifTickets = 0, foodOrders = [] } = data
+
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP'
+    }).format(amount)
+  }
+
+  const foodOrdersHtml = foodOrders.length > 0 
+    ? `
+      <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
+        <h2 style="margin: 0 0 16px 0; color: #111827;">Your Pre-orders</h2>
+        ${foodOrders.map(order => `
+          <div style="margin-bottom: 8px;">
+            <p style="margin: 0;">
+              ${order.quantity}x ${order.name} (${formatPrice(order.price)})
+              ${order.options?.length ? 
+                `<br><span style="color: #6b7280; margin-left: 20px;">
+                  ${order.options.map(opt => `${opt.name}: ${opt.choice}`).join(', ')}
+                </span>`
+                : ''
+              }
+            </p>
+          </div>
+        `).join('')}
+      </div>
+    `
+    : ''
 
   return `
     <!DOCTYPE html>
@@ -85,10 +123,13 @@ export function generateTicketConfirmationEmail(data: {
                 minute: '2-digit',
               }
             )}</p>
-            <p style="margin: 8px 0;"><strong>Tickets:</strong> ${ticketQuantity}</p>
-            <p style="margin: 8px 0;"><strong>Total Paid:</strong> £${totalAmount.toFixed(2)}</p>
+            <p style="margin: 8px 0;"><strong>Regular Tickets:</strong> ${regularTickets}</p>
+            ${pifTickets > 0 ? `<p style="margin: 8px 0;"><strong>Pay It Forward Tickets:</strong> ${pifTickets}</p>` : ''}
+            <p style="margin: 8px 0;"><strong>Total Paid:</strong> ${formatPrice(totalAmount)}</p>
           </div>
           
+          ${foodOrdersHtml}
+
           <p>Please arrive at least 15 minutes before the screening time. You'll need to show this email as proof of purchase.</p>
           
           <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">

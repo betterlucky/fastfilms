@@ -48,6 +48,7 @@ model User {
   Contribution  Contribution[]
   sessions      Session[]
   tickets       Ticket[]
+  ticketResends TicketResend[]
 }
 
 model VerificationToken {
@@ -187,6 +188,19 @@ model Ticket {
   orders                Order[]
   campaign              Campaign @relation(fields: [campaignId], references: [id])
   user                  User     @relation(fields: [userId], references: [id])
+  resends               TicketResend[]
+}
+
+model TicketResend {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@index([userId])
 }
 
 model Order {

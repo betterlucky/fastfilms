@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Ticket" ADD COLUMN     "type" TEXT NOT NULL DEFAULT 'REGULAR';

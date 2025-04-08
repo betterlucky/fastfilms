@@ -64,4 +64,15 @@ export interface EmailData {
   screeningDate: Date
   ticketQuantity: number
   totalAmount: number
+  regularTickets?: number
+  pifTickets?: number
+  foodOrders?: Array<{
+    name: string
+    quantity: number
+    price: number
+    options?: Array<{
+      name: string
+      choice: string
+    }>
+  }>
 }

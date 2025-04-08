@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { TicketIcon } from 'lucide-react'
+import { ResendConfirmationButton } from '@/components/resend-confirmation-button'
 
 interface Ticket {
   id: string
@@ -23,6 +24,7 @@ interface GroupedTickets {
     venueName: string
     screeningDate: string
     count: number
+    tickets: string[] // Array of ticket IDs
   }
 }
 
@@ -49,10 +51,12 @@ export default function TicketsPage() {
               movieTitle: ticket.campaign.movieTitle,
               venueName: ticket.campaign.venue.name,
               screeningDate: ticket.screeningDate,
-              count: 0
+              count: 0,
+              tickets: []
             }
           }
           acc[key].count++
+          acc[key].tickets.push(ticket.id)
           return acc
         }, {})
         
@@ -199,7 +203,7 @@ export default function TicketsPage() {
                       {ticket.venueName}
                     </dd>
                   </div>
-                  <div className="mt-4 flex w-full flex-none gap-x-4 px-6 pb-6">
+                  <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
                     <dt>
                       <svg
                         className="h-6 w-5 text-gray-400"
@@ -218,6 +222,11 @@ export default function TicketsPage() {
                     <dd className="text-sm leading-6 text-gray-900">
                       {formattedDate} at {formattedTime}
                     </dd>
+                  </div>
+                  <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
+                    {ticket.tickets.map((ticketId) => (
+                      <ResendConfirmationButton key={ticketId} ticketId={ticketId} />
+                    ))}
                   </div>
                 </dl>
               </div>

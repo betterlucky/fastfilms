@@ -199,12 +199,14 @@ export async function getCampaigns(includeFeatured: boolean = false) {
 
   return Array.from(uniqueCampaigns.values()).map((campaign) => ({
     ...campaign,
+    fundingTarget: Number(campaign.fundingTarget),
+    currentFunding: Number(campaign.currentFunding),
     formattedTarget: formatPrice(campaign.fundingTarget),
     formattedCurrent: formatPrice(campaign.currentFunding),
     formattedDate: formatDate(campaign.screeningDate),
     progress: calculateProgress(
-      campaign.currentFunding,
-      campaign.fundingTarget
+      Number(campaign.currentFunding),
+      Number(campaign.fundingTarget)
     ),
     timeLeft: calculateTimeLeft(campaign.deadlineDate),
     posterUrl: campaign.posterPath
@@ -212,7 +214,5 @@ export async function getCampaigns(includeFeatured: boolean = false) {
       : null,
     hasAssignedVenue: campaign.venueId !== null,
     hasScreenAllocated: campaign.screen !== null,
-    startDate: campaign.screeningDate,
-    endDate: campaign.deadlineDate,
   }))
 }

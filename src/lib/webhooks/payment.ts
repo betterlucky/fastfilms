@@ -108,6 +108,19 @@ export async function handlePaymentSuccess(
       screeningDate: tickets[0].campaign.screeningDate,
       ticketQuantity: tickets.length,
       totalAmount: amount / 100, // Convert from cents to pounds
+      regularTickets: tickets.filter(t => t.status === 'CONFIRMED').length,
+      pifTickets: tickets.filter(t => t.status === 'PAY_IT_FORWARD').length,
+      foodOrders: tickets.flatMap(ticket => 
+        ticket.orders.map(order => ({
+          name: order.menuItem.name,
+          quantity: 1,
+          price: Number(order.menuItem.price) / 100,
+          options: order.choices.map(choice => ({
+            name: choice.option.name,
+            choice: choice.selectedChoice.name
+          }))
+        }))
+      )
     }
 
     // Generate and send confirmation email to customer
@@ -158,6 +171,7 @@ interface Campaign {
 
 interface Ticket {
   id: string
+  type: 'REGULAR' | 'PAY_IT_FORWARD'
   orders: Array<{
     menuItem: {
       name: string

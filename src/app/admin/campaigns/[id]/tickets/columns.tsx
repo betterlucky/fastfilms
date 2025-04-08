@@ -5,6 +5,7 @@ import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { AllocateTicketDialog } from './allocate-ticket-dialog'
 import { ResetTicketDialog } from './reset-ticket-dialog'
+import { ResendConfirmationButton } from '@/components/resend-confirmation-button'
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -84,6 +85,7 @@ export const columns: ColumnDef<any>[] = [
           ) : (
             <ResetTicketDialog ticket={ticket} />
           )}
+          <ResendConfirmationButton ticketId={ticket.id} />
         </div>
       )
     },
