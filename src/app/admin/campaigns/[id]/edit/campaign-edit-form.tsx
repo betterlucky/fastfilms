@@ -68,6 +68,7 @@ export function CampaignEditForm({
           description: formData.get('description'),
           movieTitle: formData.get('movieTitle'),
           customBlurb: formData.get('customBlurb'),
+          posterPath: formData.get('posterPath'),
           venueId: formData.get('venueId'),
           screenId:
             formData.get('screenId') === 'unassign'
@@ -152,6 +153,31 @@ export function CampaignEditForm({
             name="customBlurb"
             defaultValue={campaign.customBlurb || ''}
           />
+        </div>
+
+        <div>
+          <label htmlFor="posterPath" className="block text-sm font-medium">
+            Poster Image URL
+          </label>
+          <div className="space-y-2">
+            <Input
+              id="posterPath"
+              name="posterPath"
+              defaultValue={campaign.posterPath || ''}
+              placeholder="TMDB path (e.g. /1H1y9ZiqNFaLgQiRDDZLA55PviW.jpg) or full URL"
+            />
+            <p className="text-sm text-muted-foreground">
+              {campaign.posterPath ? (
+                campaign.posterPath.startsWith('http') ? (
+                  <>Current poster: <code>{campaign.posterPath}</code></>
+                ) : (
+                  <>Current poster: <code>https://image.tmdb.org/t/p/w500{campaign.posterPath}</code></>
+                )
+              ) : (
+                'No poster image set'
+              )}
+            </p>
+          </div>
         </div>
 
         <div>

@@ -123,7 +123,9 @@ export default function CampaignDetails({
                   {campaign.posterPath && (
                     <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
                       <Image
-                        src={`https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
+                        src={campaign.posterPath.startsWith('http') 
+                          ? campaign.posterPath 
+                          : `https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
                         alt={campaign.movieTitle}
                         fill
                         priority

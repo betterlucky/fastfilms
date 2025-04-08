@@ -46,6 +46,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
   const [title, setTitle] = useState('')
   const [movieTitle, setMovieTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [posterPath, setPosterPath] = useState('')
 
   const currentVenue = venues.find((v) => v.id === selectedVenue)
 
@@ -58,6 +59,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
     if (!description) {
       setDescription(film.overview || '')
     }
+    setPosterPath(film.poster_path || '')
   }
 
   const calculateDeadlineDate = (): Date => {
@@ -103,7 +105,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
           isFeatured: formData.get('isFeatured') === 'on',
           isTest: formData.get('isTest') === 'on',
           tmdbId: selectedFilm?.id?.toString() || null,
-          posterPath: selectedFilm?.poster_path || null,
+          posterPath: posterPath || null,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -170,6 +172,29 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
+          <label htmlFor="posterPath" className="block text-sm font-medium">
+            Poster Image URL
+          </label>
+          <div className="space-y-2">
+            <Input
+              id="posterPath"
+              value={posterPath}
+              onChange={(e) => setPosterPath(e.target.value)}
+              placeholder="TMDB path (e.g. /1H1y9ZiqNFaLgQiRDDZLA55PviW.jpg) or full URL"
+            />
+            {posterPath && (
+              <p className="text-sm text-muted-foreground">
+                {posterPath.startsWith('http') ? (
+                  <>Using custom URL: <code>{posterPath}</code></>
+                ) : (
+                  <>Using TMDB path: <code>https://image.tmdb.org/t/p/w500{posterPath}</code></>
+                )}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div>
           <label htmlFor="venue" className="block text-sm font-medium">
             Venue
           </label>
@@ -224,7 +249,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
                 selected={screeningDate}
                 onChange={(date: Date) => setScreeningDate(date)}
                 dateFormat="dd/MM/yyyy"
-                className="w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="w-full rounded-md border-0 text-gray-900 px-3.5 py-2 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholderText="Select date (DD/MM/YYYY)"
                 required
               />
