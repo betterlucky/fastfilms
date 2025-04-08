@@ -10,14 +10,14 @@ import { Prisma, PurchaseStatus } from '@prisma/client'
 import type { PrismaClient } from '@prisma/client'
 
 interface MenuSelection {
-  menuItemId: string;
-  quantity: number;
+  menuItemId: string
+  quantity: number
 }
 
 interface RequestBody {
-  campaignId: string;
-  numTickets: number;
-  menuSelections?: MenuSelection[];
+  campaignId: string
+  numTickets: number
+  menuSelections?: MenuSelection[]
 }
 
 // Helper function to validate total amount
@@ -27,23 +27,23 @@ const validateTotalAmount = (
   calculatedTotal: number,
   providedTotal: number
 ) => {
-  const epsilon = 0.01; // Small difference allowed for floating point calculations
+  const epsilon = 0.01 // Small difference allowed for floating point calculations
   if (Math.abs(calculatedTotal - providedTotal) > epsilon) {
     throw new Error(
       `Total amount mismatch. Expected: ${calculatedTotal}, Got: ${providedTotal}. ` +
-      `(Tickets: ${ticketsTotal}, Food: ${foodOrdersTotal})`
-    );
+        `(Tickets: ${ticketsTotal}, Food: ${foodOrdersTotal})`
+    )
   }
-};
+}
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = (await request.json()) as RequestBody;
-  const { campaignId, numTickets, menuSelections = [] } = body;
+  const body = (await request.json()) as RequestBody
+  const { campaignId, numTickets, menuSelections = [] } = body
 
   try {
     const campaign = await prisma.campaign.findUnique({
@@ -51,20 +51,17 @@ export async function POST(request: NextRequest) {
       include: {
         venue: true,
       },
-    });
+    })
 
     if (!campaign) {
-      return NextResponse.json(
-        { error: "Campaign not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
     }
 
-    if (campaign.status !== "ACTIVE") {
+    if (campaign.status !== 'ACTIVE') {
       return NextResponse.json(
-        { error: "Campaign is not active" },
+        { error: 'Campaign is not active' },
         { status: 400 }
-      );
+      )
     }
 
     const menuItems = await prisma.menuItem.findMany({
@@ -73,20 +70,20 @@ export async function POST(request: NextRequest) {
           in: menuSelections.map((selection) => selection.menuItemId),
         },
       },
-    });
+    })
 
     const foodOrdersTotal = menuSelections.reduce((total, selection) => {
       const menuItem = menuItems.find(
         (item) => item.id === selection.menuItemId
-      );
-      return total + Number(menuItem?.price || 0) * selection.quantity;
-    }, 0);
+      )
+      return total + Number(menuItem?.price || 0) * selection.quantity
+    }, 0)
 
-    const ticketsTotal = numTickets * Number(campaign.fundingTarget);
-    const totalAmount = ticketsTotal + foodOrdersTotal;
+    const ticketsTotal = numTickets * Number(campaign.fundingTarget)
+    const totalAmount = ticketsTotal + foodOrdersTotal
 
     // Validate the calculated total
-    validateTotalAmount(ticketsTotal, foodOrdersTotal, totalAmount, totalAmount);
+    validateTotalAmount(ticketsTotal, foodOrdersTotal, totalAmount, totalAmount)
 
     if (campaign.isTest) {
       const purchase = await prisma.$transaction(async (tx) => {
@@ -100,16 +97,19 @@ export async function POST(request: NextRequest) {
               create: Array(numTickets).fill({
                 userId: session.user.id,
                 campaignId: campaign.id,
-                status: "CONFIRMED",
+                status: 'CONFIRMED',
                 pricePaid: new Prisma.Decimal(0),
               }),
             },
-            orders: menuSelections.length > 0 ? {
-              create: menuSelections.map((selection) => ({
-                menuItemId: selection.menuItemId,
-                quantity: selection.quantity,
-              })),
-            } : undefined,
+            orders:
+              menuSelections.length > 0
+                ? {
+                    create: menuSelections.map((selection) => ({
+                      menuItemId: selection.menuItemId,
+                      quantity: selection.quantity,
+                    })),
+                  }
+                : undefined,
           },
           include: {
             tickets: true,
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
               },
             },
           },
-        });
+        })
 
         await tx.campaign.update({
           where: { id: campaign.id },
@@ -134,10 +134,10 @@ export async function POST(request: NextRequest) {
               increment: numTickets,
             },
           },
-        });
+        })
 
-        return newPurchase;
-      });
+        return newPurchase
+      })
 
       // Generate and send confirmation email
       const emailData = {
@@ -148,40 +148,40 @@ export async function POST(request: NextRequest) {
         totalAmount: 0,
         regularTickets: numTickets,
         pifTickets: 0,
-        foodOrders: purchase.orders.map(order => ({
+        foodOrders: purchase.orders.map((order) => ({
           name: order.menuItem.name,
           quantity: order.quantity,
           price: Number(order.menuItem.price) / 100,
-          options: order.choices.map(choice => ({
+          options: order.choices.map((choice) => ({
             name: choice.option.name,
-            choice: choice.selectedChoice.name
-          }))
-        }))
-      };
+            choice: choice.selectedChoice.name,
+          })),
+        })),
+      }
 
-      const emailHtml = generateTicketConfirmationEmail(emailData);
+      const emailHtml = generateTicketConfirmationEmail(emailData)
       await sendEmail({
         to: session.user.email || '',
         subject: `Your tickets for ${campaign.movieTitle}`,
         html: emailHtml,
-      });
+      })
 
       return NextResponse.json({
         success: true,
         purchase,
-      });
+      })
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: formatAmountForStripe(totalAmount, 'usd'),
-      currency: "usd",
+      currency: 'usd',
       metadata: {
         userId: session.user.id,
         campaignId: campaign.id,
         numTickets,
         menuSelections: JSON.stringify(menuSelections),
       },
-    });
+    })
 
     const purchase = await prisma.purchase.create({
       data: {
@@ -194,32 +194,40 @@ export async function POST(request: NextRequest) {
           create: Array(numTickets).fill({
             userId: session.user.id,
             campaignId: campaign.id,
-            status: "PENDING",
+            status: 'PENDING',
             pricePaid: new Prisma.Decimal(campaign.fundingTarget),
           }),
         },
-        orders: menuSelections.length > 0 ? {
-          create: menuSelections.map((selection) => ({
-            menuItemId: selection.menuItemId,
-            quantity: selection.quantity,
-          })),
-        } : undefined,
+        orders:
+          menuSelections.length > 0
+            ? {
+                create: menuSelections.map((selection) => ({
+                  menuItemId: selection.menuItemId,
+                  quantity: selection.quantity,
+                })),
+              }
+            : undefined,
       },
       include: {
         tickets: true,
         orders: true,
       },
-    });
+    })
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       purchase,
-    });
+    })
   } catch (error) {
-    console.error("Error creating payment intent:", error);
+    console.error('Error creating payment intent:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create payment intent" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create payment intent',
+      },
       { status: 500 }
-    );
+    )
   }
 }

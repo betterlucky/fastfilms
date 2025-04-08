@@ -3,10 +3,7 @@
 import { MenuItem, MenuItemOption, MenuItemOptionChoice } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import {
-  Card,
-  CardContent,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -20,7 +17,8 @@ import { useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
 // Type for serialized menu items with numbers instead of Decimal
-interface SerializedMenuItemOptionChoice extends Omit<MenuItemOptionChoice, 'priceAdjustment'> {
+interface SerializedMenuItemOptionChoice
+  extends Omit<MenuItemOptionChoice, 'priceAdjustment'> {
   priceAdjustment: number
 }
 
@@ -45,7 +43,9 @@ export default function MenuItemList({
   const router = useRouter()
   const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<SerializedMenuItem | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<SerializedMenuItem | null>(
+    null
+  )
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const groupedItems = menuItems.reduce(
@@ -81,13 +81,14 @@ export default function MenuItemList({
         title: 'Success',
         description: 'Menu item deleted successfully',
       })
-      
+
       setDialogOpen(false)
       router.refresh()
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete menu item',
+        description:
+          error instanceof Error ? error.message : 'Failed to delete menu item',
         variant: 'destructive',
       })
     } finally {
@@ -142,15 +143,20 @@ export default function MenuItemList({
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        router.push(`/admin/venues/${venueId}/menu/${item.id}/edit`)
+                        router.push(
+                          `/admin/venues/${venueId}/menu/${item.id}/edit`
+                        )
                       }
                     >
                       Edit
                     </Button>
-                    <Dialog open={dialogOpen && itemToDelete?.id === item.id} onOpenChange={(open) => {
-                      setDialogOpen(open)
-                      if (!open) setItemToDelete(null)
-                    }}>
+                    <Dialog
+                      open={dialogOpen && itemToDelete?.id === item.id}
+                      onOpenChange={(open) => {
+                        setDialogOpen(open)
+                        if (!open) setItemToDelete(null)
+                      }}
+                    >
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
@@ -165,9 +171,12 @@ export default function MenuItemList({
                       </DialogTrigger>
                       <DialogContent className="bg-white">
                         <DialogHeader>
-                          <DialogTitle className="text-gray-900">Delete Menu Item</DialogTitle>
+                          <DialogTitle className="text-gray-900">
+                            Delete Menu Item
+                          </DialogTitle>
                           <DialogDescription className="text-gray-600">
-                            Are you sure you want to delete "{item.name}"? This action cannot be undone.
+                            Are you sure you want to delete "{item.name}"? This
+                            action cannot be undone.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>

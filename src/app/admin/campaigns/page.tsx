@@ -43,8 +43,8 @@ export default async function CampaignsPage() {
     },
   })
 
-  const liveCampaigns = campaigns.filter(campaign => !campaign.isTest)
-  const testCampaigns = campaigns.filter(campaign => campaign.isTest)
+  const liveCampaigns = campaigns.filter((campaign) => !campaign.isTest)
+  const testCampaigns = campaigns.filter((campaign) => campaign.isTest)
 
   return (
     <div className="container mx-auto py-10">

@@ -76,16 +76,19 @@ export default async function CampaignTicketsPage({
   }
 
   // Convert Decimal values to numbers in tickets and orders
-  const processedTickets = campaign.tickets.map(ticket => ({
+  const processedTickets = campaign.tickets.map((ticket) => ({
     ...ticket,
     pricePaid: convertDecimal(ticket.pricePaid),
-    orders: ticket.purchase?.orders.map(order => ({
-      ...order,
-      menuItem: order.menuItem ? {
-        ...order.menuItem,
-        price: convertDecimal(order.menuItem.price)
-      } : null
-    })) || []
+    orders:
+      ticket.purchase?.orders.map((order) => ({
+        ...order,
+        menuItem: order.menuItem
+          ? {
+              ...order.menuItem,
+              price: convertDecimal(order.menuItem.price),
+            }
+          : null,
+      })) || [],
   }))
 
   // Calculate ticket statistics

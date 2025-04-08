@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { generateGuestListPDF, generatePreordersPDF } from '@/lib/pdf/generate-guest-list'
+import {
+  generateGuestListPDF,
+  generatePreordersPDF,
+} from '@/lib/pdf/generate-guest-list'
 import nodemailer from 'nodemailer'
 import { Campaign, Order, Ticket, TicketStatus } from '@prisma/client'
 
@@ -90,22 +93,24 @@ export async function POST(
     }
 
     // Transform tickets to include orders from their purchases
-    const ticketsWithOrders = campaign.tickets.map(ticket => ({
+    const ticketsWithOrders = campaign.tickets.map((ticket) => ({
       ...ticket,
-      orders: ticket.purchase?.orders.map(order => ({
-        id: order.id,
-        quantity: order.quantity,
-      })) || [],
+      orders:
+        ticket.purchase?.orders.map((order) => ({
+          id: order.id,
+          quantity: order.quantity,
+        })) || [],
     }))
 
     // Transform orders for preorder PDF
-    const allOrders = campaign.tickets.flatMap(ticket => 
-      ticket.purchase?.orders.map(order => ({
-        ...order,
-        user: ticket.user,
-        menuItem: order.menuItem,
-        choices: order.choices,
-      })) || []
+    const allOrders = campaign.tickets.flatMap(
+      (ticket) =>
+        ticket.purchase?.orders.map((order) => ({
+          ...order,
+          user: ticket.user,
+          menuItem: order.menuItem,
+          choices: order.choices,
+        })) || []
     )
 
     // Generate PDFs

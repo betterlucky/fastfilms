@@ -61,35 +61,50 @@ export function generateTicketConfirmationEmail(data: {
     }>
   }>
 }) {
-  const { movieTitle, venueName, screeningDate, ticketQuantity, totalAmount, regularTickets = 0, pifTickets = 0, foodOrders = [] } = data
+  const {
+    movieTitle,
+    venueName,
+    screeningDate,
+    ticketQuantity,
+    totalAmount,
+    regularTickets = 0,
+    pifTickets = 0,
+    foodOrders = [],
+  } = data
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-GB', {
       style: 'currency',
-      currency: 'GBP'
+      currency: 'GBP',
     }).format(amount)
   }
 
-  const foodOrdersHtml = foodOrders.length > 0 
-    ? `
+  const foodOrdersHtml =
+    foodOrders.length > 0
+      ? `
       <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
         <h2 style="margin: 0 0 16px 0; color: #111827;">Your Pre-orders</h2>
-        ${foodOrders.map(order => `
+        ${foodOrders
+          .map(
+            (order) => `
           <div style="margin-bottom: 8px;">
             <p style="margin: 0;">
               ${order.quantity}x ${order.name} (${formatPrice(order.price)})
-              ${order.options?.length ? 
-                `<br><span style="color: #6b7280; margin-left: 20px;">
-                  ${order.options.map(opt => `${opt.name}: ${opt.choice}`).join(', ')}
+              ${
+                order.options?.length
+                  ? `<br><span style="color: #6b7280; margin-left: 20px;">
+                  ${order.options.map((opt) => `${opt.name}: ${opt.choice}`).join(', ')}
                 </span>`
-                : ''
+                  : ''
               }
             </p>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     `
-    : ''
+      : ''
 
   return `
     <!DOCTYPE html>
@@ -350,7 +365,7 @@ export function generateScreenConfirmationEmail(
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
   })
 
   let ordersList = ''
@@ -359,9 +374,12 @@ export function generateScreenConfirmationEmail(
       <div style="margin-top: 24px;">
         <h2 style="margin: 0 0 16px 0; color: #111827;">Your Pre-orders</h2>
         <ul style="list-style-type: none; padding: 0; margin: 0;">
-          ${orders.map(order => 
-            `<li>${order.quantity}x ${order.menuItem.name} (${formatPrice(order.menuItem.price * order.quantity)})</li>`
-          ).join('')}
+          ${orders
+            .map(
+              (order) =>
+                `<li>${order.quantity}x ${order.menuItem.name} (${formatPrice(order.menuItem.price * order.quantity)})</li>`
+            )
+            .join('')}
         </ul>
       </div>
     `
@@ -427,6 +445,6 @@ export async function sendScreenConfirmationEmail(
   await sendEmail({
     to,
     subject: `Screening Confirmed: ${campaignTitle}`,
-    html
+    html,
   })
 }

@@ -65,7 +65,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
   const calculateDeadlineDate = (): Date => {
     const deadline = new Date(screeningDate)
     if (deadlineTimeUnit === 'weeks') {
-      deadline.setDate(deadline.getDate() - (deadlineTimeAmount * 7))
+      deadline.setDate(deadline.getDate() - deadlineTimeAmount * 7)
     } else {
       deadline.setDate(deadline.getDate() - deadlineTimeAmount)
     }
@@ -183,11 +183,16 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
               placeholder="TMDB path (e.g. /1H1y9ZiqNFaLgQiRDDZLA55PviW.jpg) or full URL"
             />
             {posterPath && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {posterPath.startsWith('http') ? (
-                  <>Using custom URL: <code>{posterPath}</code></>
+                  <>
+                    Using custom URL: <code>{posterPath}</code>
+                  </>
                 ) : (
-                  <>Using TMDB path: <code>https://image.tmdb.org/t/p/w500{posterPath}</code></>
+                  <>
+                    Using TMDB path:{' '}
+                    <code>https://image.tmdb.org/t/p/w500{posterPath}</code>
+                  </>
                 )}
               </p>
             )}
@@ -249,17 +254,13 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
                 selected={screeningDate}
                 onChange={(date: Date) => setScreeningDate(date)}
                 dateFormat="dd/MM/yyyy"
-                className="w-full rounded-md border-0 text-gray-900 px-3.5 py-2 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholderText="Select date (DD/MM/YYYY)"
                 required
               />
             </div>
             <div className="flex-1">
-              <TimeInput
-                name="screeningTime"
-                defaultValue="7:00"
-                required
-              />
+              <TimeInput name="screeningTime" defaultValue="7:00" required />
             </div>
           </div>
         </div>
@@ -294,12 +295,12 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
               </Select>
             </div>
             <div className="flex-2">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Deadline: {calculateDeadlineDate().toLocaleDateString('en-GB')}
               </p>
             </div>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Time before screening date when campaign will close
           </p>
         </div>

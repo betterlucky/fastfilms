@@ -47,17 +47,19 @@ export default function TicketsPage() {
           throw new Error('Failed to fetch tickets')
         }
         const tickets: Ticket[] = await response.json()
-        
+
         // Group tickets by transaction (stripePaymentIntentId) or creation time for test tickets
         const grouped = tickets.reduce((acc: GroupedTickets, ticket) => {
           let key: string
-          
+
           if (ticket.purchase?.stripePaymentIntentId) {
             // For regular tickets, group by payment intent ID
             key = ticket.purchase.stripePaymentIntentId
           } else {
             // For test tickets, group by campaignId + userId + createdAt (rounded to nearest second)
-            const createdAtSeconds = Math.floor(new Date(ticket.createdAt).getTime() / 1000)
+            const createdAtSeconds = Math.floor(
+              new Date(ticket.createdAt).getTime() / 1000
+            )
             key = `${ticket.campaign.id}_${ticket.userId}_${createdAtSeconds}`
           }
 
@@ -67,14 +69,14 @@ export default function TicketsPage() {
               venueName: ticket.campaign.venue.name,
               screeningDate: ticket.screeningDate,
               count: 0,
-              tickets: []
+              tickets: [],
             }
           }
           acc[key].count++
           acc[key].tickets.push(ticket.id)
           return acc
         }, {})
-        
+
         setGroupedTickets(grouped)
       } catch (err) {
         setError(
@@ -165,12 +167,12 @@ export default function TicketsPage() {
               weekday: 'long',
               day: 'numeric',
               month: 'long',
-              year: 'numeric'
+              year: 'numeric',
             })
             const formattedTime = screeningDate.toLocaleTimeString('en-GB', {
               hour: '2-digit',
               minute: '2-digit',
-              hour12: false
+              hour12: false,
             })
 
             return (
@@ -239,8 +241,8 @@ export default function TicketsPage() {
                     </dd>
                   </div>
                   <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
-                    <ResendConfirmationButton 
-                      ticketIds={ticket.tickets} 
+                    <ResendConfirmationButton
+                      ticketIds={ticket.tickets}
                       className="w-full"
                     />
                   </div>

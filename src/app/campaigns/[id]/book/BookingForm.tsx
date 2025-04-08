@@ -236,7 +236,7 @@ export default function BookingForm({
       const option = menuItems
         .find((item) => item.id === menuItemId)
         ?.options.find((opt) => opt.id === optionId)
-      
+
       if (option?.minChoices === 0) {
         // For radio buttons, 'none' is a valid selection
         if (choiceIds.length === 0 || choiceIds[0] === 'none') {
@@ -273,14 +273,15 @@ export default function BookingForm({
             length: selection.quantity,
           }).every((_, index) => {
             const selectedChoices = selection.options[option.id]?.[index] || []
-            
+
             // For radio buttons (minChoices === 0), require either 'none' or a valid choice
             if (option.minChoices === 0) {
-              const hasValidSelection = selectedChoices.length === 1 || 
-                (selectedChoices.length === 0 && option.choices.length === 1);
-              return hasValidSelection;
+              const hasValidSelection =
+                selectedChoices.length === 1 ||
+                (selectedChoices.length === 0 && option.choices.length === 1)
+              return hasValidSelection
             }
-            
+
             // For required selections (minChoices > 0)
             return (
               selectedChoices.length >= option.minChoices &&
@@ -294,8 +295,8 @@ export default function BookingForm({
               ? option.minChoices === 0
                 ? `Please select an option for ${option.name.toLowerCase()}`
                 : option.minChoices === option.maxChoices
-                ? `Please select exactly ${option.minChoices} ${option.name.toLowerCase()} for each item`
-                : `Please select between ${option.minChoices} and ${option.maxChoices} ${option.name.toLowerCase()} for each item`
+                  ? `Please select exactly ${option.minChoices} ${option.name.toLowerCase()} for each item`
+                  : `Please select between ${option.minChoices} and ${option.maxChoices} ${option.name.toLowerCase()} for each item`
               : null,
           }
 
@@ -359,7 +360,9 @@ export default function BookingForm({
 
       // For test campaigns, redirect to success page
       if (data.clientSecret === 'test_mode') {
-        router.push(`/campaigns/${campaignId}/success?ticketIds=${data.ticketIds.join(',')}`)
+        router.push(
+          `/campaigns/${campaignId}/success?ticketIds=${data.ticketIds.join(',')}`
+        )
       } else {
         // For real campaigns, redirect to payment page
         router.push(
@@ -425,7 +428,9 @@ export default function BookingForm({
                 onChange={(e) => {
                   const value = parseInt(e.target.value)
                   if (value > maxTickets) {
-                    setError(`Maximum ${maxTickets} tickets allowed per booking`)
+                    setError(
+                      `Maximum ${maxTickets} tickets allowed per booking`
+                    )
                   } else {
                     setError(null)
                   }

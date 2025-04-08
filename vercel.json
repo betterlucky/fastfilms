@@ -1,26 +1,16 @@
 {
   "version": 2,
-  "buildCommand": "npm install --production=false && npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install --production=false",
   "framework": "nextjs",
   "regions": ["lhr1"],
   "env": {
     "NEXTAUTH_URL": "https://fastfilms-staging.vercel.app"
   },
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }
   ],
-  "ignoreCommand": "npx next build --no-lint",
   "crons": [
     {
       "path": "/api/cron/send-guest-lists",

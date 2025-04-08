@@ -149,12 +149,12 @@ export async function getCampaigns(includeFeatured: boolean = false) {
       status: 'ACTIVE',
       deadlineDate: {
         gt: new Date(),
-      }
+      },
     },
     orderBy: [
       {
         screeningDate: 'asc',
-      }
+      },
     ],
     select: {
       id: true,

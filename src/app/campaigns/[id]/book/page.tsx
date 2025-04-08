@@ -83,7 +83,7 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                 <div className="space-y-4">
                   <div className="relative">
                     {campaign.isTest && (
-                      <div className="absolute -right-[4.5rem] top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
+                      <div className="absolute right-[calc(100%-4.5rem)] top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
                         TEST CAMPAIGN
                       </div>
                     )}

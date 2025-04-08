@@ -72,9 +72,7 @@ export const columns: ColumnDef<
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/campaigns/${campaign.id}`}>
-              Book
-            </Link>
+            <Link href={`/campaigns/${campaign.id}`}>Book</Link>
           </Button>
           <Button
             variant="destructive"

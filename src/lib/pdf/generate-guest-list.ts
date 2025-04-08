@@ -9,12 +9,14 @@ interface GuestListData {
   }
   tickets: (Ticket & {
     user: Pick<User, 'name' | 'email'>
-    purchase: (Purchase & {
-      orders: {
-        id: string
-        quantity: number
-      }[]
-    }) | null
+    purchase:
+      | (Purchase & {
+          orders: {
+            id: string
+            quantity: number
+          }[]
+        })
+      | null
   })[]
 }
 

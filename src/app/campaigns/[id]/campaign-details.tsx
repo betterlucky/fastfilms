@@ -99,7 +99,7 @@ export default function CampaignDetails({
                   <div>
                     <div className="relative">
                       {campaign.isTest && (
-                        <div className="absolute -right-[4.5rem] top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
+                        <div className="absolute right-[calc(100%-4.5rem)] top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
                           TEST CAMPAIGN
                         </div>
                       )}
@@ -136,29 +136,51 @@ export default function CampaignDetails({
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Funding Progress</span>
-                          <span>£{Number(campaign.currentFunding).toFixed(2)} of £{Number(campaign.fundingTarget).toFixed(2)}</span>
+                          <span>
+                            £{Number(campaign.currentFunding).toFixed(2)} of £
+                            {Number(campaign.fundingTarget).toFixed(2)}
+                          </span>
                         </div>
                         <div className="space-y-1">
-                          <Progress 
-                            value={(Number(campaign.currentFunding) / Number(campaign.fundingTarget)) * 100} 
-                            className={cn("h-2", {
-                              "bg-green-100": Number(campaign.currentFunding) >= Number(campaign.fundingTarget) && campaign.currentTickets < campaign.ticketCap,
-                              "bg-red-100": campaign.currentTickets >= campaign.ticketCap
+                          <Progress
+                            value={
+                              (Number(campaign.currentFunding) /
+                                Number(campaign.fundingTarget)) *
+                              100
+                            }
+                            className={cn('h-2', {
+                              'bg-green-100':
+                                Number(campaign.currentFunding) >=
+                                  Number(campaign.fundingTarget) &&
+                                campaign.currentTickets < campaign.ticketCap,
+                              'bg-red-100':
+                                campaign.currentTickets >= campaign.ticketCap,
                             })}
                             indicatorClassName={cn({
-                              "bg-green-500": Number(campaign.currentFunding) >= Number(campaign.fundingTarget) && campaign.currentTickets < campaign.ticketCap,
-                              "bg-red-500": campaign.currentTickets >= campaign.ticketCap,
-                              "bg-primary": Number(campaign.currentFunding) < Number(campaign.fundingTarget)
+                              'bg-green-500':
+                                Number(campaign.currentFunding) >=
+                                  Number(campaign.fundingTarget) &&
+                                campaign.currentTickets < campaign.ticketCap,
+                              'bg-red-500':
+                                campaign.currentTickets >= campaign.ticketCap,
+                              'bg-primary':
+                                Number(campaign.currentFunding) <
+                                Number(campaign.fundingTarget),
                             })}
                           />
-                          {Number(campaign.currentFunding) >= Number(campaign.fundingTarget) && (
-                            <p className={cn("text-sm font-medium", {
-                              "text-green-600": campaign.currentTickets < campaign.ticketCap,
-                              "text-red-600": campaign.currentTickets >= campaign.ticketCap
-                            })}>
-                              {campaign.currentTickets >= campaign.ticketCap 
-                                ? "Screening SOLD OUT!" 
-                                : "Screening funded! Tickets still available"}
+                          {Number(campaign.currentFunding) >=
+                            Number(campaign.fundingTarget) && (
+                            <p
+                              className={cn('text-sm font-medium', {
+                                'text-green-600':
+                                  campaign.currentTickets < campaign.ticketCap,
+                                'text-red-600':
+                                  campaign.currentTickets >= campaign.ticketCap,
+                              })}
+                            >
+                              {campaign.currentTickets >= campaign.ticketCap
+                                ? 'Screening SOLD OUT!'
+                                : 'Screening funded! Tickets still available'}
                             </p>
                           )}
                         </div>
@@ -167,24 +189,38 @@ export default function CampaignDetails({
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center text-gray-500">
                           <CalendarIcon className="mr-2 size-4" />
-                          <span>Screening: {new Date(campaign.screeningDate).toLocaleDateString('en-GB', {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long'
-                          })}</span>
+                          <span>
+                            Screening:{' '}
+                            {new Date(
+                              campaign.screeningDate
+                            ).toLocaleDateString('en-GB', {
+                              weekday: 'long',
+                              day: 'numeric',
+                              month: 'long',
+                            })}
+                          </span>
                         </div>
                         <div className="flex items-center text-gray-500">
                           <Clock className="mr-2 size-4" />
-                          <span>Deadline: {new Date(campaign.deadlineDate).toLocaleDateString('en-GB', {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long'
-                          })}</span>
+                          <span>
+                            Deadline:{' '}
+                            {new Date(campaign.deadlineDate).toLocaleDateString(
+                              'en-GB',
+                              {
+                                weekday: 'long',
+                                day: 'numeric',
+                                month: 'long',
+                              }
+                            )}
+                          </span>
                         </div>
                         <div className="flex items-center text-gray-500">
                           <Users className="mr-2 size-4" />
                           {campaign.screen ? (
-                            <span>{campaign.ticketCap - campaign.currentTickets} tickets remaining</span>
+                            <span>
+                              {campaign.ticketCap - campaign.currentTickets}{' '}
+                              tickets remaining
+                            </span>
                           ) : (
                             <span>{campaign.currentTickets} tickets sold</span>
                           )}
@@ -199,9 +235,11 @@ export default function CampaignDetails({
                   {campaign.posterPath && (
                     <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
                       <Image
-                        src={campaign.posterPath.startsWith('http') 
-                          ? campaign.posterPath 
-                          : `https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
+                        src={
+                          campaign.posterPath.startsWith('http')
+                            ? campaign.posterPath
+                            : `https://image.tmdb.org/t/p/w500${campaign.posterPath}`
+                        }
                         alt={campaign.movieTitle}
                         fill
                         priority

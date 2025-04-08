@@ -17,8 +17,8 @@ export async function DELETE(
     const menuItem = await prisma.menuItem.findUnique({
       where: { id: params.menuItemId },
       include: {
-        campaigns: true
-      }
+        campaigns: true,
+      },
     })
 
     if (!menuItem || menuItem.venueId !== params.id) {
@@ -33,11 +33,11 @@ export async function DELETE(
       where: {
         menuItems: {
           some: {
-            menuItemId: params.menuItemId
-          }
+            menuItemId: params.menuItemId,
+          },
         },
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     })
 
     if (activeCampaigns > 0) {
@@ -56,29 +56,29 @@ export async function DELETE(
       // Delete campaign menu item references
       prisma.campaignMenuItem.deleteMany({
         where: {
-          menuItemId: params.menuItemId
-        }
+          menuItemId: params.menuItemId,
+        },
       }),
       // Delete menu item option choices
       prisma.menuItemOptionChoice.deleteMany({
         where: {
           option: {
-            menuItemId: params.menuItemId
-          }
-        }
+            menuItemId: params.menuItemId,
+          },
+        },
       }),
       // Delete menu item options
       prisma.menuItemOption.deleteMany({
         where: {
-          menuItemId: params.menuItemId
-        }
+          menuItemId: params.menuItemId,
+        },
       }),
       // Finally delete the menu item
       prisma.menuItem.delete({
         where: {
-          id: params.menuItemId
-        }
-      })
+          id: params.menuItemId,
+        },
+      }),
     ])
 
     return NextResponse.json({ success: true })
@@ -89,4 +89,4 @@ export async function DELETE(
       { status: 500 }
     )
   }
-} 
+}

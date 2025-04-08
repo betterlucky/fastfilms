@@ -39,7 +39,7 @@ export async function GET() {
     })
 
     // Transform the data to combine date and time
-    const transformedTickets = tickets.map(ticket => {
+    const transformedTickets = tickets.map((ticket) => {
       const screeningDate = new Date(ticket.campaign.screeningDate)
       const [hours, minutes] = ticket.campaign.screeningTime.split(':')
       screeningDate.setHours(parseInt(hours), parseInt(minutes))
@@ -47,7 +47,7 @@ export async function GET() {
       return {
         ...ticket,
         screeningDate: screeningDate.toISOString(),
-        stripePaymentIntentId: ticket.purchase?.stripePaymentIntentId || null
+        stripePaymentIntentId: ticket.purchase?.stripePaymentIntentId || null,
       }
     })
 
@@ -96,9 +96,11 @@ export async function POST(request: Request) {
         data: {
           campaignId,
           userId: session.user.id,
-          status: campaign.isTest ? TicketStatus.CONFIRMED : TicketStatus.PENDING,
+          status: campaign.isTest
+            ? TicketStatus.CONFIRMED
+            : TicketStatus.PENDING,
           totalAmount: 0, // Set to 0 for test mode
-        }
+        },
       })
 
       // Get the created tickets and link them to the purchase
@@ -106,7 +108,9 @@ export async function POST(request: Request) {
         where: {
           campaignId,
           userId: session.user.id,
-          status: campaign.isTest ? TicketStatus.CONFIRMED : TicketStatus.PENDING,
+          status: campaign.isTest
+            ? TicketStatus.CONFIRMED
+            : TicketStatus.PENDING,
         },
         orderBy: {
           createdAt: 'desc',
@@ -118,12 +122,12 @@ export async function POST(request: Request) {
       await prisma.ticket.updateMany({
         where: {
           id: {
-            in: createdTickets.map(t => t.id)
-          }
+            in: createdTickets.map((t) => t.id),
+          },
         },
         data: {
-          purchaseId: purchase.id
-        }
+          purchaseId: purchase.id,
+        },
       })
 
       // Create orders linked to the purchase

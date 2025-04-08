@@ -56,8 +56,8 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
         </h1>
         <p className="mx-auto max-w-3xl text-xl text-gray-600">
           Support and attend community film screenings across Cornwall. Book
-          tickets, pre-order food and drinks, and help bring the films you most want to see to your
-          local cinema.
+          tickets, pre-order food and drinks, and help bring the films you most
+          want to see to your local cinema.
         </p>
       </section>
 
@@ -77,14 +77,17 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
             <CardContent className="space-y-4">
               <div className="relative">
                 {campaign.isTest && (
-                  <div className="absolute -right-[4.5rem] top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
+                  <div className="absolute right-[calc(100%-4.5rem)] top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
                     TEST CAMPAIGN
                   </div>
                 )}
-                {(campaign.posterUrl || campaign.posterPath) ? (
+                {campaign.posterUrl || campaign.posterPath ? (
                   <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
                     <Image
-                      src={campaign.posterUrl || `https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
+                      src={
+                        campaign.posterUrl ||
+                        `https://image.tmdb.org/t/p/w500${campaign.posterPath}`
+                      }
                       alt={campaign.movieTitle}
                       fill
                       className="object-cover"
@@ -120,7 +123,10 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                       Target: £{campaign.fundingTarget.toFixed(2)}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {Math.round((campaign.currentFunding / campaign.fundingTarget) * 100)}% funded
+                      {Math.round(
+                        (campaign.currentFunding / campaign.fundingTarget) * 100
+                      )}
+                      % funded
                     </p>
                   </div>
                   <div className="space-y-1">
@@ -128,7 +134,8 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                       <div
                         className={`h-2.5 rounded-full ${
                           campaign.currentFunding >= campaign.fundingTarget
-                            ? campaign.hasScreenAllocated && campaign.currentTickets >= campaign.ticketCap
+                            ? campaign.hasScreenAllocated &&
+                              campaign.currentTickets >= campaign.ticketCap
                               ? 'bg-red-500'
                               : 'bg-green-500'
                             : 'bg-primary'
@@ -141,12 +148,14 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                     {campaign.currentFunding >= campaign.fundingTarget && (
                       <p
                         className={`text-sm font-medium ${
-                          campaign.hasScreenAllocated && campaign.currentTickets >= campaign.ticketCap
+                          campaign.hasScreenAllocated &&
+                          campaign.currentTickets >= campaign.ticketCap
                             ? 'text-red-500'
                             : 'text-green-500'
                         }`}
                       >
-                        {campaign.hasScreenAllocated && campaign.currentTickets >= campaign.ticketCap
+                        {campaign.hasScreenAllocated &&
+                        campaign.currentTickets >= campaign.ticketCap
                           ? 'SOLD OUT'
                           : 'Screening funded, tickets available'}
                       </p>
@@ -203,7 +212,8 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
           <CardContent>
             <p>
               Affordable ticket pricing with a minimum of £5 plus a small
-              transaction fee. Help make cinema accessible to all by Paying It Forward.
+              transaction fee. Help make cinema accessible to all by Paying It
+              Forward.
             </p>
           </CardContent>
         </Card>
@@ -213,7 +223,8 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
       <section className="space-y-4 text-center">
         <h2 className="text-3xl font-bold">Want to See More?</h2>
         <p className="mx-auto max-w-2xl text-xl text-gray-600">
-          Browse our upcoming campaigns and help bring more classic cinema to your community.
+          Browse our upcoming campaigns and help bring more classic cinema to
+          your community.
         </p>
         <Button
           variant="outline"

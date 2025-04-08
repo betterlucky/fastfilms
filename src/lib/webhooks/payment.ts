@@ -1,4 +1,9 @@
-import { PrismaClient, Prisma, PurchaseStatus, TicketStatus } from '@prisma/client'
+import {
+  PrismaClient,
+  Prisma,
+  PurchaseStatus,
+  TicketStatus,
+} from '@prisma/client'
 import { sendEmail } from '@/lib/email'
 import { prisma } from '@/lib/db'
 import { Stripe } from 'stripe'
@@ -32,7 +37,7 @@ export async function handlePaymentSuccess(
         where: {
           stripePaymentIntentId: paymentIntentId,
         },
-      });
+      })
 
       if (existingPurchase) {
         // If purchase exists, update it
@@ -40,9 +45,9 @@ export async function handlePaymentSuccess(
           where: { id: existingPurchase.id },
           data: {
             status: PurchaseStatus.CONFIRMED,
-            totalAmount: amount
-          }
-        });
+            totalAmount: amount,
+          },
+        })
       } else {
         // If no purchase exists, create a new one
         await tx.purchase.create({
@@ -53,19 +58,19 @@ export async function handlePaymentSuccess(
             status: PurchaseStatus.CONFIRMED,
             totalAmount: amount,
             tickets: {
-              connect: ticketIds.map(id => ({ id }))
-            }
-          }
-        });
+              connect: ticketIds.map((id) => ({ id })),
+            },
+          },
+        })
       }
 
       // Update ticket status to confirmed
       await tx.ticket.updateMany({
         where: { id: { in: ticketIds } },
-        data: { 
-          status: TicketStatus.CONFIRMED
+        data: {
+          status: TicketStatus.CONFIRMED,
         },
-      });
+      })
 
       // Update campaign ticket count
       await tx.campaign.update({
@@ -75,8 +80,8 @@ export async function handlePaymentSuccess(
             increment: ticketIds.length,
           },
         },
-      });
-    });
+      })
+    })
 
     // Get tickets with orders for the email
     const tickets = await prisma.ticket.findMany({
@@ -149,19 +154,22 @@ export async function handlePaymentSuccess(
       screeningDate: tickets[0].campaign.screeningDate,
       ticketQuantity: tickets.length,
       totalAmount: amount / 100, // Convert from cents to pounds
-      regularTickets: tickets.filter(t => t.status === TicketStatus.CONFIRMED).length,
-      pifTickets: tickets.filter(t => t.status === TicketStatus.PAY_IT_FORWARD).length,
-      foodOrders: tickets.flatMap(ticket => 
-        (ticket.purchase?.orders || []).map(order => ({
+      regularTickets: tickets.filter((t) => t.status === TicketStatus.CONFIRMED)
+        .length,
+      pifTickets: tickets.filter(
+        (t) => t.status === TicketStatus.PAY_IT_FORWARD
+      ).length,
+      foodOrders: tickets.flatMap((ticket) =>
+        (ticket.purchase?.orders || []).map((order) => ({
           name: order.menuItem.name,
           quantity: 1,
           price: Number(order.menuItem.price) / 100,
-          options: order.choices.map(choice => ({
+          options: order.choices.map((choice) => ({
             name: choice.option.name,
-            choice: choice.selectedChoice.name
-          }))
+            choice: choice.selectedChoice.name,
+          })),
         }))
-      )
+      ),
     }
 
     // Generate and send confirmation email to customer

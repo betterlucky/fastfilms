@@ -17,6 +17,18 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { Campaign, Venue, Charity, MenuItem, Screen } from '@prisma/client'
 import { Loader2 } from 'lucide-react'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { toast } from 'sonner'
 
 interface CampaignEditFormProps {
   campaign: Campaign & {
@@ -36,6 +48,16 @@ interface CampaignEditFormProps {
   charities: Charity[]
 }
 
+const formSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  movieTitle: z.string().min(1, 'Movie title is required'),
+  description: z.string().min(1, 'Description is required'),
+  fundingTarget: z.number().min(0, 'Funding target must be positive'),
+  ticketCap: z.number().min(0, 'Ticket cap must be positive'),
+  screeningDate: z.date(),
+  deadlineDate: z.date(),
+})
+
 export function CampaignEditForm({
   campaign,
   venues,
@@ -54,349 +76,224 @@ export function CampaignEditForm({
 
   const currentVenue = venues.find((v) => v.id === selectedVenue)
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (isSubmitting) return
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: campaign.title,
+      movieTitle: campaign.movieTitle,
+      description: campaign.description,
+      fundingTarget: Number(campaign.fundingTarget),
+      ticketCap: campaign.ticketCap,
+      screeningDate: new Date(campaign.screeningDate),
+      deadlineDate: new Date(campaign.deadlineDate),
+    },
+  })
 
-    setIsSubmitting(true)
-    const formData = new FormData(event.currentTarget)
-
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setIsSubmitting(true)
+      const formData = new FormData()
+
+      // Add form values
+      Object.entries(values).forEach(([key, value]) => {
+        if (value instanceof Date) {
+          formData.append(key, value.toISOString().slice(0, 16))
+        } else {
+          formData.append(key, value.toString())
+        }
+      })
+
+      // Add additional form data
+      formData.append('customBlurb', '')
+      formData.append('posterPath', '')
+      formData.append('venueId', selectedVenue)
+      formData.append('screenId', selectedScreen || 'unassign')
+      formData.append('screeningTime', '')
+      formData.append('charityId', campaign.charityId || 'none')
+      formData.append(
+        'menuItemIds',
+        JSON.stringify(campaign.menuItems.map((item) => item.menuItem.id))
+      )
+      formData.append('isFeatured', 'on')
+
       const response = await fetch(`/api/admin/campaigns/${campaign.id}`, {
         method: 'PUT',
-        body: JSON.stringify({
-          title: formData.get('title'),
-          description: formData.get('description'),
-          movieTitle: formData.get('movieTitle'),
-          customBlurb: formData.get('customBlurb'),
-          posterPath: formData.get('posterPath'),
-          venueId: formData.get('venueId'),
-          screenId:
-            formData.get('screenId') === 'unassign'
-              ? null
-              : formData.get('screenId'),
-          screeningDate: screeningDate,
-          screeningTime: formData.get('screeningTime'),
-          deadlineDate: deadlineDate,
-          ticketCap: Number(formData.get('ticketCap')),
-          fundingTarget: Number(formData.get('fundingTarget')),
-          charityId:
-            formData.get('charityId') === 'none'
-              ? null
-              : formData.get('charityId'),
-          menuItemIds: formData.getAll('menuItemIds[]'),
-          isFeatured: formData.get('isFeatured') === 'on',
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: formData,
       })
 
       if (!response.ok) {
         throw new Error('Failed to update campaign')
       }
 
-      router.refresh()
+      toast.success('Campaign updated successfully')
       router.push('/admin/campaigns')
+      router.refresh()
     } catch (error) {
       console.error('Error updating campaign:', error)
-      // TODO: Show error message to user
+      toast.error('Failed to update campaign')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-8">
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="title" className="block font-medium text-sm">
-            Campaign Title
-          </label>
-          <Input
-            id="title"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
             name="title"
-            defaultValue={campaign.title}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Campaign Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter campaign title" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block font-medium text-sm">
-            Description
-          </label>
-          <Textarea
-            id="description"
-            name="description"
-            defaultValue={campaign.description}
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="movieTitle" className="block font-medium text-sm">
-            Movie Title
-          </label>
-          <Input
-            id="movieTitle"
+          <FormField
+            control={form.control}
             name="movieTitle"
-            defaultValue={campaign.movieTitle}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Movie Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter movie title" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div>
-          <label htmlFor="customBlurb" className="block font-medium text-sm">
-            Custom Blurb
-          </label>
-          <Textarea
-            id="customBlurb"
-            name="customBlurb"
-            defaultValue={campaign.customBlurb || ''}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter campaign description"
+                    className="h-32 resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div>
-          <label htmlFor="posterPath" className="block font-medium text-sm">
-            Poster Image URL
-          </label>
-          <div className="space-y-2">
-            <Input
-              id="posterPath"
-              name="posterPath"
-              defaultValue={campaign.posterPath || ''}
-              placeholder="TMDB path (e.g. /1H1y9ZiqNFaLgQiRDDZLA55PviW.jpg) or full URL"
-            />
-            <p className="text-sm text-muted-foreground">
-              {campaign.posterPath ? (
-                campaign.posterPath.startsWith('http') ? (
-                  <>Current poster: <code>{campaign.posterPath}</code></>
-                ) : (
-                  <>Current poster: <code>https://image.tmdb.org/t/p/w500{campaign.posterPath}</code></>
-                )
-              ) : (
-                'No poster image set'
-              )}
-            </p>
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="venue" className="block font-medium text-sm">
-            Venue
-          </label>
-          <Select
-            name="venueId"
-            defaultValue={selectedVenue}
-            onValueChange={setSelectedVenue}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select a venue" />
-            </SelectTrigger>
-            <SelectContent>
-              {venues.map((venue) => (
-                <SelectItem key={venue.id} value={venue.id}>
-                  {venue.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <label htmlFor="screen" className="block font-medium text-sm">
-            Screen
-          </label>
-          <Select
-            name="screenId"
-            defaultValue={selectedScreen || 'unassign'}
-            onValueChange={setSelectedScreen}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select a screen" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="unassign">Unassign Screen</SelectItem>
-              {currentVenue?.screens.map((screen) => (
-                <SelectItem key={screen.id} value={screen.id}>
-                  {screen.name} ({screen.capacity} seats)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <label htmlFor="screeningDate" className="block font-medium text-sm">
-            Screening Date & Time
-          </label>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <DatePicker
-                selected={screeningDate}
-                onChange={(date: Date) => setScreeningDate(date)}
-                dateFormat="dd/MM/yyyy"
-                className="w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholderText="Select date (DD/MM/YYYY)"
-                required
-              />
-            </div>
-            <div className="flex-1">
-              <Input
-                type="time"
-                name="screeningTime"
-                defaultValue={campaign.screeningTime}
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="deadlineDate" className="block font-medium text-sm">
-            Campaign Deadline
-          </label>
-          <DatePicker
-            selected={deadlineDate}
-            onChange={(date: Date) => setDeadlineDate(date)}
-            dateFormat="dd/MM/yyyy"
-            className="w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholderText="Select date (DD/MM/YYYY)"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="ticketCap" className="block font-medium text-sm">
-            Ticket Cap
-          </label>
-          <Input
-            type="number"
-            id="ticketCap"
-            name="ticketCap"
-            defaultValue={campaign.ticketCap}
-            min={0}
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="fundingTarget" className="block font-medium text-sm">
-            Funding Target (£)
-          </label>
-          <Input
-            type="number"
-            id="fundingTarget"
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
             name="fundingTarget"
-            defaultValue={Number(campaign.fundingTarget)}
-            min={0}
-            step={0.01}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Funding Target (£)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter funding target"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="ticketCap"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ticket Cap</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter ticket cap"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div>
-          <label htmlFor="charity" className="block font-medium text-sm">
-            Charity
-          </label>
-          <Select name="charityId" defaultValue={campaign.charityId || 'none'}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a charity" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No charity</SelectItem>
-              {charities.map((charity) => (
-                <SelectItem key={charity.id} value={charity.id}>
-                  {charity.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <label className="mb-2 block font-medium text-sm">Menu Items</label>
-          {currentVenue?.menuItems.length === 0 ? (
-            <p className="text-sm text-gray-500">
-              No menu items available for this venue.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {Object.entries(
-                currentVenue?.menuItems.reduce(
-                  (acc, item) => {
-                    if (!acc[item.category]) {
-                      acc[item.category] = []
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="screeningDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Screening Date</FormLabel>
+                <FormControl>
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    value={
+                      field.value
+                        ? new Date(field.value).toISOString().slice(0, 16)
+                        : ''
                     }
-                    acc[item.category].push(item)
-                    return acc
-                  },
-                  {} as Record<string, MenuItem[]>
-                ) || {}
-              ).map(([category, items]) => (
-                <div key={category} className="space-y-2">
-                  <h3 className="font-medium">{category}</h3>
-                  <div className="grid gap-2">
-                    {items.map((item) => (
-                      <div key={item.id} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`menuItem-${item.id}`}
-                          name="menuItemIds[]"
-                          value={item.id}
-                          defaultChecked={campaign.menuItems.some(
-                            (mi) => mi.menuItem.id === item.id
-                          )}
-                        />
-                        <label
-                          htmlFor={`menuItem-${item.id}`}
-                          className="flex-1 text-sm"
-                        >
-                          {item.name} - £{Number(item.price).toFixed(2)}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="isFeatured"
-            name="isFeatured"
-            defaultChecked={campaign.isFeatured}
+                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <label
-            htmlFor="isFeatured"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Feature this campaign
-          </label>
+          <FormField
+            control={form.control}
+            name="deadlineDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Deadline Date</FormLabel>
+                <FormControl>
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    value={
+                      field.value
+                        ? new Date(field.value).toISOString().slice(0, 16)
+                        : ''
+                    }
+                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-      </div>
 
-      <div className="flex items-center justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          className="w-32"
-        >
-          Cancel
-        </Button>
-        <Button type="submit" className="w-32" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Save"
-          )}
-        </Button>
-      </div>
-    </form>
+        <div className="flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push('/admin/campaigns')}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   )
 }

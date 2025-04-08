@@ -10,7 +10,10 @@ interface ResendConfirmationButtonProps {
   className?: string
 }
 
-export function ResendConfirmationButton({ ticketIds, className }: ResendConfirmationButtonProps) {
+export function ResendConfirmationButton({
+  ticketIds,
+  className,
+}: ResendConfirmationButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -18,7 +21,7 @@ export function ResendConfirmationButton({ ticketIds, className }: ResendConfirm
     setIsLoading(true)
     try {
       const responses = await Promise.all(
-        ticketIds.map(ticketId =>
+        ticketIds.map((ticketId) =>
           fetch(`/api/tickets/${ticketId}/resend-confirmation`, {
             method: 'POST',
           })
@@ -29,7 +32,10 @@ export function ResendConfirmationButton({ ticketIds, className }: ResendConfirm
         responses.map(async (response, index) => {
           if (!response.ok) {
             const data = await response.json()
-            return { ticketId: ticketIds[index], error: data.error || 'Failed to resend confirmation' }
+            return {
+              ticketId: ticketIds[index],
+              error: data.error || 'Failed to resend confirmation',
+            }
           }
           return null
         })
@@ -39,7 +45,7 @@ export function ResendConfirmationButton({ ticketIds, className }: ResendConfirm
       if (failedTickets.length > 0) {
         throw new Error(
           `Failed to resend confirmation for tickets: ${failedTickets
-            .map(t => t?.ticketId)
+            .map((t) => t?.ticketId)
             .join(', ')}`
         )
       }
@@ -51,7 +57,10 @@ export function ResendConfirmationButton({ ticketIds, className }: ResendConfirm
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to resend confirmation',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to resend confirmation',
         variant: 'destructive',
       })
     } finally {
@@ -71,4 +80,4 @@ export function ResendConfirmationButton({ ticketIds, className }: ResendConfirm
       {isLoading ? 'Sending...' : 'Resend Confirmation'}
     </Button>
   )
-} 
+}

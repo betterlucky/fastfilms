@@ -65,10 +65,10 @@ export async function POST(
         purchase: {
           select: {
             id: true,
-            stripePaymentIntentId: true
-          }
+            stripePaymentIntentId: true,
+          },
         },
-      }
+      },
     })
 
     if (!targetTicket) {
@@ -76,15 +76,16 @@ export async function POST(
     }
 
     // Get all tickets from the same transaction
-    const tickets = await prisma.ticket.findMany({
+    const tickets = (await prisma.ticket.findMany({
       where: {
         OR: [
           // If it's a Stripe transaction, get all tickets with same payment intent
           {
             purchase: {
-              stripePaymentIntentId: targetTicket.purchase.stripePaymentIntentId,
-              NOT: { stripePaymentIntentId: null }
-            }
+              stripePaymentIntentId:
+                targetTicket.purchase.stripePaymentIntentId,
+              NOT: { stripePaymentIntentId: null },
+            },
           },
           // If it's a test transaction, get tickets created at the same time
           {
@@ -94,12 +95,12 @@ export async function POST(
               {
                 createdAt: {
                   gte: new Date(targetTicket.createdAt.getTime() - 1000), // Within 1 second
-                  lte: new Date(targetTicket.createdAt.getTime() + 1000)
-                }
-              }
-            ]
-          }
-        ]
+                  lte: new Date(targetTicket.createdAt.getTime() + 1000),
+                },
+              },
+            ],
+          },
+        ],
       },
       include: {
         campaign: {
@@ -108,9 +109,9 @@ export async function POST(
               select: {
                 id: true,
                 name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         purchase: {
           include: {
@@ -120,21 +121,21 @@ export async function POST(
                 choices: {
                   include: {
                     option: { select: { name: true } },
-                    selectedChoice: { select: { name: true } }
-                  }
-                }
-              }
-            }
-          }
+                    selectedChoice: { select: { name: true } },
+                  },
+                },
+              },
+            },
+          },
         },
         user: {
           select: {
             name: true,
-            email: true
-          }
-        }
-      }
-    }) as TicketWithRelations[]
+            email: true,
+          },
+        },
+      },
+    })) as TicketWithRelations[]
 
     if (!tickets.length) {
       return NextResponse.json(
@@ -144,7 +145,10 @@ export async function POST(
     }
 
     // Check if user is authorized (either admin or ticket owner)
-    if (session.user.role !== 'ADMIN' && tickets[0]?.userId !== session.user.id) {
+    if (
+      session.user.role !== 'ADMIN' &&
+      tickets[0]?.userId !== session.user.id
+    ) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -158,37 +162,48 @@ export async function POST(
     if (session.user.role !== 'ADMIN' && lastResend) {
       const timeSinceLastResend = Date.now() - lastResend.createdAt.getTime()
       if (timeSinceLastResend < RESEND_COOLDOWN) {
-        const remainingMinutes = Math.ceil((RESEND_COOLDOWN - timeSinceLastResend) / (60 * 1000))
+        const remainingMinutes = Math.ceil(
+          (RESEND_COOLDOWN - timeSinceLastResend) / (60 * 1000)
+        )
         return NextResponse.json(
-          { error: `Please wait ${remainingMinutes} minutes before requesting another resend` },
+          {
+            error: `Please wait ${remainingMinutes} minutes before requesting another resend`,
+          },
           { status: 429 }
         )
       }
     }
 
     // Calculate total amount including tickets and food
-    const ticketsTotal = tickets.reduce((sum, t) => sum + Number(t.pricePaid), 0)
-    const foodTotal = tickets.reduce((sum, t) => 
-      sum + (t.purchase?.orders || []).reduce((orderSum, o) => 
-        orderSum + (Number(o.menuItem.price) * o.quantity), 0
-      ), 0
+    const ticketsTotal = tickets.reduce(
+      (sum, t) => sum + Number(t.pricePaid),
+      0
+    )
+    const foodTotal = tickets.reduce(
+      (sum, t) =>
+        sum +
+        (t.purchase?.orders || []).reduce(
+          (orderSum, o) => orderSum + Number(o.menuItem.price) * o.quantity,
+          0
+        ),
+      0
     )
 
     // Group food orders by menu item
     const foodOrdersMap = new Map()
-    tickets.forEach(ticket => {
+    tickets.forEach((ticket) => {
       if (ticket.purchase) {
-        ticket.purchase.orders.forEach(order => {
+        ticket.purchase.orders.forEach((order) => {
           const key = order.menuItem.id
           if (!foodOrdersMap.has(key)) {
             foodOrdersMap.set(key, {
               name: order.menuItem.name,
               quantity: 0,
               price: Number(order.menuItem.price) / 100,
-              options: order.choices.map(choice => ({
+              options: order.choices.map((choice) => ({
                 name: choice.option.name,
-                choice: choice.selectedChoice.name
-              }))
+                choice: choice.selectedChoice.name,
+              })),
             })
           }
           const item = foodOrdersMap.get(key)
@@ -204,9 +219,9 @@ export async function POST(
       screeningDate: tickets[0].campaign.screeningDate,
       ticketQuantity: tickets.length,
       totalAmount: (ticketsTotal + foodTotal) / 100,
-      regularTickets: tickets.filter(t => t.status === 'CONFIRMED').length,
-      pifTickets: tickets.filter(t => t.status === 'PAY_IT_FORWARD').length,
-      foodOrders: Array.from(foodOrdersMap.values())
+      regularTickets: tickets.filter((t) => t.status === 'CONFIRMED').length,
+      pifTickets: tickets.filter((t) => t.status === 'PAY_IT_FORWARD').length,
+      foodOrders: Array.from(foodOrdersMap.values()),
     }
 
     // Ensure we have a valid email address
@@ -228,13 +243,15 @@ export async function POST(
 
     // Record the resend for all tickets in the group
     await prisma.ticketResend.createMany({
-      data: tickets.map(t => ({
+      data: tickets.map((t) => ({
         ticketId: t.id,
-        userId: session.user.id
-      }))
+        userId: session.user.id,
+      })),
     })
 
-    return NextResponse.json({ message: 'Confirmation email resent successfully' })
+    return NextResponse.json({
+      message: 'Confirmation email resent successfully',
+    })
   } catch (error) {
     console.error('Error resending confirmation email:', error)
     return NextResponse.json(
@@ -242,4 +259,4 @@ export async function POST(
       { status: 500 }
     )
   }
-} 
+}

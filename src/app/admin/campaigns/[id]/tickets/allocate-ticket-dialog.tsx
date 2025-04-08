@@ -86,9 +86,11 @@ export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
           Allocate
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogContent className="bg-white sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-gray-900">Allocate Pay It Forward Ticket</DialogTitle>
+          <DialogTitle className="text-gray-900">
+            Allocate Pay It Forward Ticket
+          </DialogTitle>
           <DialogDescription className="text-gray-600">
             Enter the email address of the user you want to allocate this ticket
             to. The ticket is for {ticket.campaign.movieTitle} on{' '}
@@ -112,7 +114,11 @@ export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isLoading} className="bg-primary text-white hover:bg-primary/90">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
               {isLoading ? 'Allocating...' : 'Allocate Ticket'}
             </Button>
           </DialogFooter>

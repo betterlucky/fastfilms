@@ -7,7 +7,11 @@ interface TimeInputProps {
   required?: boolean
 }
 
-export function TimeInput({ name, defaultValue = '7:00', required = false }: TimeInputProps) {
+export function TimeInput({
+  name,
+  defaultValue = '7:00',
+  required = false,
+}: TimeInputProps) {
   const [displayValue, setDisplayValue] = useState(() => {
     // Convert 24h time to 12h time for display
     if (!defaultValue) return ''
@@ -25,9 +29,11 @@ export function TimeInput({ name, defaultValue = '7:00', required = false }: Tim
     const [hours, minutes] = value.split(':')
     const hour = parseInt(hours)
     const formattedValue = `${hour.toString().padStart(2, '0')}:${minutes}`
-    
+
     // Update the hidden input that will be used for form submission
-    const hiddenInput = document.querySelector(`input[name="${name}"]`) as HTMLInputElement
+    const hiddenInput = document.querySelector(
+      `input[name="${name}"]`
+    ) as HTMLInputElement
     if (hiddenInput) {
       hiddenInput.value = formattedValue
     }
@@ -41,11 +47,15 @@ export function TimeInput({ name, defaultValue = '7:00', required = false }: Tim
         onChange={handleChange}
         required={required}
       />
-      <input 
-        type="hidden" 
-        name={name} 
-        value={displayValue.split(':')[0].padStart(2, '0') + ':' + displayValue.split(':')[1]}
+      <input
+        type="hidden"
+        name={name}
+        value={
+          displayValue.split(':')[0].padStart(2, '0') +
+          ':' +
+          displayValue.split(':')[1]
+        }
       />
     </div>
   )
-} 
+}

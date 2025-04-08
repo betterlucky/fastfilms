@@ -41,16 +41,16 @@ export default async function VenueMenuPage({
   }
 
   // Convert Decimal values to numbers
-  const serializedMenuItems = venue.menuItems.map(item => ({
+  const serializedMenuItems = venue.menuItems.map((item) => ({
     ...item,
     price: Number(item.price),
-    options: item.options.map(option => ({
+    options: item.options.map((option) => ({
       ...option,
-      choices: option.choices.map(choice => ({
+      choices: option.choices.map((choice) => ({
         ...choice,
-        priceAdjustment: Number(choice.priceAdjustment)
-      }))
-    }))
+        priceAdjustment: Number(choice.priceAdjustment),
+      })),
+    })),
   }))
 
   return (
