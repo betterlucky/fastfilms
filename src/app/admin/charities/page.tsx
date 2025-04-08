@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import Image from "next/image"
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import Image from 'next/image'
 
 interface Charity {
   id: string
@@ -49,9 +49,9 @@ export default function CharitiesPage() {
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="justify-between items-center flex mb-8">
-        <h1 className="font-bold text-3xl">Manage Charities</h1>
+    <div className="container mx-auto py-8">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Manage Charities</h1>
         <Link href="/admin/charities/new">
           <Button>Add New Charity</Button>
         </Link>
@@ -61,23 +61,27 @@ export default function CharitiesPage() {
         {charities.map((charity) => (
           <Card key={charity.id}>
             <CardHeader>
-              <div className="justify-between items-start flex">
+              <div className="flex items-start justify-between">
                 <div>
                   <CardTitle>{charity.name}</CardTitle>
                   {charity.description && (
                     <p className="mt-2 text-gray-500">{charity.description}</p>
                   )}
                 </div>
-                <div className="items-center flex gap-2">
-                  <Button 
+                <div className="flex items-center gap-2">
+                  <Button
                     variant="outline"
-                    onClick={() => router.push(`/admin/charities/${charity.id}/edit`)}
+                    onClick={() =>
+                      router.push(`/admin/charities/${charity.id}/edit`)
+                    }
                   >
                     Edit
                   </Button>
-                  <Button 
+                  <Button
                     variant="destructive"
-                    onClick={() => router.push(`/admin/charities/${charity.id}/delete`)}
+                    onClick={() =>
+                      router.push(`/admin/charities/${charity.id}/delete`)
+                    }
                   >
                     Delete
                   </Button>
@@ -85,7 +89,7 @@ export default function CharitiesPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="items-center flex gap-4">
+              <div className="flex items-center gap-4">
                 {charity.logoPath && (
                   <div className="relative size-20">
                     <Image
@@ -102,7 +106,7 @@ export default function CharitiesPage() {
                       href={charity.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:underline text-blue-600"
+                      className="text-blue-600 hover:underline"
                     >
                       Visit Website
                     </a>
@@ -115,4 +119,4 @@ export default function CharitiesPage() {
       </div>
     </div>
   )
-} 
+}

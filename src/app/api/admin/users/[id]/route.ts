@@ -1,9 +1,9 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { NextResponse } from "next/server"
-import { z } from "zod"
-import { UserRole } from "@prisma/client"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import { UserRole } from '@prisma/client'
 
 const userSchema = z.object({
   name: z.string().min(1),
@@ -18,7 +18,7 @@ export async function PATCH(
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    return new NextResponse("Unauthorized", { status: 401 })
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
@@ -38,10 +38,10 @@ export async function PATCH(
 
     return NextResponse.json(user)
   } catch (error) {
-    console.error("[USERS_PATCH]", error)
+    console.error('[USERS_PATCH]', error)
     if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid request data", { status: 400 })
+      return new NextResponse('Invalid request data', { status: 400 })
     }
-    return new NextResponse("Internal error", { status: 500 })
+    return new NextResponse('Internal error', { status: 500 })
   }
-} 
+}

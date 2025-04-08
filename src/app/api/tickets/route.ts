@@ -1,12 +1,12 @@
-import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
+import { getServerSession } from 'next-auth'
+import { NextResponse } from 'next/server'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json([])
     }
@@ -14,7 +14,7 @@ export async function GET() {
     const tickets = await prisma.ticket.findMany({
       where: {
         userId: session.user.id,
-        status: "CONFIRMED",
+        status: 'CONFIRMED',
       },
       include: {
         campaign: {
@@ -28,13 +28,13 @@ export async function GET() {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     })
 
     return NextResponse.json(tickets)
   } catch (error) {
-    console.error("Error fetching tickets:", error)
+    console.error('Error fetching tickets:', error)
     // Even on error, return empty array to show "no tickets" state
     return NextResponse.json([])
   }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 })
+      return new NextResponse('Unauthorized', { status: 401 })
     }
 
     const data = await request.json()
@@ -53,11 +53,11 @@ export async function POST(request: Request) {
     // Get campaign to check if it's in test mode
     const campaign = await prisma.campaign.findUnique({
       where: { id: campaignId },
-      select: { isTest: true }
+      select: { isTest: true },
     })
 
     if (!campaign) {
-      return new NextResponse("Campaign not found", { status: 404 })
+      return new NextResponse('Campaign not found', { status: 404 })
     }
 
     // Create tickets
@@ -66,8 +66,8 @@ export async function POST(request: Request) {
         campaignId,
         userId: session.user.id,
         pricePaid: 0, // Set price to 0 for test mode
-        status: campaign.isTest ? "CONFIRMED" : "PENDING"
-      })
+        status: campaign.isTest ? 'CONFIRMED' : 'PENDING',
+      }),
     })
 
     // Create menu item orders if provided
@@ -76,12 +76,12 @@ export async function POST(request: Request) {
         where: {
           campaignId,
           userId: session.user.id,
-          status: campaign.isTest ? "CONFIRMED" : "PENDING"
+          status: campaign.isTest ? 'CONFIRMED' : 'PENDING',
         },
         orderBy: {
-          createdAt: "desc"
+          createdAt: 'desc',
         },
-        take: quantity
+        take: quantity,
       })
 
       for (const ticket of createdTickets) {
@@ -90,8 +90,8 @@ export async function POST(request: Request) {
             data: {
               ticketId: ticket.id,
               menuItemId: item.id,
-              quantity: item.quantity
-            }
+              quantity: item.quantity,
+            },
           })
         }
       }
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(tickets)
   } catch (error) {
-    console.error("Error creating tickets:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    console.error('Error creating tickets:', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
-} 
+}

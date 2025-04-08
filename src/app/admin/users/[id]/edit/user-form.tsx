@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import { User } from "@prisma/client"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { User } from '@prisma/client'
 
 interface UserFormProps {
   user: User
@@ -22,7 +22,7 @@ export function UserForm({ user }: UserFormProps) {
 
     setIsSubmitting(true)
     const formData = new FormData(event.currentTarget)
-    
+
     try {
       const response = await fetch(`/api/admin/users/${user.id}`, {
         method: 'PATCH',
@@ -32,8 +32,8 @@ export function UserForm({ user }: UserFormProps) {
           isAdmin: isAdmin,
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       })
 
       if (!response.ok) {
@@ -54,17 +54,16 @@ export function UserForm({ user }: UserFormProps) {
     <form onSubmit={onSubmit} className="space-y-8">
       <div className="space-y-4">
         <div>
-          <label htmlFor="name" className="block font-medium text-sm">Name</label>
-          <Input
-            id="name"
-            name="name"
-            defaultValue={user.name}
-            required
-          />
+          <label htmlFor="name" className="block text-sm font-medium">
+            Name
+          </label>
+          <Input id="name" name="name" defaultValue={user.name} required />
         </div>
 
         <div>
-          <label htmlFor="email" className="block font-medium text-sm">Email</label>
+          <label htmlFor="email" className="block text-sm font-medium">
+            Email
+          </label>
           <Input
             id="email"
             name="email"
@@ -74,26 +73,23 @@ export function UserForm({ user }: UserFormProps) {
           />
         </div>
 
-        <div className="items-center flex space-x-2">
+        <div className="flex items-center space-x-2">
           <Checkbox
             id="isAdmin"
             checked={isAdmin}
             onCheckedChange={(checked) => setIsAdmin(checked === true)}
           />
-          <label
-            htmlFor="isAdmin"
-            className="font-medium text-sm leading-none"
-          >
+          <label htmlFor="isAdmin" className="text-sm font-medium leading-none">
             Admin User
           </label>
         </div>
       </div>
 
-      <div className="justify-end flex">
+      <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Changes"}
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
     </form>
   )
-} 
+}

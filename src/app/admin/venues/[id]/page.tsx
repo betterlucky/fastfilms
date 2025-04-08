@@ -1,12 +1,16 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { notFound } from "next/navigation"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
-export default async function VenuePage({ params }: { params: { id: string } }) {
+export default async function VenuePage({
+  params,
+}: {
+  params: { id: string }
+}) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
@@ -18,7 +22,7 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
     include: {
       screens: true,
       campaigns: true,
-    }
+    },
   })
 
   if (!venue) {
@@ -26,9 +30,9 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
   }
 
   return (
-    <div className="container py-6 mx-auto">
-      <div className="justify-between items-center flex mb-6">
-        <h1 className="font-bold text-3xl">{venue.name}</h1>
+    <div className="container mx-auto py-6">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">{venue.name}</h1>
         <Button asChild>
           <Link href={`/admin/venues/${venue.id}/edit`}>Edit Venue</Link>
         </Button>
@@ -44,7 +48,9 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
               <div>
                 <h3 className="font-semibold">Address</h3>
                 <p>{venue.address}</p>
-                <p>{venue.city}, {venue.postcode}</p>
+                <p>
+                  {venue.city}, {venue.postcode}
+                </p>
               </div>
               <div>
                 <h3 className="font-semibold">Contact</h3>
@@ -60,12 +66,15 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
             <CardTitle>Screens</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="justify-between items-center flex mb-4">
-              <p className="text-sm text-muted-foreground">
-                {venue.screens.length} screen{venue.screens.length !== 1 ? "s" : ""}
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-muted-foreground text-sm">
+                {venue.screens.length} screen
+                {venue.screens.length !== 1 ? 's' : ''}
               </p>
               <Button asChild>
-                <Link href={`/admin/venues/${venue.id}/screens`}>Manage Screens</Link>
+                <Link href={`/admin/venues/${venue.id}/screens`}>
+                  Manage Screens
+                </Link>
               </Button>
             </div>
           </CardContent>
@@ -76,12 +85,15 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
             <CardTitle>Campaigns</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="justify-between items-center flex mb-4">
-              <p className="text-sm text-muted-foreground">
-                {venue.campaigns.length} campaign{venue.campaigns.length !== 1 ? "s" : ""}
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-muted-foreground text-sm">
+                {venue.campaigns.length} campaign
+                {venue.campaigns.length !== 1 ? 's' : ''}
               </p>
               <Button asChild>
-                <Link href={`/admin/venues/${venue.id}/campaigns`}>View Campaigns</Link>
+                <Link href={`/admin/venues/${venue.id}/campaigns`}>
+                  View Campaigns
+                </Link>
               </Button>
             </div>
           </CardContent>
@@ -89,4 +101,4 @@ export default async function VenuePage({ params }: { params: { id: string } }) 
       </div>
     </div>
   )
-} 
+}

@@ -1,4 +1,4 @@
-import { Order, MenuItem, Ticket, Prisma } from "@prisma/client"
+import { Order, MenuItem, Ticket, Prisma } from '@prisma/client'
 
 export interface WebhookHandlerResponse {
   received: boolean
@@ -18,4 +18,4 @@ export interface OrderWithMenuItem extends Omit<Order, 'choices'> {
 
 export interface TicketWithOrders extends Ticket {
   orders: OrderWithMenuItem[]
-} 
+}

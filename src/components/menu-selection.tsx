@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { MenuItem, MenuItemOption, MenuItemOptionChoice } from "@prisma/client"
+import { useState } from 'react'
+import { MenuItem, MenuItemOption, MenuItemOptionChoice } from '@prisma/client'
 
 interface MenuItemWithOptions extends MenuItem {
   options: (MenuItemOption & {
@@ -25,9 +25,14 @@ interface MenuSelectionProps {
   onOrdersChange: (orders: Order[]) => void
 }
 
-export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps) {
+export function MenuSelection({
+  menuItems,
+  onOrdersChange,
+}: MenuSelectionProps) {
   const [quantities, setQuantities] = useState<Record<string, number>>({})
-  const [choices, setChoices] = useState<Record<string, Record<string, string>>>({})
+  const [choices, setChoices] = useState<
+    Record<string, Record<string, string>>
+  >({})
 
   const handleQuantityChange = (menuItemId: string, quantity: number) => {
     const newQuantities = {
@@ -38,7 +43,11 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
     updateOrders(newQuantities, choices)
   }
 
-  const handleChoiceChange = (menuItemId: string, optionId: string, choice: string) => {
+  const handleChoiceChange = (
+    menuItemId: string,
+    optionId: string,
+    choice: string
+  ) => {
     const newChoices = {
       ...choices,
       [menuItemId]: {
@@ -57,54 +66,59 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
     const orders = Object.entries(currentQuantities)
       .filter(([_, quantity]) => quantity > 0)
       .map(([menuItemId, quantity]) => {
-        const menuItem = menuItems.find(item => item.id === menuItemId)
+        const menuItem = menuItems.find((item) => item.id === menuItemId)
         const itemChoices = currentChoices[menuItemId] || {}
-        
+
         return {
           menuItemId,
           quantity,
-          choices: menuItem?.options.map(option => ({
-            optionId: option.id,
-            selectedChoice: itemChoices[option.id] || option.choices[0].id,
-          })) || [],
+          choices:
+            menuItem?.options.map((option) => ({
+              optionId: option.id,
+              selectedChoice: itemChoices[option.id] || option.choices[0].id,
+            })) || [],
         }
       })
 
     onOrdersChange(orders)
   }
 
-  const groupedItems = menuItems.reduce((groups, item) => {
-    const group = groups[item.category] || []
-    group.push(item)
-    return { ...groups, [item.category]: group }
-  }, {} as Record<string, MenuItemWithOptions[]>)
+  const groupedItems = menuItems.reduce(
+    (groups, item) => {
+      const group = groups[item.category] || []
+      group.push(item)
+      return { ...groups, [item.category]: group }
+    },
+    {} as Record<string, MenuItemWithOptions[]>
+  )
 
   return (
-    <div className="ring-1 ring-gray-900/5 bg-white shadow-sm sm:rounded-xl">
+    <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl">
       <div className="px-4 py-6 sm:p-8">
         <div className="space-y-8">
           {Object.entries(groupedItems).map(([category, items]) => (
             <div key={category}>
-              <h3 className="mb-4 font-semibold text-lg text-gray-900">
-                {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}s
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                {category.charAt(0).toUpperCase() +
+                  category.slice(1).toLowerCase()}
+                s
               </h3>
               <div className="space-y-4">
                 {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 bg-gray-50 rounded-lg"
-                  >
-                    <div className="items-center justify-between flex mb-4">
+                  <div key={item.id} className="rounded-lg bg-gray-50 p-4">
+                    <div className="mb-4 flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium text-sm text-gray-900">
+                        <h4 className="text-sm font-medium text-gray-900">
                           {item.name}
                         </h4>
-                        <p className="text-sm text-gray-500">{item.description}</p>
-                        <p className="mt-1 font-medium text-sm text-gray-900">
+                        <p className="text-sm text-gray-500">
+                          {item.description}
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-gray-900">
                           £{Number(item.price).toFixed(2)}
                         </p>
                       </div>
-                      <div className="items-center flex space-x-2">
+                      <div className="flex items-center space-x-2">
                         <button
                           type="button"
                           onClick={() =>
@@ -113,7 +127,7 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                               Math.max(0, (quantities[item.id] || 0) - 1)
                             )
                           }
-                          className="ring-1 ring-inset ring-gray-300 px-2.5 py-1.5 hover:bg-gray-50 font-semibold text-sm text-gray-900 bg-white rounded-md shadow-sm"
+                          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                         >
                           -
                         </button>
@@ -128,7 +142,7 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                               (quantities[item.id] || 0) + 1
                             )
                           }
-                          className="ring-1 ring-inset ring-gray-300 px-2.5 py-1.5 hover:bg-gray-50 font-semibold text-sm text-gray-900 bg-white rounded-md shadow-sm"
+                          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                         >
                           +
                         </button>
@@ -136,10 +150,10 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                     </div>
 
                     {quantities[item.id] > 0 && item.options.length > 0 && (
-                      <div className="space-y-4 pt-4 mt-4 border-t border-gray-200">
+                      <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
                         {item.options.map((option) => (
                           <div key={option.id}>
-                            <label className="block mb-1 font-medium text-sm text-gray-700">
+                            <label className="mb-1 block text-sm font-medium text-gray-700">
                               {option.name}
                               {option.minChoices > 0 && (
                                 <span className="ml-1 text-red-500">*</span>
@@ -147,7 +161,8 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                             </label>
                             <select
                               value={
-                                choices[item.id]?.[option.id] || option.choices[0].id
+                                choices[item.id]?.[option.id] ||
+                                option.choices[0].id
                               }
                               onChange={(e) =>
                                 handleChoiceChange(
@@ -156,7 +171,7 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
                                   e.target.value
                                 )
                               }
-                              className="ring-1 ring-inset ring-gray-300 block py-1.5 pl-3 pr-10 w-full text-gray-900 border-0 rounded-md focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             >
                               {option.choices.map((choice) => (
                                 <option key={choice.id} value={choice.id}>
@@ -177,4 +192,4 @@ export function MenuSelection({ menuItems, onOrdersChange }: MenuSelectionProps)
       </div>
     </div>
   )
-} 
+}

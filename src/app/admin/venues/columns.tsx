@@ -1,29 +1,31 @@
-"use client"
+'use client'
 
-import { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { Venue } from "@prisma/client"
+import { ColumnDef } from '@tanstack/react-table'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { Venue } from '@prisma/client'
 
-export const columns: ColumnDef<Venue & { _count: { campaigns: number; screens: number } }>[] = [
+export const columns: ColumnDef<
+  Venue & { _count: { campaigns: number; screens: number } }
+>[] = [
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: 'name',
+    header: 'Name',
   },
   {
-    accessorKey: "city",
-    header: "City",
+    accessorKey: 'city',
+    header: 'City',
   },
   {
-    accessorKey: "_count.campaigns",
-    header: "Campaigns",
+    accessorKey: '_count.campaigns',
+    header: 'Campaigns',
   },
   {
-    accessorKey: "_count.screens",
-    header: "Screens",
+    accessorKey: '_count.screens',
+    header: 'Screens',
   },
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => {
       const venue = row.original
 
@@ -42,11 +44,18 @@ export const columns: ColumnDef<Venue & { _count: { campaigns: number; screens: 
             variant="destructive"
             size="sm"
             onClick={async () => {
-              if (confirm("Are you sure you want to delete this venue? This action cannot be undone.")) {
+              if (
+                confirm(
+                  'Are you sure you want to delete this venue? This action cannot be undone.'
+                )
+              ) {
                 try {
-                  const response = await fetch(`/api/admin/venues/${venue.id}`, {
-                    method: "DELETE",
-                  })
+                  const response = await fetch(
+                    `/api/admin/venues/${venue.id}`,
+                    {
+                      method: 'DELETE',
+                    }
+                  )
 
                   if (response.ok) {
                     window.location.reload()
@@ -55,7 +64,7 @@ export const columns: ColumnDef<Venue & { _count: { campaigns: number; screens: 
                     alert(error)
                   }
                 } catch (error) {
-                  alert("Failed to delete venue")
+                  alert('Failed to delete venue')
                 }
               }
             }}
@@ -66,4 +75,4 @@ export const columns: ColumnDef<Venue & { _count: { campaigns: number; screens: 
       )
     },
   },
-] 
+]

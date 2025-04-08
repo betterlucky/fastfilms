@@ -1,8 +1,10 @@
-import { prisma } from "@/lib/db"
-import { sendEmail } from "@/lib/email"
-import { generateVenueGuestListEmail } from "@/lib/email"
+import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email'
+import { generateVenueGuestListEmail } from '@/lib/email'
 
-export async function sendGuestListsForToday(): Promise<{ guestListsSent: number }> {
+export async function sendGuestListsForToday(): Promise<{
+  guestListsSent: number
+}> {
   try {
     // Get all campaigns screening today
     const today = new Date()
@@ -16,7 +18,7 @@ export async function sendGuestListsForToday(): Promise<{ guestListsSent: number
           gte: today,
           lt: tomorrow,
         },
-        status: "ACTIVE",
+        status: 'ACTIVE',
       },
       include: {
         venue: {
@@ -27,7 +29,7 @@ export async function sendGuestListsForToday(): Promise<{ guestListsSent: number
           },
         },
         tickets: {
-          where: { status: "CONFIRMED" },
+          where: { status: 'CONFIRMED' },
           include: {
             user: {
               select: {
@@ -73,47 +75,52 @@ export async function sendGuestListsForToday(): Promise<{ guestListsSent: number
       if (!campaign.venue.contactEmail?.length) continue
 
       // Group tickets by user to create guest list
-      const guestList = campaign.tickets.reduce((acc, ticket) => {
-        const existingGuest = acc.find(g => g.email === ticket.user.email)
-        if (existingGuest) {
-          existingGuest.ticketCount += 1
-          existingGuest.foodOrders.push(...ticket.orders.map(order => ({
-            itemName: order.menuItem.name,
-            quantity: order.quantity,
-            options: order.choices.map(choice => ({
-              optionName: choice.option?.name || "",
-              choice: choice.selectedChoice?.name || "",
-            })),
-          })))
-        } else {
-          acc.push({
-            name: ticket.user.name || "Guest",
-            email: ticket.user.email,
-            ticketCount: 1,
-            foodOrders: ticket.orders.map(order => ({
-              itemName: order.menuItem.name,
-              quantity: order.quantity,
-              options: order.choices.map(choice => ({
-                optionName: choice.option?.name || "",
-                choice: choice.selectedChoice?.name || "",
+      const guestList = campaign.tickets.reduce(
+        (acc, ticket) => {
+          const existingGuest = acc.find((g) => g.email === ticket.user.email)
+          if (existingGuest) {
+            existingGuest.ticketCount += 1
+            existingGuest.foodOrders.push(
+              ...ticket.orders.map((order) => ({
+                itemName: order.menuItem.name,
+                quantity: order.quantity,
+                options: order.choices.map((choice) => ({
+                  optionName: choice.option?.name || '',
+                  choice: choice.selectedChoice?.name || '',
+                })),
+              }))
+            )
+          } else {
+            acc.push({
+              name: ticket.user.name || 'Guest',
+              email: ticket.user.email,
+              ticketCount: 1,
+              foodOrders: ticket.orders.map((order) => ({
+                itemName: order.menuItem.name,
+                quantity: order.quantity,
+                options: order.choices.map((choice) => ({
+                  optionName: choice.option?.name || '',
+                  choice: choice.selectedChoice?.name || '',
+                })),
               })),
-            })),
-          })
-        }
-        return acc
-      }, [] as Array<{
-        name: string | null
-        email: string
-        ticketCount: number
-        foodOrders: Array<{
-          itemName: string
-          quantity: number
-          options: Array<{
-            optionName: string
-            choice: string
+            })
+          }
+          return acc
+        },
+        [] as Array<{
+          name: string | null
+          email: string
+          ticketCount: number
+          foodOrders: Array<{
+            itemName: string
+            quantity: number
+            options: Array<{
+              optionName: string
+              choice: string
+            }>
           }>
         }>
-      }>)
+      )
 
       const emailHtml = generateVenueGuestListEmail({
         movieTitle: campaign.movieTitle,
@@ -135,7 +142,7 @@ export async function sendGuestListsForToday(): Promise<{ guestListsSent: number
 
     return { guestListsSent }
   } catch (error) {
-    console.error("Error sending guest lists:", error)
+    console.error('Error sending guest lists:', error)
     throw error
   }
-} 
+}

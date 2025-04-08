@@ -1,9 +1,9 @@
 'use client'
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import Link from "next/link"
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface CampaignDetailsProps {
   campaign: {
@@ -65,52 +65,63 @@ export default function CampaignDetails({
   charities,
   venueMenuItems,
 }: CampaignDetailsProps) {
-  const formattedDate = new Date(campaign.screeningDate).toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
+  const formattedDate = new Date(campaign.screeningDate).toLocaleDateString(
+    'en-GB',
+    {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }
+  )
 
-  const formattedDeadlineDate = new Date(campaign.deadlineDate).toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
+  const formattedDeadlineDate = new Date(
+    campaign.deadlineDate
+  ).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   })
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto py-8">
+      <div className="mx-auto max-w-4xl">
         <div className="grid gap-8">
           <Card>
             <CardContent className="p-6">
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <h1 className="font-bold text-2xl">{campaign.title}</h1>
+                    <h1 className="text-2xl font-bold">{campaign.title}</h1>
                     <p className="text-gray-500">{campaign.description}</p>
                     <div className="mt-4">
-                      <div className="flex flex-col md:flex-row gap-4">
-                        <Button 
-                          size="lg" 
-                          className="md:w-auto w-full"
-                          onClick={() => window.location.href = `/campaigns/${campaign.id}/book`}
+                      <div className="flex flex-col gap-4 md:flex-row">
+                        <Button
+                          size="lg"
+                          className="w-full md:w-auto"
+                          onClick={() =>
+                            (window.location.href = `/campaigns/${campaign.id}/book`)
+                          }
                         >
                           Book Tickets
                         </Button>
                       </div>
                       {campaign.charityId && (
-                        <div className="items-center flex p-4 mt-4 gap-2 bg-green-50 rounded-lg">
+                        <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 p-4">
                           <p className="text-sm text-green-700">
-                            Proudly supporting {charities.find(c => c.id === campaign.charityId)?.name}
+                            Proudly supporting{' '}
+                            {
+                              charities.find((c) => c.id === campaign.charityId)
+                                ?.name
+                            }
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
                   {campaign.posterPath && (
-                    <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
+                    <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
                       <Image
                         src={`https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
                         alt={campaign.movieTitle}
@@ -125,14 +136,16 @@ export default function CampaignDetails({
 
                 {campaign.customBlurb && (
                   <div>
-                    <h2 className="font-semibold text-lg">Additional Information</h2>
+                    <h2 className="text-lg font-semibold">
+                      Additional Information
+                    </h2>
                     <p>{campaign.customBlurb}</p>
                   </div>
                 )}
 
                 <div>
-                  <h2 className="font-semibold text-lg">Campaign Details</h2>
-                  <dl className="grid grid-cols-2 mt-2 gap-4">
+                  <h2 className="text-lg font-semibold">Campaign Details</h2>
+                  <dl className="mt-2 grid grid-cols-2 gap-4">
                     <div>
                       <dt className="text-gray-500">Target Funding</dt>
                       <dd>£{campaign.fundingTarget}</dd>
@@ -147,7 +160,9 @@ export default function CampaignDetails({
                     </div>
                     <div>
                       <dt className="text-gray-500">Screening Date</dt>
-                      <dd>{formattedDate} at {campaign.screeningTime}</dd>
+                      <dd>
+                        {formattedDate} at {campaign.screeningTime}
+                      </dd>
                     </div>
                     <div>
                       <dt className="text-gray-500">Campaign Deadline</dt>
@@ -160,7 +175,10 @@ export default function CampaignDetails({
                     {campaign.screen && (
                       <div>
                         <dt className="text-gray-500">Screen</dt>
-                        <dd>{campaign.screen.name} ({campaign.screen.capacity} seats)</dd>
+                        <dd>
+                          {campaign.screen.name} ({campaign.screen.capacity}{' '}
+                          seats)
+                        </dd>
                       </div>
                     )}
                   </dl>
@@ -172,4 +190,4 @@ export default function CampaignDetails({
       </div>
     </div>
   )
-} 
+}

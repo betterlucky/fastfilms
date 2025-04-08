@@ -1,17 +1,17 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { format } from "date-fns"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { format } from 'date-fns'
 
 export default async function UsersPage() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    redirect("/")
+    redirect('/')
   }
 
   const users = await prisma.user.findMany({
@@ -21,9 +21,9 @@ export default async function UsersPage() {
   })
 
   return (
-    <div className="container py-10 mx-auto">
-      <div className="justify-between items-center flex mb-8">
-        <h1 className="font-bold text-3xl">Users</h1>
+    <div className="container mx-auto py-10">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Users</h1>
       </div>
 
       <Card>
@@ -35,27 +35,33 @@ export default async function UsersPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="py-4 px-6 text-left">Name</th>
-                  <th className="py-4 px-6 text-left">Email</th>
-                  <th className="py-4 px-6 text-left">Role</th>
-                  <th className="py-4 px-6 text-left">Joined</th>
-                  <th className="py-4 px-6 text-left">Actions</th>
+                  <th className="px-6 py-4 text-left">Name</th>
+                  <th className="px-6 py-4 text-left">Email</th>
+                  <th className="px-6 py-4 text-left">Role</th>
+                  <th className="px-6 py-4 text-left">Joined</th>
+                  <th className="px-6 py-4 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id} className="border-b">
-                    <td className="py-4 px-6">{user.name}</td>
-                    <td className="py-4 px-6">{user.email}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        user.role === 'ADMIN' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
+                    <td className="px-6 py-4">{user.name}</td>
+                    <td className="px-6 py-4">{user.email}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs ${
+                          user.role === 'ADMIN'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {user.role === 'ADMIN' ? 'Admin' : 'User'}
                       </span>
                     </td>
-                    <td className="py-4 px-6">{format(new Date(user.createdAt), 'dd/MM/yyyy')}</td>
-                    <td className="py-4 px-6">
+                    <td className="px-6 py-4">
+                      {format(new Date(user.createdAt), 'dd/MM/yyyy')}
+                    </td>
+                    <td className="px-6 py-4">
                       <Link href={`/admin/users/${user.id}/edit`}>
                         <Button variant="outline" size="sm">
                           Edit
@@ -71,4 +77,4 @@ export default async function UsersPage() {
       </Card>
     </div>
   )
-} 
+}

@@ -1,22 +1,22 @@
-import { Metadata } from "next"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { SendCampaignGuestList } from "@/components/admin/send-campaign-guest-list"
-import { prisma } from "@/lib/db"
-import Link from "next/link"
+import { Metadata } from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { SendCampaignGuestList } from '@/components/admin/send-campaign-guest-list'
+import { prisma } from '@/lib/db'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard",
-  description: "Manage your cinema crowdfunding platform",
+  title: 'Admin Dashboard',
+  description: 'Manage your cinema crowdfunding platform',
 }
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions)
-  if (!session || session.user.role !== "ADMIN") {
-    redirect("/")
+  if (!session || session.user.role !== 'ADMIN') {
+    redirect('/')
   }
 
   // Get counts for dashboard
@@ -26,7 +26,7 @@ export default async function AdminDashboard() {
     prisma.charity.count(),
     prisma.ticket.count({
       where: {
-        status: "CONFIRMED",
+        status: 'CONFIRMED',
         campaign: {
           screeningDate: {
             gte: new Date(),
@@ -38,48 +38,48 @@ export default async function AdminDashboard() {
   ])
 
   return (
-    <div className="container py-8 mx-auto">
-      <h1 className="mb-8 font-bold text-3xl">Admin Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 mb-8 gap-4 lg:grid-cols-4">
+    <div className="container mx-auto py-8">
+      <h1 className="mb-8 text-3xl font-bold">Admin Dashboard</h1>
+
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle>Active Campaigns</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-2xl">{campaigns}</p>
+            <p className="text-2xl font-bold">{campaigns}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Venues</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-2xl">{venues}</p>
+            <p className="text-2xl font-bold">{venues}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Charities</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-2xl">{charities}</p>
+            <p className="text-2xl font-bold">{charities}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Upcoming Tickets</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-2xl">{tickets}</p>
+            <p className="text-2xl font-bold">{tickets}</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 mb-8 gap-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
@@ -100,7 +100,7 @@ export default async function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Campaign Management</CardTitle>
@@ -144,15 +144,15 @@ export default async function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 mt-8 gap-4">
+      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>User Management</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="justify-between items-center flex">
-              <p className="font-bold text-2xl">{users}</p>
-              <span className="text-sm text-muted-foreground">Total Users</span>
+            <div className="flex items-center justify-between">
+              <p className="text-2xl font-bold">{users}</p>
+              <span className="text-muted-foreground text-sm">Total Users</span>
             </div>
             <Button variant="outline" className="w-full" asChild>
               <Link href="/admin/users">Manage Users</Link>
@@ -162,4 +162,4 @@ export default async function AdminDashboard() {
       </div>
     </div>
   )
-} 
+}

@@ -1,14 +1,18 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import MenuItemForm from "../../MenuItemForm"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import MenuItemForm from '../../MenuItemForm'
 
-export default async function EditMenuItemPage({ params }: { params: { id: string; menuItemId: string } }) {
+export default async function EditMenuItemPage({
+  params,
+}: {
+  params: { id: string; menuItemId: string }
+}) {
   const session = await getServerSession(authOptions)
-  const isAdmin = session?.user?.role === "ADMIN"
-  
+  const isAdmin = session?.user?.role === 'ADMIN'
+
   if (!isAdmin) {
     return <div>Unauthorized</div>
   }
@@ -30,12 +34,12 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
   ])
 
   if (!venue || !menuItem || menuItem.venueId !== venue.id) {
-    redirect("/venues")
+    redirect('/venues')
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto py-8">
+      <div className="mx-auto max-w-4xl">
         <div className="grid gap-8">
           <Card>
             <CardHeader>
@@ -58,7 +62,7 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
                     minChoices: option.minChoices,
                     maxChoices: option.maxChoices,
                     order: index,
-                    choices: option.choices.map(choice => ({
+                    choices: option.choices.map((choice) => ({
                       id: choice.id,
                       name: choice.name,
                       priceAdjustment: Number(choice.priceAdjustment),
@@ -72,4 +76,4 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
       </div>
     </div>
   )
-} 
+}

@@ -1,14 +1,21 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import Link from "next/link"
-import { handleUpdateVenue } from "./actions"
-import { PlusIcon } from "@heroicons/react/24/outline"
-import Image from "next/image"
-import { MapPinIcon } from "@heroicons/react/24/outline"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import Link from 'next/link'
+import { handleUpdateVenue } from './actions'
+import { PlusIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
+import { MapPinIcon } from '@heroicons/react/24/outline'
 
 async function getVenues() {
   return prisma.venue.findMany({
@@ -20,7 +27,7 @@ async function getVenues() {
 
 export default async function VenuesPage() {
   const session = await getServerSession(authOptions)
-  const isAdmin = session?.user?.role === "ADMIN"
+  const isAdmin = session?.user?.role === 'ADMIN'
   const venues = await getVenues()
 
   if (!isAdmin) {
@@ -28,12 +35,12 @@ export default async function VenuesPage() {
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto py-8">
+      <div className="mx-auto max-w-4xl">
         <div className="grid gap-8">
           <Card>
             <CardHeader>
-              <div className="justify-between items-center flex">
+              <div className="flex items-center justify-between">
                 <CardTitle>Venues</CardTitle>
                 <Link href="/venues/new">
                   <Button>Create New Venue</Button>
@@ -43,12 +50,15 @@ export default async function VenuesPage() {
             <CardContent>
               <div className="space-y-4">
                 {venues.map((venue) => (
-                  <div key={venue.id} className="p-4 border rounded-lg">
+                  <div key={venue.id} className="rounded-lg border p-4">
                     <form action={handleUpdateVenue} className="space-y-4">
                       <input type="hidden" name="venueId" value={venue.id} />
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor={`name-${venue.id}`} className="block font-medium text-sm text-gray-700">
+                          <label
+                            htmlFor={`name-${venue.id}`}
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Venue Name
                           </label>
                           <Input
@@ -61,7 +71,10 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`address-${venue.id}`} className="block font-medium text-sm text-gray-700">
+                          <label
+                            htmlFor={`address-${venue.id}`}
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Address
                           </label>
                           <Input
@@ -74,7 +87,10 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`city-${venue.id}`} className="block font-medium text-sm text-gray-700">
+                          <label
+                            htmlFor={`city-${venue.id}`}
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             City
                           </label>
                           <Input
@@ -87,7 +103,10 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`postcode-${venue.id}`} className="block font-medium text-sm text-gray-700">
+                          <label
+                            htmlFor={`postcode-${venue.id}`}
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Postcode
                           </label>
                           <Input
@@ -100,7 +119,10 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`url-${venue.id}`} className="block font-medium text-sm text-gray-700">
+                          <label
+                            htmlFor={`url-${venue.id}`}
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Website
                           </label>
                           <Input
@@ -112,7 +134,10 @@ export default async function VenuesPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor={`phone-${venue.id}`} className="block font-medium text-sm text-gray-700">
+                          <label
+                            htmlFor={`phone-${venue.id}`}
+                            className="block text-sm font-medium text-gray-700"
+                          >
                             Phone Number
                           </label>
                           <Input
@@ -124,19 +149,24 @@ export default async function VenuesPage() {
                           />
                         </div>
                       </div>
-                      <div className="justify-between items-center flex">
+                      <div className="flex items-center justify-between">
                         <div className="text-sm text-gray-500">
-                          {venue.screens.length} screen{venue.screens.length !== 1 ? 's' : ''}
+                          {venue.screens.length} screen
+                          {venue.screens.length !== 1 ? 's' : ''}
                         </div>
                         <div className="flex space-x-2">
                           <Button type="submit">Update Venue</Button>
                           <Button
-                            onClick={() => window.location.href = `/venues/${venue.id}/screens`}
+                            onClick={() =>
+                              (window.location.href = `/venues/${venue.id}/screens`)
+                            }
                           >
                             Manage Screens
                           </Button>
                           <Button
-                            onClick={() => window.location.href = `/venues/${venue.id}/menu`}
+                            onClick={() =>
+                              (window.location.href = `/venues/${venue.id}/menu`)
+                            }
                           >
                             Manage Menu
                           </Button>
@@ -152,4 +182,4 @@ export default async function VenuesPage() {
       </div>
     </div>
   )
-} 
+}

@@ -1,5 +1,5 @@
 const TMDB_API_KEY = process.env.TMDB_API_KEY
-const TMDB_BASE_URL = "https://api.themoviedb.org/3"
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 
 export interface TMDBFilm {
   id: number
@@ -13,7 +13,7 @@ export interface TMDBFilm {
 
 export async function searchFilms(query: string): Promise<TMDBFilm[]> {
   if (!TMDB_API_KEY) {
-    throw new Error("TMDB_API_KEY is not set")
+    throw new Error('TMDB_API_KEY is not set')
   }
 
   const response = await fetch(
@@ -23,7 +23,7 @@ export async function searchFilms(query: string): Promise<TMDBFilm[]> {
   )
 
   if (!response.ok) {
-    throw new Error("Failed to search films")
+    throw new Error('Failed to search films')
   }
 
   const data = await response.json()
@@ -32,7 +32,7 @@ export async function searchFilms(query: string): Promise<TMDBFilm[]> {
 
 export async function getFilmDetails(id: number): Promise<TMDBFilm> {
   if (!TMDB_API_KEY) {
-    throw new Error("TMDB_API_KEY is not set")
+    throw new Error('TMDB_API_KEY is not set')
   }
 
   const response = await fetch(
@@ -40,8 +40,8 @@ export async function getFilmDetails(id: number): Promise<TMDBFilm> {
   )
 
   if (!response.ok) {
-    throw new Error("Failed to get film details")
+    throw new Error('Failed to get film details')
   }
 
   return response.json()
-} 
+}

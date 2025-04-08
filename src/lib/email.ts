@@ -1,8 +1,8 @@
-import nodemailer from "nodemailer"
+import nodemailer from 'nodemailer'
 
 // Create a transporter using Gmail SMTP with secure settings
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: 'smtp.gmail.com',
   port: 465,
   secure: true, // use SSL
   auth: {
@@ -12,32 +12,32 @@ const transporter = nodemailer.createTransport({
 })
 
 interface SendEmailOptions {
-  to: string | string[]  // Allow either a single email or an array of emails
+  to: string | string[] // Allow either a single email or an array of emails
   subject: string
   html: string
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   if (!process.env.CONTACT_EMAIL || !process.env.EMAIL_HOST_PASSWORD) {
-    console.warn("Email credentials not found. Skipping email send.")
+    console.warn('Email credentials not found. Skipping email send.')
     return
   }
 
   try {
     // Verify the connection configuration
     await transporter.verify()
-    
+
     // Convert single email to array for consistent handling
     const recipients = Array.isArray(to) ? to : [to]
-    
+
     await transporter.sendMail({
       from: `FastFilms <${process.env.CONTACT_EMAIL}>`,
-      to: recipients.join(", "),  // Join multiple emails with commas
+      to: recipients.join(', '), // Join multiple emails with commas
       subject,
       html,
     })
   } catch (error) {
-    console.error("Failed to send email:", error)
+    console.error('Failed to send email:', error)
     throw error // Re-throw to handle in the calling code
   }
 }
@@ -49,7 +49,8 @@ export function generateTicketConfirmationEmail(data: {
   ticketQuantity: number
   totalAmount: number
 }) {
-  const { movieTitle, venueName, screeningDate, ticketQuantity, totalAmount } = data
+  const { movieTitle, venueName, screeningDate, ticketQuantity, totalAmount } =
+    data
 
   return `
     <!DOCTYPE html>
@@ -67,16 +68,22 @@ export function generateTicketConfirmationEmail(data: {
           <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
             <h2 style="margin: 0 0 16px 0; color: #111827;">${movieTitle}</h2>
             <p style="margin: 8px 0;"><strong>Venue:</strong> ${venueName}</p>
-            <p style="margin: 8px 0;"><strong>Date:</strong> ${screeningDate.toLocaleDateString("en-GB", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}</p>
-            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningDate.toLocaleTimeString("en-GB", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}</p>
+            <p style="margin: 8px 0;"><strong>Date:</strong> ${screeningDate.toLocaleDateString(
+              'en-GB',
+              {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }
+            )}</p>
+            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningDate.toLocaleTimeString(
+              'en-GB',
+              {
+                hour: '2-digit',
+                minute: '2-digit',
+              }
+            )}</p>
             <p style="margin: 8px 0;"><strong>Tickets:</strong> ${ticketQuantity}</p>
             <p style="margin: 8px 0;"><strong>Total Paid:</strong> £${totalAmount.toFixed(2)}</p>
           </div>
@@ -184,29 +191,52 @@ export function generateVenueGuestListEmail(data: {
     }>
   }>
 }) {
-  const { movieTitle, venueName, screeningDate, screeningTime, totalTickets, guestList } = data
+  const {
+    movieTitle,
+    venueName,
+    screeningDate,
+    screeningTime,
+    totalTickets,
+    guestList,
+  } = data
 
-  const formatGuestList = guestList.map(guest => `
+  const formatGuestList = guestList
+    .map(
+      (guest) => `
     <div style="margin-bottom: 16px; padding: 12px; background-color: #f9fafb; border-radius: 8px;">
       <p style="margin: 0 0 8px 0;"><strong>${guest.name}</strong> (${guest.email})</p>
       <p style="margin: 0 0 8px 0;">Tickets: ${guest.ticketCount}</p>
-      ${guest.foodOrders.length > 0 ? `
+      ${
+        guest.foodOrders.length > 0
+          ? `
         <p style="margin: 0 0 8px 0;"><strong>Food Orders:</strong></p>
         <ul style="margin: 0; padding-left: 20px;">
-          ${guest.foodOrders.map(order => `
+          ${guest.foodOrders
+            .map(
+              (order) => `
             <li>
               ${order.quantity}x ${order.itemName}
-              ${order.options.length > 0 ? `
+              ${
+                order.options.length > 0
+                  ? `
                 <ul style="margin: 0; padding-left: 20px;">
-                  ${order.options.map(opt => `<li>${opt.optionName}: ${opt.choice}</li>`).join('')}
+                  ${order.options.map((opt) => `<li>${opt.optionName}: ${opt.choice}</li>`).join('')}
                 </ul>
-              ` : ''}
+              `
+                  : ''
+              }
             </li>
-          `).join('')}
+          `
+            )
+            .join('')}
         </ul>
-      ` : '<p style="margin: 0;">No food orders</p>'}
+      `
+          : '<p style="margin: 0;">No food orders</p>'
+      }
     </div>
-  `).join('')
+  `
+    )
+    .join('')
 
   return `
     <!DOCTYPE html>
@@ -222,12 +252,15 @@ export function generateVenueGuestListEmail(data: {
           <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
             <h2 style="margin: 0 0 16px 0; color: #111827;">${movieTitle}</h2>
             <p style="margin: 8px 0;"><strong>Venue:</strong> ${venueName}</p>
-            <p style="margin: 8px 0;"><strong>Date:</strong> ${screeningDate.toLocaleDateString("en-GB", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}</p>
+            <p style="margin: 8px 0;"><strong>Date:</strong> ${screeningDate.toLocaleDateString(
+              'en-GB',
+              {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }
+            )}</p>
             <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningTime}</p>
             <p style="margin: 8px 0;"><strong>Total Tickets:</strong> ${totalTickets}</p>
           </div>
@@ -244,4 +277,4 @@ export function generateVenueGuestListEmail(data: {
       </body>
     </html>
   `
-} 
+}

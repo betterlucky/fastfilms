@@ -4,14 +4,14 @@ declare module 'bcryptjs' {
    * @param {number} [rounds] - Number of rounds to use, defaults to 10 if omitted
    * @returns {string} Resulting salt
    */
-  export function genSaltSync(rounds?: number): string;
+  export function genSaltSync(rounds?: number): string
 
   /**
    * Generate a salt asynchronously
    * @param {number} [rounds] - Number of rounds to use, defaults to 10 if omitted
    * @returns {Promise<string>} Resulting salt
    */
-  export function genSalt(rounds?: number): Promise<string>;
+  export function genSalt(rounds?: number): Promise<string>
 
   /**
    * Hash a string synchronously
@@ -19,7 +19,7 @@ declare module 'bcryptjs' {
    * @param {string|number} salt - Salt length to generate or salt to use
    * @returns {string} Resulting hash
    */
-  export function hashSync(s: string, salt: string | number): string;
+  export function hashSync(s: string, salt: string | number): string
 
   /**
    * Hash a string asynchronously
@@ -27,7 +27,7 @@ declare module 'bcryptjs' {
    * @param {string|number} salt - Salt length to generate or salt to use
    * @returns {Promise<string>} Resulting hash
    */
-  export function hash(s: string, salt: string | number): Promise<string>;
+  export function hash(s: string, salt: string | number): Promise<string>
 
   /**
    * Compare a string to a hash synchronously
@@ -35,7 +35,7 @@ declare module 'bcryptjs' {
    * @param {string} hash - Hash to compare to
    * @returns {boolean} true if matching, false otherwise
    */
-  export function compareSync(s: string, hash: string): boolean;
+  export function compareSync(s: string, hash: string): boolean
 
   /**
    * Compare a string to a hash asynchronously
@@ -43,12 +43,12 @@ declare module 'bcryptjs' {
    * @param {string} hash - Hash to compare to
    * @returns {Promise<boolean>} true if matching, false otherwise
    */
-  export function compare(s: string, hash: string): Promise<boolean>;
+  export function compare(s: string, hash: string): Promise<boolean>
 
   /**
    * Gets the number of rounds used to encrypt a hash
    * @param {string} hash - Hash to get the number of rounds from
    * @returns {number} number of rounds
    */
-  export function getRounds(hash: string): number;
-} 
+  export function getRounds(hash: string): number
+}

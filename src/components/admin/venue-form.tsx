@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -13,19 +13,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
-import { X } from "lucide-react"
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
+import { X } from 'lucide-react'
 
 const venueSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  address: z.string().min(1, "Address is required"),
-  city: z.string().min(1, "City is required"),
-  postcode: z.string().min(1, "Postcode is required"),
+  name: z.string().min(1, 'Name is required'),
+  address: z.string().min(1, 'Address is required'),
+  city: z.string().min(1, 'City is required'),
+  postcode: z.string().min(1, 'Postcode is required'),
   phone: z.string().optional(),
-  url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  contactEmail: z.array(z.string().email("Must be a valid email")).default([]),
+  url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  contactEmail: z.array(z.string().email('Must be a valid email')).default([]),
 })
 
 type VenueFormValues = z.infer<typeof venueSchema>
@@ -38,17 +38,17 @@ interface VenueFormProps {
 export function VenueForm({ initialData, venueId }: VenueFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [newEmail, setNewEmail] = useState("")
+  const [newEmail, setNewEmail] = useState('')
 
   const form = useForm<VenueFormValues>({
     resolver: zodResolver(venueSchema),
     defaultValues: {
-      name: initialData?.name || "",
-      address: initialData?.address || "",
-      city: initialData?.city || "",
-      postcode: initialData?.postcode || "",
-      phone: initialData?.phone || "",
-      url: initialData?.url || "",
+      name: initialData?.name || '',
+      address: initialData?.address || '',
+      city: initialData?.city || '',
+      postcode: initialData?.postcode || '',
+      phone: initialData?.phone || '',
+      url: initialData?.url || '',
       contactEmail: initialData?.contactEmail || [],
     },
   })
@@ -56,27 +56,29 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
   const onSubmit = async (data: VenueFormValues) => {
     try {
       setIsLoading(true)
-      const url = venueId ? `/api/admin/venues/${venueId}` : "/api/admin/venues"
-      const method = venueId ? "PATCH" : "POST"
+      const url = venueId ? `/api/admin/venues/${venueId}` : '/api/admin/venues'
+      const method = venueId ? 'PATCH' : 'POST'
 
       const response = await fetch(url, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to save venue")
+        throw new Error('Failed to save venue')
       }
 
-      toast.success(venueId ? "Venue updated successfully" : "Venue created successfully")
-      router.push("/admin/venues")
+      toast.success(
+        venueId ? 'Venue updated successfully' : 'Venue created successfully'
+      )
+      router.push('/admin/venues')
       router.refresh()
     } catch (error) {
-      console.error("Error saving venue:", error)
-      toast.error("Failed to save venue")
+      console.error('Error saving venue:', error)
+      toast.error('Failed to save venue')
     } finally {
       setIsLoading(false)
     }
@@ -85,17 +87,17 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
   const handleAddEmail = () => {
     if (!newEmail) return
 
-    const emails = form.getValues("contactEmail")
+    const emails = form.getValues('contactEmail')
     if (!emails.includes(newEmail)) {
-      form.setValue("contactEmail", [...emails, newEmail])
-      setNewEmail("")
+      form.setValue('contactEmail', [...emails, newEmail])
+      setNewEmail('')
     }
   }
 
   const handleRemoveEmail = (emailToRemove: string) => {
-    const emails = form.getValues("contactEmail")
+    const emails = form.getValues('contactEmail')
     form.setValue(
-      "contactEmail",
+      'contactEmail',
       emails.filter((email) => email !== emailToRemove)
     )
   }
@@ -103,7 +105,7 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
             name="name"
@@ -215,13 +217,13 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
                       {field.value.map((email) => (
                         <div
                           key={email}
-                          className="items-center flex px-2 py-1 gap-1 bg-gray-100 rounded"
+                          className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1"
                         >
                           <span className="text-sm">{email}</span>
                           <button
                             type="button"
                             onClick={() => handleRemoveEmail(email)}
-                            className="hover:text-gray-700 text-gray-500"
+                            className="text-gray-500 hover:text-gray-700"
                           >
                             <X className="size-4" />
                           </button>
@@ -236,12 +238,16 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
           </div>
         </div>
 
-        <div className="justify-end flex">
+        <div className="flex justify-end">
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : venueId ? "Update Venue" : "Create Venue"}
+            {isLoading
+              ? 'Saving...'
+              : venueId
+                ? 'Update Venue'
+                : 'Create Venue'}
           </Button>
         </div>
       </form>
     </Form>
   )
-} 
+}

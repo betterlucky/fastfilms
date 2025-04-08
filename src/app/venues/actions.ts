@@ -1,14 +1,14 @@
 'use server'
 
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { revalidatePath } from "next/cache"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 
 export async function handleUpdateVenue(formData: FormData) {
   const session = await getServerSession(authOptions)
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized")
+  if (session?.user?.role !== 'ADMIN') {
+    throw new Error('Unauthorized')
   }
 
   const venueId = formData.get('venueId') as string
@@ -32,4 +32,4 @@ export async function handleUpdateVenue(formData: FormData) {
   })
 
   revalidatePath('/venues')
-} 
+}

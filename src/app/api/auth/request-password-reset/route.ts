@@ -1,18 +1,15 @@
-import { prisma } from "@/lib/db"
-import { NextResponse, type NextRequest } from "next/server"
-import { sendEmail } from "@/lib/email"
-import { generatePasswordResetEmail } from "@/lib/email"
-import { v4 as uuidv4 } from "uuid"
+import { prisma } from '@/lib/db'
+import { NextResponse, type NextRequest } from 'next/server'
+import { sendEmail } from '@/lib/email'
+import { generatePasswordResetEmail } from '@/lib/email'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
     // Check if user exists
@@ -23,7 +20,8 @@ export async function POST(request: NextRequest) {
     if (!user) {
       // Return success even if user doesn't exist (security through obscurity)
       return NextResponse.json({
-        message: "If an account exists with this email, you will receive a password reset link.",
+        message:
+          'If an account exists with this email, you will receive a password reset link.',
       })
     }
 
@@ -51,29 +49,29 @@ export async function POST(request: NextRequest) {
       const emailHtml = generatePasswordResetEmail(token, baseUrl)
       await sendEmail({
         to: email,
-        subject: "Reset your FastFilms password",
+        subject: 'Reset your FastFilms password',
         html: emailHtml,
       })
     } catch (emailError) {
-      console.error("Failed to send password reset email:", emailError)
+      console.error('Failed to send password reset email:', emailError)
       // Delete the token since email failed
       await prisma.passwordResetToken.delete({
         where: { token },
       })
       return NextResponse.json(
-        { error: "Failed to send password reset email. Please try again later." },
+        {
+          error: 'Failed to send password reset email. Please try again later.',
+        },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
-      message: "If an account exists with this email, you will receive a password reset link.",
+      message:
+        'If an account exists with this email, you will receive a password reset link.',
     })
   } catch (error) {
-    console.error("Error requesting password reset:", error)
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    )
+    console.error('Error requesting password reset:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
-} 
+}

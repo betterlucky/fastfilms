@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -6,9 +6,9 @@ async function main() {
   try {
     // Test database connection
     await prisma.$connect()
-    console.log("Successfully connected to database")
+    console.log('Successfully connected to database')
 
-    const oldAdminEmail = "admin@fastfilms.com"
+    const oldAdminEmail = 'admin@fastfilms.com'
 
     console.log(`Attempting to delete admin user with email: ${oldAdminEmail}`)
 
@@ -19,9 +19,9 @@ async function main() {
     console.log(`Admin user deleted successfully:`, result)
   } catch (error) {
     if (error.code === 'P2025') {
-      console.log("Admin user not found, nothing to delete")
+      console.log('Admin user not found, nothing to delete')
     } else {
-      console.error("Error deleting admin user:", error)
+      console.error('Error deleting admin user:', error)
       process.exit(1)
     }
   } finally {
@@ -29,8 +29,7 @@ async function main() {
   }
 }
 
-main()
-  .catch((error) => {
-    console.error("Fatal error:", error)
-    process.exit(1)
-  }) 
+main().catch((error) => {
+  console.error('Fatal error:', error)
+  process.exit(1)
+})

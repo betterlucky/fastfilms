@@ -1,4 +1,4 @@
-import { Decimal } from "@prisma/client/runtime/library"
+import { Decimal } from '@prisma/client/runtime/library'
 
 export interface OrderChoice {
   optionId: string
@@ -64,4 +64,4 @@ export interface EmailData {
   screeningDate: Date
   ticketQuantity: number
   totalAmount: number
-} 
+}

@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session || session.user.role !== "ADMIN") {
-    return new NextResponse("Unauthorized", { status: 401 })
+  if (!session || session.user.role !== 'ADMIN') {
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
@@ -28,7 +28,7 @@ export async function PUT(
       fundingTarget,
       charityId,
       menuItemIds,
-      isFeatured
+      isFeatured,
     } = body
 
     // Update campaign
@@ -68,7 +68,7 @@ export async function PUT(
     return NextResponse.json(campaign)
   } catch (error) {
     console.error('Error updating campaign:', error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
 
@@ -78,8 +78,8 @@ export async function DELETE(
 ) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return new NextResponse("Unauthorized", { status: 401 })
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
@@ -92,22 +92,22 @@ export async function DELETE(
             tickets: {
               where: {
                 status: {
-                  not: "CANCELLED"
-                }
-              }
-            }
-          }
-        }
-      }
+                  not: 'CANCELLED',
+                },
+              },
+            },
+          },
+        },
+      },
     })
 
     if (!campaign) {
-      return new NextResponse("Campaign not found", { status: 404 })
+      return new NextResponse('Campaign not found', { status: 404 })
     }
 
     if (campaign._count.tickets > 0) {
       return new NextResponse(
-        "Cannot delete campaign with active tickets. Please handle ticket transfers or refunds first.",
+        'Cannot delete campaign with active tickets. Please handle ticket transfers or refunds first.',
         { status: 400 }
       )
     }
@@ -116,42 +116,42 @@ export async function DELETE(
     await prisma.$transaction(async (tx) => {
       // 1. Delete CampaignMenuItem records
       await tx.campaignMenuItem.deleteMany({
-        where: { campaignId: params.id }
+        where: { campaignId: params.id },
       })
 
       // 2. Delete Comment records (including nested replies)
       await tx.comment.deleteMany({
-        where: { campaignId: params.id }
+        where: { campaignId: params.id },
       })
 
       // 3. Delete Order records associated with campaign tickets
       await tx.order.deleteMany({
         where: {
           ticket: {
-            campaignId: params.id
-          }
-        }
+            campaignId: params.id,
+          },
+        },
       })
 
       // 4. Delete Ticket records (should only be cancelled ones at this point)
       await tx.ticket.deleteMany({
-        where: { campaignId: params.id }
+        where: { campaignId: params.id },
       })
 
       // 5. Delete Contribution records
       await tx.contribution.deleteMany({
-        where: { campaignId: params.id }
+        where: { campaignId: params.id },
       })
 
       // 6. Finally delete the campaign
       await tx.campaign.delete({
-        where: { id: params.id }
+        where: { id: params.id },
       })
     })
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error("Error deleting campaign:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    console.error('Error deleting campaign:', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
-} 
+}

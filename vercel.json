@@ -21,8 +21,10 @@
     }
   ],
   "ignoreCommand": "npx next build --no-lint",
-  "crons": [{
-    "path": "/api/cron/send-guest-lists",
-    "schedule": "0 6 * * *"
-  }]
-} 
+  "crons": [
+    {
+      "path": "/api/cron/send-guest-lists",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}

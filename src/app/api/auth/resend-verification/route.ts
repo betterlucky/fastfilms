@@ -1,18 +1,15 @@
-import { prisma } from "@/lib/db"
-import { NextResponse, type NextRequest } from "next/server"
-import { sendEmail } from "@/lib/email"
-import { generateVerificationEmail } from "@/lib/email"
-import { v4 as uuidv4 } from "uuid"
+import { prisma } from '@/lib/db'
+import { NextResponse, type NextRequest } from 'next/server'
+import { sendEmail } from '@/lib/email'
+import { generateVerificationEmail } from '@/lib/email'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
     // Check if user exists
@@ -21,16 +18,13 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Check if email is already verified
     if (user.emailVerified) {
       return NextResponse.json(
-        { error: "Email is already verified" },
+        { error: 'Email is already verified' },
         { status: 400 }
       )
     }
@@ -59,29 +53,26 @@ export async function POST(request: NextRequest) {
       const emailHtml = generateVerificationEmail(token, baseUrl)
       await sendEmail({
         to: email,
-        subject: "Verify your FastFilms account",
+        subject: 'Verify your FastFilms account',
         html: emailHtml,
       })
     } catch (emailError) {
-      console.error("Failed to send verification email:", emailError)
+      console.error('Failed to send verification email:', emailError)
       // Delete the token since email failed
       await prisma.verificationToken.delete({
         where: { token },
       })
       return NextResponse.json(
-        { error: "Failed to send verification email. Please try again later." },
+        { error: 'Failed to send verification email. Please try again later.' },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
-      message: "Verification email sent. Please check your inbox.",
+      message: 'Verification email sent. Please check your inbox.',
     })
   } catch (error) {
-    console.error("Error resending verification email:", error)
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    )
+    console.error('Error resending verification email:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
-} 
+}

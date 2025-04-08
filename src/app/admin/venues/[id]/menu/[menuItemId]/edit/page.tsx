@@ -1,14 +1,18 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import MenuItemForm from "../../MenuItemForm"
-import { notFound } from "next/navigation"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import MenuItemForm from '../../MenuItemForm'
+import { notFound } from 'next/navigation'
 
-export default async function EditMenuItemPage({ params }: { params: { id: string; menuItemId: string } }) {
+export default async function EditMenuItemPage({
+  params,
+}: {
+  params: { id: string; menuItemId: string }
+}) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user?.isAdmin) {
     return notFound()
   }
@@ -30,14 +34,14 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
   })
 
   if (!venue || !venue.menuItems.length) {
-    redirect("/admin/venues")
+    redirect('/admin/venues')
   }
 
   const menuItem = venue.menuItems[0]
 
   return (
     <div className="space-y-8">
-      <h1 className="font-bold text-3xl">Edit Menu Item for {venue.name}</h1>
+      <h1 className="text-3xl font-bold">Edit Menu Item for {venue.name}</h1>
 
       <Card>
         <CardHeader>
@@ -53,13 +57,13 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
               price: Number(menuItem.price),
               category: menuItem.category,
               isActive: menuItem.isActive,
-              options: menuItem.options.map(option => ({
+              options: menuItem.options.map((option) => ({
                 id: option.id,
                 name: option.name,
                 description: option.description || undefined,
                 minChoices: option.minChoices,
                 maxChoices: option.maxChoices,
-                choices: option.choices.map(choice => ({
+                choices: option.choices.map((choice) => ({
                   id: choice.id,
                   name: choice.name,
                   priceAdjustment: Number(choice.priceAdjustment),
@@ -71,4 +75,4 @@ export default async function EditMenuItemPage({ params }: { params: { id: strin
       </Card>
     </div>
   )
-} 
+}

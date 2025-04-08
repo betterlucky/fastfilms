@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Charity {
   id: string
@@ -11,7 +11,11 @@ interface Charity {
   description: string | null
 }
 
-export default function DeleteCharityPage({ params }: { params: { id: string } }) {
+export default function DeleteCharityPage({
+  params,
+}: {
+  params: { id: string }
+}) {
   const router = useRouter()
   const [charity, setCharity] = useState<Charity | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -35,7 +39,11 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
   }, [params.id])
 
   async function handleDelete() {
-    if (!confirm('Are you sure you want to delete this charity? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to delete this charity? This action cannot be undone.'
+      )
+    ) {
       return
     }
 
@@ -66,12 +74,12 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="items-center justify-between flex mb-8">
-        <h1 className="font-bold text-3xl">Delete Charity</h1>
-        <Button 
+    <div className="container mx-auto py-8">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Delete Charity</h1>
+        <Button
           variant="outline"
-          onClick={() => router.push("/admin/charities")}
+          onClick={() => router.push('/admin/charities')}
         >
           Back to Charities
         </Button>
@@ -86,19 +94,20 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
             <p>
               Are you sure you want to delete <strong>{charity.name}</strong>?
               {charity.description && (
-                <span className="block mt-1 text-gray-500">{charity.description}</span>
+                <span className="mt-1 block text-gray-500">
+                  {charity.description}
+                </span>
               )}
             </p>
             <p className="text-red-500">
-              This action cannot be undone. Any campaigns associated with this charity will need to be updated.
+              This action cannot be undone. Any campaigns associated with this
+              charity will need to be updated.
             </p>
-            {error && (
-              <div className="text-red-500">{error}</div>
-            )}
-            <div className="justify-end flex space-x-4">
+            {error && <div className="text-red-500">{error}</div>}
+            <div className="flex justify-end space-x-4">
               <Button
                 variant="outline"
-                onClick={() => router.push("/admin/charities")}
+                onClick={() => router.push('/admin/charities')}
                 disabled={isLoading}
               >
                 Cancel
@@ -108,7 +117,7 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
                 onClick={handleDelete}
                 disabled={isLoading}
               >
-                {isLoading ? "Deleting..." : "Delete Charity"}
+                {isLoading ? 'Deleting...' : 'Delete Charity'}
               </Button>
             </div>
           </div>
@@ -116,4 +125,4 @@ export default function DeleteCharityPage({ params }: { params: { id: string } }
       </Card>
     </div>
   )
-} 
+}

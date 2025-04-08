@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import { useState, Suspense } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
+import { useState, Suspense } from 'react'
+import { signIn } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import LoginForm from '@/components/login-form'
 
 export default function LoginPage() {
@@ -12,4 +12,4 @@ export default function LoginPage() {
       <LoginForm />
     </Suspense>
   )
-} 
+}

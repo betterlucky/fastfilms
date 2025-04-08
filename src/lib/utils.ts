@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -17,7 +17,7 @@ export function formatDate(date: Date): string {
   return date.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   })
 }
 
@@ -36,4 +36,4 @@ export function calculateTimeLeft(deadlineDate: Date): { days: number } {
   const difference = deadlineDate.getTime() - now.getTime()
   const days = Math.ceil(difference / (1000 * 60 * 60 * 24))
   return { days: Math.max(days, 0) }
-} 
+}

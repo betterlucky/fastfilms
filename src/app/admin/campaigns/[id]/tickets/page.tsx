@@ -1,12 +1,12 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { DataTable } from "@/components/ui/data-table"
-import { columns } from "./columns"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { DataTable } from '@/components/ui/data-table'
+import { columns } from './columns'
 
 export default async function CampaignTicketsPage({
   params: { id },
@@ -14,8 +14,8 @@ export default async function CampaignTicketsPage({
   params: { id: string }
 }) {
   const session = await getServerSession(authOptions)
-  if (!session || session.user.role !== "ADMIN") {
-    redirect("/")
+  if (!session || session.user.role !== 'ADMIN') {
+    redirect('/')
   }
 
   const campaign = await prisma.campaign.findUnique({
@@ -27,7 +27,7 @@ export default async function CampaignTicketsPage({
             select: {
               name: true,
               email: true,
-            }
+            },
           },
           orders: {
             include: {
@@ -36,77 +36,94 @@ export default async function CampaignTicketsPage({
                 include: {
                   option: true,
                   selectedChoice: true,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: 'desc',
+        },
       },
       _count: {
         select: {
-          tickets: true
-        }
-      }
-    }
+          tickets: true,
+        },
+      },
+    },
   })
 
   if (!campaign) {
-    redirect("/admin/campaigns")
+    redirect('/admin/campaigns')
   }
 
   // Calculate ticket statistics
   const totalTickets = campaign._count.tickets
-  const totalRevenue = campaign.tickets.reduce((sum, ticket) => sum + Number(ticket.pricePaid), 0)
-  const payItForwardTickets = campaign.tickets.filter(ticket => ticket.status === 'PAY_IT_FORWARD').length
-  const standardTickets = campaign.tickets.filter(ticket => ticket.status === 'CONFIRMED').length
+  const totalRevenue = campaign.tickets.reduce(
+    (sum, ticket) => sum + Number(ticket.pricePaid),
+    0
+  )
+  const payItForwardTickets = campaign.tickets.filter(
+    (ticket) => ticket.status === 'PAY_IT_FORWARD'
+  ).length
+  const standardTickets = campaign.tickets.filter(
+    (ticket) => ticket.status === 'CONFIRMED'
+  ).length
 
   return (
-    <div className="container py-10 mx-auto">
-      <div className="max-w-7xl mx-auto">
-        <div className="justify-between items-center flex mb-6">
-          <h1 className="font-bold text-3xl">Campaign Tickets</h1>
+    <div className="container mx-auto py-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Campaign Tickets</h1>
           <Button variant="outline" asChild>
             <Link href="/admin/campaigns">Back to Campaigns</Link>
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 mb-6 gap-6">
+        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
           <Card>
-            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
-              <CardTitle className="font-medium text-sm">Total Tickets</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Tickets
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">{totalTickets}</div>
+              <div className="text-2xl font-bold">{totalTickets}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
-              <CardTitle className="font-medium text-sm">Total Revenue</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">£{totalRevenue.toFixed(2)}</div>
+              <div className="text-2xl font-bold">
+                £{totalRevenue.toFixed(2)}
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
-              <CardTitle className="font-medium text-sm">Standard Tickets</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Standard Tickets
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">{standardTickets}</div>
+              <div className="text-2xl font-bold">{standardTickets}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="items-center justify-between flex flex-row space-y-0 pb-2">
-              <CardTitle className="font-medium text-sm">Pay It Forward</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Pay It Forward
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">{payItForwardTickets}</div>
+              <div className="text-2xl font-bold">{payItForwardTickets}</div>
             </CardContent>
           </Card>
         </div>
@@ -122,4 +139,4 @@ export default async function CampaignTicketsPage({
       </div>
     </div>
   )
-} 
+}

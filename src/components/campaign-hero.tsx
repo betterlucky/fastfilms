@@ -1,68 +1,79 @@
 'use client'
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 interface Campaign {
-  id: string;
-  title: string;
-  movieTitle: string;
-  description: string;
-  posterPath: string | null;
-  posterUrl: string | null;
-  fundingTarget: string;
-  currentFunding: string;
-  currentTickets: number;
-  ticketCap: number;
-  screeningDate: Date;
-  deadlineDate: Date;
-  formattedTarget: string;
-  formattedCurrent: string;
-  formattedDate: string;
-  progress: number;
-  timeLeft: { days: number };
+  id: string
+  title: string
+  movieTitle: string
+  description: string
+  posterPath: string | null
+  posterUrl: string | null
+  fundingTarget: string
+  currentFunding: string
+  currentTickets: number
+  ticketCap: number
+  screeningDate: Date
+  deadlineDate: Date
+  formattedTarget: string
+  formattedCurrent: string
+  formattedDate: string
+  progress: number
+  timeLeft: { days: number }
   venue: {
-    name: string;
-    id: string;
-  };
+    name: string
+    id: string
+  }
   screen: {
-    name: string;
-    id: string;
-    capacity: number;
-  } | null;
-  hasScreenAllocated: boolean;
+    name: string
+    id: string
+    capacity: number
+  } | null
+  hasScreenAllocated: boolean
 }
 
 interface CampaignHeroProps {
-  campaign: Campaign;
+  campaign: Campaign
 }
 
 export function CampaignHero({ campaign }: CampaignHeroProps) {
-  const router = useRouter();
+  const router = useRouter()
 
   return (
     <div className="space-y-12">
       {/* Hero Section */}
       <section className="space-y-4 text-center">
-        <h1 className="font-bold text-4xl tracking-tight sm:text-6xl">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
           Bring Cinema to Your Community
         </h1>
         <p className="mx-auto max-w-3xl text-xl text-gray-600">
-          Support and attend community film screenings across Cornwall. Book tickets, pre-order food and drinks, and help bring cinema to your local area.
+          Support and attend community film screenings across Cornwall. Book
+          tickets, pre-order food and drinks, and help bring cinema to your
+          local area.
         </p>
       </section>
 
       {/* Featured Campaign Section */}
       <section className="mx-auto max-w-4xl">
         <div
-          className="group cursor-pointer block"
+          className="group block cursor-pointer"
           onClick={() => router.push(`/campaigns/${campaign.id}`)}
         >
-          <Card className="transition-transform hover:-translate-y-1 hover:shadow-lg border-2 border-primary">
+          <Card className="border-primary border-2 transition-transform hover:-translate-y-1 hover:shadow-lg">
             <CardHeader>
-              <CardTitle className="group-hover:text-gray-600 text-3xl">{campaign.movieTitle}</CardTitle>
+              <CardTitle className="text-3xl group-hover:text-gray-600">
+                {campaign.movieTitle}
+              </CardTitle>
               <CardDescription>{campaign.title}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -76,55 +87,73 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                   />
                 </div>
               ) : (
-                <div className="aspect-video items-center justify-center flex bg-gray-200 rounded-lg">
+                <div className="flex aspect-video items-center justify-center rounded-lg bg-gray-200">
                   <span className="text-gray-500">No poster available</span>
                 </div>
               )}
               <div className="space-y-2">
                 <p className="text-gray-600">{campaign.description}</p>
                 <div className="space-y-2 pt-4">
-                  <div className="items-center justify-between flex">
-                    <p className="text-sm text-gray-500">Cinema: {campaign.venue.name}</p>
-                    <p className="text-sm text-gray-500">{campaign.currentTickets} tickets sold</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-500">
+                      Cinema: {campaign.venue.name}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {campaign.currentTickets} tickets sold
+                    </p>
                   </div>
-                  <div className="items-center justify-between flex">
-                    <p className="text-sm text-gray-500">Date: {campaign.formattedDate}</p>
-                    <p className="text-sm text-gray-500">{campaign.timeLeft.days} days left</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-500">
+                      Date: {campaign.formattedDate}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {campaign.timeLeft.days} days left
+                    </p>
                   </div>
-                  <div className="items-center justify-between flex">
-                    <p className="text-sm text-gray-500">Target: {campaign.formattedTarget}</p>
-                    <p className="text-sm text-gray-500">Current: {campaign.formattedCurrent}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-500">
+                      Target: {campaign.formattedTarget}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Current: {campaign.formattedCurrent}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-gray-500">Progress: {campaign.progress}%</p>
-                    <div className="w-full h-2.5 bg-gray-200 rounded-full">
+                    <p className="text-sm text-gray-500">
+                      Progress: {campaign.progress}%
+                    </p>
+                    <div className="h-2.5 w-full rounded-full bg-gray-200">
                       <div
                         className={`h-2.5 rounded-full ${
                           campaign.progress >= 100
                             ? campaign.currentTickets >= campaign.ticketCap
-                              ? "bg-red-500"
-                              : "bg-green-500"
-                            : "bg-primary"
+                              ? 'bg-red-500'
+                              : 'bg-green-500'
+                            : 'bg-primary'
                         }`}
-                        style={{ width: `${Math.min(campaign.progress, 100)}%` }}
+                        style={{
+                          width: `${Math.min(campaign.progress, 100)}%`,
+                        }}
                       />
                     </div>
                     {campaign.progress >= 100 && (
-                      <p className={`text-sm font-medium ${campaign.currentTickets >= campaign.ticketCap ? "text-red-500" : "text-green-500"}`}>
+                      <p
+                        className={`text-sm font-medium ${campaign.currentTickets >= campaign.ticketCap ? 'text-red-500' : 'text-green-500'}`}
+                      >
                         {campaign.currentTickets >= campaign.ticketCap
-                          ? "SOLD OUT"
-                          : "Show confirmed, tickets still available"}
+                          ? 'SOLD OUT'
+                          : 'Show confirmed, tickets still available'}
                       </p>
                     )}
                   </div>
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="items-center justify-between flex">
+            <CardFooter className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
                 Tickets from £5 + £0.50 fee
               </div>
-              <div className="group-hover:text-gray-600 font-semibold text-primary">
+              <div className="text-primary font-semibold group-hover:text-gray-600">
                 Support This Campaign →
               </div>
             </CardFooter>
@@ -133,14 +162,17 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
       </section>
 
       {/* Features Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Community Powered</CardTitle>
             <CardDescription>Support local cinema initiatives</CardDescription>
           </CardHeader>
           <CardContent>
-            <p>Help bring cinema to your area by supporting crowdfunding campaigns. Every ticket counts!</p>
+            <p>
+              Help bring cinema to your area by supporting crowdfunding
+              campaigns. Every ticket counts!
+            </p>
           </CardContent>
         </Card>
 
@@ -150,7 +182,10 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
             <CardDescription>Pre-order from local venues</CardDescription>
           </CardHeader>
           <CardContent>
-            <p>Enjoy delicious food and drinks from our partner venues. Pre-order with your tickets for a seamless experience.</p>
+            <p>
+              Enjoy delicious food and drinks from our partner venues. Pre-order
+              with your tickets for a seamless experience.
+            </p>
           </CardContent>
         </Card>
 
@@ -160,25 +195,28 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
             <CardDescription>From £5 per ticket</CardDescription>
           </CardHeader>
           <CardContent>
-            <p>Affordable ticket pricing with a minimum of £5 plus a small transaction fee. Help make cinema accessible to all.</p>
+            <p>
+              Affordable ticket pricing with a minimum of £5 plus a small
+              transaction fee. Help make cinema accessible to all.
+            </p>
           </CardContent>
         </Card>
       </section>
 
       {/* Secondary CTA */}
       <section className="space-y-4 text-center">
-        <h2 className="font-bold text-3xl">Want to See More?</h2>
+        <h2 className="text-3xl font-bold">Want to See More?</h2>
         <p className="mx-auto max-w-2xl text-xl text-gray-600">
           Browse our upcoming campaigns and help bring cinema to your community.
         </p>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="lg"
-          onClick={() => router.push("/campaigns")}
+          onClick={() => router.push('/campaigns')}
         >
           View All Campaigns
         </Button>
       </section>
     </div>
-  );
-} 
+  )
+}

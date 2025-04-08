@@ -1,8 +1,8 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { NextResponse } from "next/server"
-import { z } from "zod"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 const campaignSchema = z.object({
   title: z.string().min(1),
@@ -19,14 +19,14 @@ const campaignSchema = z.object({
   charityId: z.string().nullable(),
   menuItemIds: z.array(z.string()),
   isFeatured: z.boolean(),
-  isTest: z.boolean()
+  isTest: z.boolean(),
 })
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    return new NextResponse("Unauthorized", { status: 401 })
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
@@ -50,19 +50,19 @@ export async function POST(request: Request) {
         isFeatured: body.isFeatured,
         isTest: body.isTest,
         menuItems: {
-          create: body.menuItemIds.map(menuItemId => ({
-            menuItemId
-          }))
-        }
-      }
+          create: body.menuItemIds.map((menuItemId) => ({
+            menuItemId,
+          })),
+        },
+      },
     })
 
     return NextResponse.json(campaign)
   } catch (error) {
-    console.error("[CAMPAIGNS_POST]", error)
+    console.error('[CAMPAIGNS_POST]', error)
     if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid request data", { status: 400 })
+      return new NextResponse('Invalid request data', { status: 400 })
     }
-    return new NextResponse("Internal error", { status: 500 })
+    return new NextResponse('Internal error', { status: 500 })
   }
-} 
+}

@@ -1,10 +1,10 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { prisma } from "@/lib/db"
-import { CampaignForm } from "./campaign-form"
-import { MenuItem, Screen, Venue } from "@prisma/client"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { prisma } from '@/lib/db'
+import { CampaignForm } from './campaign-form'
+import { MenuItem, Screen, Venue } from '@prisma/client'
 
 // Create a type for the serialized menu item where price is a number
 type SerializedMenuItem = Omit<MenuItem, 'price'> & { price: number }
@@ -17,7 +17,7 @@ export default async function NewCampaignPage() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    redirect("/")
+    redirect('/')
   }
 
   const venues = await prisma.venue.findMany({
@@ -25,11 +25,11 @@ export default async function NewCampaignPage() {
       screens: true,
       menuItems: {
         where: {
-          isActive: true
+          isActive: true,
         },
         orderBy: {
-          name: 'asc'
-        }
+          name: 'asc',
+        },
       },
     },
     orderBy: {
@@ -38,12 +38,12 @@ export default async function NewCampaignPage() {
   })
 
   // Serialize Decimal objects to numbers for client components
-  const serializedVenues: SerializedVenue[] = venues.map(venue => ({
+  const serializedVenues: SerializedVenue[] = venues.map((venue) => ({
     ...venue,
-    menuItems: venue.menuItems.map(item => ({
+    menuItems: venue.menuItems.map((item) => ({
       ...item,
-      price: item.price.toNumber() // Convert Decimal to number for client-side use
-    }))
+      price: item.price.toNumber(), // Convert Decimal to number for client-side use
+    })),
   }))
 
   const charities = await prisma.charity.findMany({
@@ -53,8 +53,8 @@ export default async function NewCampaignPage() {
   })
 
   return (
-    <div className="container py-10 mx-auto">
-      <h1 className="mb-8 font-bold text-3xl">Create New Campaign</h1>
+    <div className="container mx-auto py-10">
+      <h1 className="mb-8 text-3xl font-bold">Create New Campaign</h1>
       <Card>
         <CardHeader>
           <CardTitle>Campaign Details</CardTitle>
@@ -65,4 +65,4 @@ export default async function NewCampaignPage() {
       </Card>
     </div>
   )
-} 
+}

@@ -11,4 +11,4 @@ export async function main() {
     await prisma.$disconnect()
     process.exit(1)
   }
-} 
+}

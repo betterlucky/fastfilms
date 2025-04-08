@@ -1,15 +1,26 @@
 'use client'
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { PlusIcon, TrashIcon, ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import {
+  PlusIcon,
+  TrashIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+} from '@heroicons/react/24/outline'
 
 interface Choice {
   id?: string
@@ -40,46 +51,52 @@ interface MenuItemFormProps {
   }
 }
 
-const CATEGORIES = ["Food", "Drink", "Combo"]
+const CATEGORIES = ['Food', 'Drink', 'Combo']
 
-export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps) {
+export default function MenuItemForm({
+  venueId,
+  initialData,
+}: MenuItemFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const [formData, setFormData] = useState({
-    name: initialData?.name || "",
-    description: initialData?.description || "",
+    name: initialData?.name || '',
+    description: initialData?.description || '',
     price: initialData?.price || 0,
     category: initialData?.category || CATEGORIES[0],
     isActive: initialData?.isActive ?? true,
     options: (initialData?.options || []).map((opt, index) => ({
       ...opt,
-      order: opt.order ?? index
-    }))
+      order: opt.order ?? index,
+    })),
   })
 
   const addOption = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      options: [...prev.options, {
-        name: "",
-        description: "",
-        order: prev.options.length,
-        minChoices: 1,
-        maxChoices: 1,
-        choices: []
-      }]
+      options: [
+        ...prev.options,
+        {
+          name: '',
+          description: '',
+          order: prev.options.length,
+          minChoices: 1,
+          maxChoices: 1,
+          choices: [],
+        },
+      ],
     }))
   }
 
   const removeOption = (index: number) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newOptions = prev.options.filter((_, i) => i !== index)
       // Reorder remaining options
       return {
         ...prev,
-        options: newOptions.map((opt, i) => ({ ...opt, order: i }))
+        options: newOptions.map((opt, i) => ({ ...opt, order: i })),
       }
     })
   }
@@ -87,62 +104,73 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
   const moveOption = (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= formData.options.length) return
 
-    setFormData(prev => {
+    setFormData((prev) => {
       const newOptions = [...prev.options]
       const [movedOption] = newOptions.splice(fromIndex, 1)
       newOptions.splice(toIndex, 0, movedOption)
       // Update order values
       return {
         ...prev,
-        options: newOptions.map((opt, i) => ({ ...opt, order: i }))
+        options: newOptions.map((opt, i) => ({ ...opt, order: i })),
       }
     })
   }
 
   const updateOption = (index: number, field: keyof Option, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      options: prev.options.map((option, i) => 
+      options: prev.options.map((option, i) =>
         i === index ? { ...option, [field]: value } : option
-      )
+      ),
     }))
   }
 
   const addChoice = (optionIndex: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      options: prev.options.map((option, i) => 
-        i === optionIndex ? {
-          ...option,
-          choices: [...option.choices, { name: "", priceAdjustment: 0 }]
-        } : option
-      )
+      options: prev.options.map((option, i) =>
+        i === optionIndex
+          ? {
+              ...option,
+              choices: [...option.choices, { name: '', priceAdjustment: 0 }],
+            }
+          : option
+      ),
     }))
   }
 
   const removeChoice = (optionIndex: number, choiceIndex: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      options: prev.options.map((option, i) => 
-        i === optionIndex ? {
-          ...option,
-          choices: option.choices.filter((_, j) => j !== choiceIndex)
-        } : option
-      )
+      options: prev.options.map((option, i) =>
+        i === optionIndex
+          ? {
+              ...option,
+              choices: option.choices.filter((_, j) => j !== choiceIndex),
+            }
+          : option
+      ),
     }))
   }
 
-  const updateChoice = (optionIndex: number, choiceIndex: number, field: keyof Choice, value: any) => {
-    setFormData(prev => ({
+  const updateChoice = (
+    optionIndex: number,
+    choiceIndex: number,
+    field: keyof Choice,
+    value: any
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      options: prev.options.map((option, i) => 
-        i === optionIndex ? {
-          ...option,
-          choices: option.choices.map((choice, j) => 
-            j === choiceIndex ? { ...choice, [field]: value } : choice
-          )
-        } : option
-      )
+      options: prev.options.map((option, i) =>
+        i === optionIndex
+          ? {
+              ...option,
+              choices: option.choices.map((choice, j) =>
+                j === choiceIndex ? { ...choice, [field]: value } : choice
+              ),
+            }
+          : option
+      ),
     }))
   }
 
@@ -152,13 +180,16 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
     setIsLoading(true)
 
     try {
-      const response = await fetch(`/api/venues/${venueId}/menu${initialData?.id ? `/${initialData.id}` : ''}`, {
-        method: initialData?.id ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
+      const response = await fetch(
+        `/api/venues/${venueId}/menu${initialData?.id ? `/${initialData.id}` : ''}`,
+        {
+          method: initialData?.id ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        }
+      )
 
       if (!response.ok) {
         const data = await response.json()
@@ -185,7 +216,9 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   required
                 />
               </div>
@@ -193,7 +226,9 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, category: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -214,7 +249,12 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 required
               />
             </div>
@@ -228,15 +268,22 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                   min="0"
                   step="0.01"
                   value={formData.price}
-                  onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      price: parseFloat(e.target.value),
+                    }))
+                  }
                   required
                 />
               </div>
-              <div className="items-center flex space-x-2">
+              <div className="flex items-center space-x-2">
                 <Switch
                   id="isActive"
                   checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, isActive: checked }))
+                  }
                 />
                 <Label htmlFor="isActive">Active</Label>
               </div>
@@ -248,33 +295,45 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            <div className="justify-between items-center flex">
-              <h3 className="font-semibold text-lg">Options</h3>
-              <Button type="button" onClick={addOption} variant="outline" size="sm">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Options</h3>
+              <Button
+                type="button"
+                onClick={addOption}
+                variant="outline"
+                size="sm"
+              >
                 <PlusIcon className="mr-2 size-4" />
                 Add Option
               </Button>
             </div>
 
             {formData.options.map((option, optionIndex) => (
-              <div key={optionIndex} className="space-y-4 p-4 border rounded-lg">
-                <div className="justify-between items-start flex">
+              <div
+                key={optionIndex}
+                className="space-y-4 rounded-lg border p-4"
+              >
+                <div className="flex items-start justify-between">
                   <div className="flex-1 space-y-4">
-                    <div className="items-center flex gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="flex-1">
                         <Label>Option Name</Label>
                         <Input
                           value={option.name}
-                          onChange={(e) => updateOption(optionIndex, 'name', e.target.value)}
+                          onChange={(e) =>
+                            updateOption(optionIndex, 'name', e.target.value)
+                          }
                           required
                         />
                       </div>
-                      <div className="flex flex-col pt-6 gap-1">
+                      <div className="flex flex-col gap-1 pt-6">
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => moveOption(optionIndex, optionIndex - 1)}
+                          onClick={() =>
+                            moveOption(optionIndex, optionIndex - 1)
+                          }
                           disabled={optionIndex === 0}
                         >
                           <ArrowUpIcon className="size-4" />
@@ -283,7 +342,9 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => moveOption(optionIndex, optionIndex + 1)}
+                          onClick={() =>
+                            moveOption(optionIndex, optionIndex + 1)
+                          }
                           disabled={optionIndex === formData.options.length - 1}
                         >
                           <ArrowDownIcon className="size-4" />
@@ -306,7 +367,13 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                           type="number"
                           min="0"
                           value={option.minChoices}
-                          onChange={(e) => updateOption(optionIndex, 'minChoices', parseInt(e.target.value))}
+                          onChange={(e) =>
+                            updateOption(
+                              optionIndex,
+                              'minChoices',
+                              parseInt(e.target.value)
+                            )
+                          }
                           required
                         />
                       </div>
@@ -316,7 +383,13 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                           type="number"
                           min="1"
                           value={option.maxChoices}
-                          onChange={(e) => updateOption(optionIndex, 'maxChoices', parseInt(e.target.value))}
+                          onChange={(e) =>
+                            updateOption(
+                              optionIndex,
+                              'maxChoices',
+                              parseInt(e.target.value)
+                            )
+                          }
                           required
                         />
                       </div>
@@ -325,7 +398,7 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                 </div>
 
                 <div className="space-y-2">
-                  <div className="justify-between items-center flex">
+                  <div className="flex items-center justify-between">
                     <h4 className="font-medium">Choices</h4>
                     <Button
                       type="button"
@@ -339,11 +412,21 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                   </div>
 
                   {option.choices.map((choice, choiceIndex) => (
-                    <div key={choiceIndex} className="items-center flex space-x-2">
+                    <div
+                      key={choiceIndex}
+                      className="flex items-center space-x-2"
+                    >
                       <Input
                         placeholder="Choice name"
                         value={choice.name}
-                        onChange={(e) => updateChoice(optionIndex, choiceIndex, 'name', e.target.value)}
+                        onChange={(e) =>
+                          updateChoice(
+                            optionIndex,
+                            choiceIndex,
+                            'name',
+                            e.target.value
+                          )
+                        }
                         required
                       />
                       <Input
@@ -352,7 +435,14 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
                         step="0.01"
                         placeholder="Price adjustment"
                         value={choice.priceAdjustment}
-                        onChange={(e) => updateChoice(optionIndex, choiceIndex, 'priceAdjustment', parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          updateChoice(
+                            optionIndex,
+                            choiceIndex,
+                            'priceAdjustment',
+                            parseFloat(e.target.value)
+                          )
+                        }
                         required
                       />
                       <Button
@@ -372,13 +462,9 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
         </CardContent>
       </Card>
 
-      {error && (
-        <div className="text-sm text-red-600">
-          {error}
-        </div>
-      )}
+      {error && <div className="text-sm text-red-600">{error}</div>}
 
-      <div className="justify-end flex space-x-4">
+      <div className="flex justify-end space-x-4">
         <Button
           type="button"
           variant="outline"
@@ -388,9 +474,9 @@ export default function MenuItemForm({ venueId, initialData }: MenuItemFormProps
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : (initialData?.id ? "Update" : "Create")}
+          {isLoading ? 'Saving...' : initialData?.id ? 'Update' : 'Create'}
         </Button>
       </div>
     </form>
   )
-} 
+}

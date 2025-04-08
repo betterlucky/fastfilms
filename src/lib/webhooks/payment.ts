@@ -1,11 +1,11 @@
-import { PrismaClient, Prisma } from "@prisma/client"
-import { sendEmail } from "@/lib/email"
-import { prisma } from "@/lib/db"
-import { Stripe } from "stripe"
-import { NextResponse } from "next/server"
-import { generateTicketConfirmationEmail } from "@/lib/email"
-import { EmailData } from "@/lib/types"
-import { WebhookHandlerResponse } from "./types"
+import { PrismaClient, Prisma } from '@prisma/client'
+import { sendEmail } from '@/lib/email'
+import { prisma } from '@/lib/db'
+import { Stripe } from 'stripe'
+import { NextResponse } from 'next/server'
+import { generateTicketConfirmationEmail } from '@/lib/email'
+import { EmailData } from '@/lib/types'
+import { WebhookHandlerResponse } from './types'
 
 const prismaClient = new PrismaClient()
 
@@ -19,7 +19,7 @@ export async function handlePaymentSuccess(
   if (ticketIds.length === 0) {
     return {
       received: false,
-      error: "No ticket IDs found",
+      error: 'No ticket IDs found',
       status: 400,
     }
   }
@@ -29,17 +29,17 @@ export async function handlePaymentSuccess(
     await prisma.$transaction([
       prisma.ticket.updateMany({
         where: { id: { in: ticketIds } },
-        data: { status: "CONFIRMED" },
+        data: { status: 'CONFIRMED' },
       }),
       prisma.campaign.update({
         where: { id: campaignId },
         data: {
           currentTickets: {
-            increment: ticketIds.length
-          }
-        }
-      })
-    ]);
+            increment: ticketIds.length,
+          },
+        },
+      }),
+    ])
 
     // Get tickets with orders for the email
     const tickets = await prisma.ticket.findMany({
@@ -96,7 +96,7 @@ export async function handlePaymentSuccess(
     if (tickets.length === 0) {
       return {
         received: false,
-        error: "No tickets found",
+        error: 'No tickets found',
         status: 404,
       }
     }
@@ -113,17 +113,17 @@ export async function handlePaymentSuccess(
     // Generate and send confirmation email to customer
     const emailHtml = generateTicketConfirmationEmail(emailData)
     await sendEmail({
-      to: tickets[0].user?.email || "",
+      to: tickets[0].user?.email || '',
       subject: `Your tickets for ${tickets[0].campaign.movieTitle}`,
       html: emailHtml,
     })
 
     return { received: true }
   } catch (error) {
-    console.error("Error processing payment:", error)
+    console.error('Error processing payment:', error)
     return {
       received: false,
-      error: "Error processing payment",
+      error: 'Error processing payment',
       status: 500,
     }
   }
@@ -139,10 +139,10 @@ export async function handlePaymentFailure(
 
     return { received: true }
   } catch (error) {
-    console.error("Error processing payment failure:", error)
+    console.error('Error processing payment failure:', error)
     return {
       received: false,
-      error: "Failed to process payment failure",
+      error: 'Failed to process payment failure',
       status: 500,
     }
   }
@@ -176,19 +176,19 @@ function generateConfirmationEmail(
   tickets: Ticket[]
 ): string {
   const formatDate = (date: Date) =>
-    new Date(date).toLocaleDateString("en-GB", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "numeric",
-      minute: "numeric",
+    new Date(date).toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
     })
 
   const formatPrice = (price: number | Prisma.Decimal) =>
-    new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency: "GBP",
+    new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
     }).format(Number(price) / 100)
 
   const ticketList = tickets
@@ -196,29 +196,26 @@ function generateConfirmationEmail(
       const ordersList = ticket.orders
         .map((order) => {
           const choices = order.choices
-            .map(
-              (choice) =>
-                `${choice.selectedChoice} (${choice.optionId})`
-            )
-            .join(", ")
+            .map((choice) => `${choice.selectedChoice} (${choice.optionId})`)
+            .join(', ')
 
           return `
             <li>
-              ${order.menuItem.name}${choices ? ` - ${choices}` : ""}
+              ${order.menuItem.name}${choices ? ` - ${choices}` : ''}
               (${formatPrice(order.menuItem.price)})
             </li>
           `
         })
-        .join("")
+        .join('')
 
       return `
         <div style="margin-bottom: 20px;">
           <h3>Ticket #${ticket.id}</h3>
-          ${ordersList ? `<h4>Orders:</h4><ul>${ordersList}</ul>` : ""}
+          ${ordersList ? `<h4>Orders:</h4><ul>${ordersList}</ul>` : ''}
         </div>
       `
     })
-    .join("")
+    .join('')
 
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -233,4 +230,4 @@ function generateConfirmationEmail(
       <p>Thank you for your purchase!</p>
     </div>
   `
-} 
+}

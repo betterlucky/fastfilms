@@ -1,5 +1,5 @@
-import { NextRequest } from "next/server"
-import { constructStripeEvent, handleStripeWebhook } from "@/lib/webhooks"
+import { NextRequest } from 'next/server'
+import { constructStripeEvent, handleStripeWebhook } from '@/lib/webhooks'
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 
@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
 
   if (error || !event) {
     return Response.json(
-      { message: error?.message || "No event constructed" },
+      { message: error?.message || 'No event constructed' },
       { status: error?.status || 400 }
     )
   }
@@ -17,10 +17,10 @@ export async function POST(request: NextRequest) {
 
   if (!result.received) {
     return Response.json(
-      { message: result.error || "Failed to process webhook" },
+      { message: result.error || 'Failed to process webhook' },
       { status: result.status || 400 }
     )
   }
 
   return Response.json({ received: true })
-} 
+}

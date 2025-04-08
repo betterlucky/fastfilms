@@ -1,11 +1,11 @@
-import { NextAuthOptions } from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/lib/db"
-import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
+import { NextAuthOptions } from 'next-auth'
+import { PrismaAdapter } from '@auth/prisma-adapter'
+import { prisma } from '@/lib/db'
+import GoogleProvider from 'next-auth/providers/google'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import bcrypt from 'bcryptjs'
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: {
       id: string
@@ -25,7 +25,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     id: string
     name?: string | null
@@ -43,14 +43,14 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials")
+          throw new Error('Invalid credentials')
         }
 
         const user = await prisma.user.findUnique({
@@ -60,11 +60,11 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!user || !user?.password) {
-          throw new Error("Invalid credentials")
+          throw new Error('Invalid credentials')
         }
 
-        if (!user.emailVerified && !credentials.password.startsWith("$2a$")) {
-          throw new Error("Please verify your email before logging in")
+        if (!user.emailVerified && !credentials.password.startsWith('$2a$')) {
+          throw new Error('Please verify your email before logging in')
         }
 
         const isCorrectPassword = await bcrypt.compare(
@@ -73,7 +73,7 @@ export const authOptions: NextAuthOptions = {
         )
 
         if (!isCorrectPassword) {
-          throw new Error("Invalid credentials")
+          throw new Error('Invalid credentials')
         }
 
         return user
@@ -101,10 +101,10 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/login",
+    signIn: '/login',
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
-} 
+}

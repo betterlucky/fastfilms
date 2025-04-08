@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/db"
-import { NextResponse, type NextRequest } from "next/server"
-import bcrypt from "bcryptjs"
-import { sendEmail } from "@/lib/email"
-import { generateVerificationEmail } from "@/lib/email"
-import { v4 as uuidv4 } from "uuid"
+import { prisma } from '@/lib/db'
+import { NextResponse, type NextRequest } from 'next/server'
+import bcrypt from 'bcryptjs'
+import { sendEmail } from '@/lib/email'
+import { generateVerificationEmail } from '@/lib/email'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: 'Email and password are required' },
         { status: 400 }
       )
     }
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { error: 'User already exists' },
         { status: 400 }
       )
     }
@@ -59,11 +59,11 @@ export async function POST(request: NextRequest) {
       const emailHtml = generateVerificationEmail(token, baseUrl)
       await sendEmail({
         to: email,
-        subject: "Verify your FastFilms account",
+        subject: 'Verify your FastFilms account',
         html: emailHtml,
       })
     } catch (emailError) {
-      console.error("Failed to send verification email:", emailError)
+      console.error('Failed to send verification email:', emailError)
       // Delete the user and token since email failed
       await prisma.user.delete({
         where: { id: user.id },
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         where: { token },
       })
       return NextResponse.json(
-        { error: "Failed to send verification email. Please try again later." },
+        { error: 'Failed to send verification email. Please try again later.' },
         { status: 500 }
       )
     }
@@ -81,13 +81,10 @@ export async function POST(request: NextRequest) {
       id: user.id,
       name: user.name,
       email: user.email,
-      message: "Verification email sent. Please check your inbox.",
+      message: 'Verification email sent. Please check your inbox.',
     })
   } catch (error) {
-    console.error("Error in registration:", error)
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    )
+    console.error('Error in registration:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
-} 
+}

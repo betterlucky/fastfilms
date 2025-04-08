@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/db"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { notFound } from "next/navigation"
-import CampaignDetails from "./campaign-details"
+import { prisma } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { notFound } from 'next/navigation'
+import CampaignDetails from './campaign-details'
 
 export default async function CampaignPage({
   params: { id },
@@ -10,7 +10,7 @@ export default async function CampaignPage({
   params: { id: string }
 }) {
   const session = await getServerSession(authOptions)
-  const isAdmin = session?.user?.role === "ADMIN"
+  const isAdmin = session?.user?.role === 'ADMIN'
 
   const campaign = await prisma.campaign.findUnique({
     where: { id },
@@ -40,14 +40,14 @@ export default async function CampaignPage({
           postcode: true,
           phone: true,
           url: true,
-          contactEmail: true
-        }
+          contactEmail: true,
+        },
       },
       screen: true,
       menuItems: {
         include: {
-          menuItem: true
-        }
+          menuItem: true,
+        },
       },
     },
   })
@@ -83,14 +83,14 @@ export default async function CampaignPage({
     currentFunding: campaign.currentFunding.toString(),
     menuItems: campaign.menuItems.map(({ menuItem }) => ({
       ...menuItem,
-      price: Number(menuItem.price)
-    }))
+      price: Number(menuItem.price),
+    })),
   }
 
   // Convert venue menu item prices to numbers
-  const venueMenuItemsWithNumberPrices = venueMenuItems.map(item => ({
+  const venueMenuItemsWithNumberPrices = venueMenuItems.map((item) => ({
     ...item,
-    price: Number(item.price)
+    price: Number(item.price),
   }))
 
   return (

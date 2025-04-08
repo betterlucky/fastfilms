@@ -1,12 +1,12 @@
-import { prisma } from "./db";
-import { formatPrice, formatDate, calculateProgress } from "./utils";
+import { prisma } from './db'
+import { formatPrice, formatDate, calculateProgress } from './utils'
 
 export async function getFeaturedCampaign() {
   // First try to get the manually featured campaign that's still active and not past its deadline
   let campaign = await prisma.campaign.findFirst({
     where: {
       isFeatured: true,
-      status: "ACTIVE",
+      status: 'ACTIVE',
       deadlineDate: {
         gt: new Date(),
       },
@@ -40,13 +40,13 @@ export async function getFeaturedCampaign() {
         },
       },
     },
-  });
+  })
 
   // If no featured campaign is found or it's expired, get the next upcoming active campaign
   if (!campaign) {
     campaign = await prisma.campaign.findFirst({
       where: {
-        status: "ACTIVE",
+        status: 'ACTIVE',
         deadlineDate: {
           gt: new Date(),
         },
@@ -86,10 +86,10 @@ export async function getFeaturedCampaign() {
           },
         },
       },
-    });
+    })
   }
 
-  if (!campaign) return null;
+  if (!campaign) return null
 
   return {
     ...campaign,
@@ -98,14 +98,17 @@ export async function getFeaturedCampaign() {
     formattedTarget: formatPrice(Number(campaign.fundingTarget)),
     formattedCurrent: formatPrice(Number(campaign.currentFunding)),
     formattedDate: formatDate(campaign.screeningDate),
-    progress: calculateProgress(Number(campaign.currentFunding), Number(campaign.fundingTarget)),
+    progress: calculateProgress(
+      Number(campaign.currentFunding),
+      Number(campaign.fundingTarget)
+    ),
     timeLeft: calculateTimeLeft(campaign.deadlineDate),
-    posterUrl: campaign.posterPath 
+    posterUrl: campaign.posterPath
       ? `https://image.tmdb.org/t/p/w500${campaign.posterPath}`
       : null,
     hasAssignedVenue: campaign.venueId !== null,
     hasScreenAllocated: campaign.screen !== null,
-  };
+  }
 }
 
 // Function to toggle the featured status of a campaign
@@ -118,7 +121,7 @@ export async function toggleCampaignFeatured(campaignId: string) {
     data: {
       isFeatured: false,
     },
-  });
+  })
 
   // Then feature the selected campaign
   const campaign = await prisma.campaign.update({
@@ -128,9 +131,9 @@ export async function toggleCampaignFeatured(campaignId: string) {
     data: {
       isFeatured: true,
     },
-  });
+  })
 
-  return campaign;
+  return campaign
 }
 
 export function calculateTimeLeft(deadlineDate: Date): { days: number } {
@@ -143,7 +146,7 @@ export function calculateTimeLeft(deadlineDate: Date): { days: number } {
 export async function getCampaigns() {
   const campaigns = await prisma.campaign.findMany({
     where: {
-      status: "ACTIVE",
+      status: 'ACTIVE',
       deadlineDate: {
         gt: new Date(),
       },
@@ -177,23 +180,26 @@ export async function getCampaigns() {
         },
       },
     },
-  });
+  })
 
-  return campaigns.map(campaign => ({
+  return campaigns.map((campaign) => ({
     ...campaign,
     fundingTarget: campaign.fundingTarget.toString(),
     currentFunding: campaign.currentFunding.toString(),
     formattedTarget: formatPrice(Number(campaign.fundingTarget)),
     formattedCurrent: formatPrice(Number(campaign.currentFunding)),
     formattedDate: formatDate(campaign.screeningDate),
-    progress: calculateProgress(Number(campaign.currentFunding), Number(campaign.fundingTarget)),
+    progress: calculateProgress(
+      Number(campaign.currentFunding),
+      Number(campaign.fundingTarget)
+    ),
     timeLeft: calculateTimeLeft(campaign.deadlineDate),
-    posterUrl: campaign.posterPath 
+    posterUrl: campaign.posterPath
       ? `https://image.tmdb.org/t/p/w500${campaign.posterPath}`
       : null,
     hasAssignedVenue: campaign.venueId !== null,
     hasScreenAllocated: campaign.screen !== null,
     startDate: campaign.screeningDate,
     endDate: campaign.deadlineDate,
-  }));
-} 
+  }))
+}

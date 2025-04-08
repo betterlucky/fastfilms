@@ -1,9 +1,9 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { Prisma } from "@prisma/client"
-import { NextResponse } from "next/server"
-import { z } from "zod"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { Prisma } from '@prisma/client'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 const venueSchema = z.object({
   name: z.string().min(1),
@@ -11,7 +11,7 @@ const venueSchema = z.object({
   city: z.string().min(1),
   postcode: z.string().min(1),
   phone: z.string().optional(),
-  url: z.string().url().optional().or(z.literal("")),
+  url: z.string().url().optional().or(z.literal('')),
   contactEmail: z.array(z.string().email()).default([]),
 })
 
@@ -22,7 +22,7 @@ export async function GET(
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    return new NextResponse("Unauthorized", { status: 401 })
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   const venue = await prisma.venue.findUnique({
@@ -39,7 +39,7 @@ export async function PATCH(
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    return new NextResponse("Unauthorized", { status: 401 })
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
@@ -61,11 +61,11 @@ export async function PATCH(
 
     return NextResponse.json(venue)
   } catch (error) {
-    console.error("Error updating venue:", error)
+    console.error('Error updating venue:', error)
     if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid request data", { status: 400 })
+      return new NextResponse('Invalid request data', { status: 400 })
     }
-    return new NextResponse("Internal Server Error", { status: 500 })
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
 
@@ -76,7 +76,7 @@ export async function DELETE(
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    return new NextResponse("Unauthorized", { status: 401 })
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
@@ -88,33 +88,32 @@ export async function DELETE(
           select: {
             campaigns: {
               where: {
-                status: "ACTIVE"
-              }
-            }
-          }
-        }
-      }
+                status: 'ACTIVE',
+              },
+            },
+          },
+        },
+      },
     })
 
     if (!venue) {
-      return new NextResponse("Venue not found", { status: 404 })
+      return new NextResponse('Venue not found', { status: 404 })
     }
 
     if (venue._count.campaigns > 0) {
-      return new NextResponse(
-        "Cannot delete venue with active campaigns",
-        { status: 400 }
-      )
+      return new NextResponse('Cannot delete venue with active campaigns', {
+        status: 400,
+      })
     }
 
     // Delete the venue
     await prisma.venue.delete({
-      where: { id: params.id }
+      where: { id: params.id },
     })
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error("Error deleting venue:", error)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    console.error('Error deleting venue:', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
-} 
+}

@@ -1,10 +1,14 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { handleAddScreen, handleUpdateScreen, handleDeleteScreen } from "./actions"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  handleAddScreen,
+  handleUpdateScreen,
+  handleDeleteScreen,
+} from './actions'
 
 async function getVenue(id: string) {
   const venue = await prisma.venue.findUnique({
@@ -15,15 +19,19 @@ async function getVenue(id: string) {
   })
 
   if (!venue) {
-    throw new Error("Venue not found")
+    throw new Error('Venue not found')
   }
 
   return venue
 }
 
-export default async function VenueScreensPage({ params }: { params: { id: string } }) {
+export default async function VenueScreensPage({
+  params,
+}: {
+  params: { id: string }
+}) {
   const session = await getServerSession(authOptions)
-  const isAdmin = session?.user?.role === "ADMIN"
+  const isAdmin = session?.user?.role === 'ADMIN'
   const venue = await getVenue(params.id)
 
   if (!isAdmin) {
@@ -31,8 +39,8 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto py-8">
+      <div className="mx-auto max-w-4xl">
         <div className="grid gap-8">
           <Card>
             <CardHeader>
@@ -45,7 +53,10 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
                   <input type="hidden" name="venueId" value={venue.id} />
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="name" className="block font-medium text-sm text-gray-700">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Screen Name
                       </label>
                       <Input
@@ -57,7 +68,10 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
                       />
                     </div>
                     <div>
-                      <label htmlFor="capacity" className="block font-medium text-sm text-gray-700">
+                      <label
+                        htmlFor="capacity"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Capacity
                       </label>
                       <Input
@@ -75,17 +89,30 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
 
                 {/* Existing Screens */}
                 <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Existing Screens</h3>
+                  <h3 className="text-lg font-medium">Existing Screens</h3>
                   {venue.screens.map((screen) => (
-                    <div key={screen.id} className="items-center justify-between flex p-4 border rounded-lg">
+                    <div
+                      key={screen.id}
+                      className="flex items-center justify-between rounded-lg border p-4"
+                    >
                       <div>
                         <h4 className="font-medium">{screen.name}</h4>
-                        <p className="text-sm text-gray-500">Capacity: {screen.capacity}</p>
+                        <p className="text-sm text-gray-500">
+                          Capacity: {screen.capacity}
+                        </p>
                       </div>
                       <div className="flex space-x-2">
                         <form action={handleUpdateScreen}>
-                          <input type="hidden" name="screenId" value={screen.id} />
-                          <input type="hidden" name="venueId" value={venue.id} />
+                          <input
+                            type="hidden"
+                            name="screenId"
+                            value={screen.id}
+                          />
+                          <input
+                            type="hidden"
+                            name="venueId"
+                            value={venue.id}
+                          />
                           <div className="flex space-x-2">
                             <Input
                               type="text"
@@ -104,9 +131,19 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
                           </div>
                         </form>
                         <form action={handleDeleteScreen}>
-                          <input type="hidden" name="screenId" value={screen.id} />
-                          <input type="hidden" name="venueId" value={venue.id} />
-                          <Button type="submit" variant="destructive">Delete</Button>
+                          <input
+                            type="hidden"
+                            name="screenId"
+                            value={screen.id}
+                          />
+                          <input
+                            type="hidden"
+                            name="venueId"
+                            value={venue.id}
+                          />
+                          <Button type="submit" variant="destructive">
+                            Delete
+                          </Button>
                         </form>
                       </div>
                     </div>
@@ -119,4 +156,4 @@ export default async function VenueScreensPage({ params }: { params: { id: strin
       </div>
     </div>
   )
-} 
+}

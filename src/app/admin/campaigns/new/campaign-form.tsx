@@ -1,17 +1,24 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
-import { Campaign, Venue, Charity, MenuItem, Screen } from "@prisma/client"
-import FilmSearch from "@/components/movie-search"
-import { TMDBFilm } from "@/lib/tmdb"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { TimeInput } from '@/components/ui/time-input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { Campaign, Venue, Charity, MenuItem, Screen } from '@prisma/client'
+import FilmSearch from '@/components/movie-search'
+import { TMDBFilm } from '@/lib/tmdb'
 
 // Create a type for the serialized menu item where price is a number
 type SerializedMenuItem = Omit<MenuItem, 'price'> & { price: number }
@@ -25,19 +32,22 @@ interface CampaignFormProps {
   charities: Charity[]
 }
 
+type TimeUnit = 'days' | 'weeks'
+
 export function CampaignForm({ venues, charities }: CampaignFormProps) {
   const router = useRouter()
-  const [selectedVenue, setSelectedVenue] = useState("")
-  const [selectedScreen, setSelectedScreen] = useState("")
+  const [selectedVenue, setSelectedVenue] = useState('')
+  const [selectedScreen, setSelectedScreen] = useState('')
   const [screeningDate, setScreeningDate] = useState(new Date())
-  const [deadlineDate, setDeadlineDate] = useState(new Date())
+  const [deadlineTimeAmount, setDeadlineTimeAmount] = useState(1)
+  const [deadlineTimeUnit, setDeadlineTimeUnit] = useState<TimeUnit>('weeks')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFilm, setSelectedFilm] = useState<TMDBFilm | null>(null)
-  const [title, setTitle] = useState("")
-  const [movieTitle, setMovieTitle] = useState("")
-  const [description, setDescription] = useState("")
+  const [title, setTitle] = useState('')
+  const [movieTitle, setMovieTitle] = useState('')
+  const [description, setDescription] = useState('')
 
-  const currentVenue = venues.find(v => v.id === selectedVenue)
+  const currentVenue = venues.find((v) => v.id === selectedVenue)
 
   const handleFilmSelect = (film: TMDBFilm) => {
     setSelectedFilm(film)
@@ -46,8 +56,18 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
       setTitle(film.title)
     }
     if (!description) {
-      setDescription(film.overview || "")
+      setDescription(film.overview || '')
     }
+  }
+
+  const calculateDeadlineDate = (): Date => {
+    const deadline = new Date(screeningDate)
+    if (deadlineTimeUnit === 'weeks') {
+      deadline.setDate(deadline.getDate() - (deadlineTimeAmount * 7))
+    } else {
+      deadline.setDate(deadline.getDate() - deadlineTimeAmount)
+    }
+    return deadline
   }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -56,7 +76,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
 
     setIsSubmitting(true)
     const formData = new FormData(event.currentTarget)
-    
+
     try {
       const response = await fetch('/api/admin/campaigns', {
         method: 'POST',
@@ -66,13 +86,19 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
           movieTitle: movieTitle,
           customBlurb: formData.get('customBlurb'),
           venueId: formData.get('venueId'),
-          screenId: formData.get('screenId') === 'unassign' ? null : formData.get('screenId'),
+          screenId:
+            formData.get('screenId') === 'unassign'
+              ? null
+              : formData.get('screenId'),
           screeningDate: screeningDate,
           screeningTime: formData.get('screeningTime'),
-          deadlineDate: deadlineDate,
+          deadlineDate: calculateDeadlineDate(),
           ticketCap: Number(formData.get('ticketCap')),
           fundingTarget: Number(formData.get('fundingTarget')),
-          charityId: formData.get('charityId') === 'none' ? null : formData.get('charityId'),
+          charityId:
+            formData.get('charityId') === 'none'
+              ? null
+              : formData.get('charityId'),
           menuItemIds: formData.getAll('menuItemIds[]'),
           isFeatured: formData.get('isFeatured') === 'on',
           isTest: formData.get('isTest') === 'on',
@@ -80,8 +106,8 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
           posterPath: selectedFilm?.poster_path || null,
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       })
 
       if (!response.ok) {
@@ -102,8 +128,10 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
     <form onSubmit={onSubmit} className="space-y-8">
       <div className="space-y-4">
         <div>
-          <label htmlFor="movieTitle" className="block font-medium text-sm">Film Title</label>
-          <FilmSearch 
+          <label htmlFor="movieTitle" className="block text-sm font-medium">
+            Film Title
+          </label>
+          <FilmSearch
             onSelect={handleFilmSelect}
             value={movieTitle}
             onChange={setMovieTitle}
@@ -111,7 +139,9 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="title" className="block font-medium text-sm">Campaign Title</label>
+          <label htmlFor="title" className="block text-sm font-medium">
+            Campaign Title
+          </label>
           <Input
             id="title"
             value={title}
@@ -121,7 +151,9 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="description" className="block font-medium text-sm">Description</label>
+          <label htmlFor="description" className="block text-sm font-medium">
+            Description
+          </label>
           <Textarea
             id="description"
             value={description}
@@ -131,16 +163,21 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="customBlurb" className="block font-medium text-sm">Custom Blurb</label>
-          <Textarea
-            id="customBlurb"
-            name="customBlurb"
-          />
+          <label htmlFor="customBlurb" className="block text-sm font-medium">
+            Custom Blurb
+          </label>
+          <Textarea id="customBlurb" name="customBlurb" />
         </div>
 
         <div>
-          <label htmlFor="venue" className="block font-medium text-sm">Venue</label>
-          <Select name="venueId" value={selectedVenue} onValueChange={setSelectedVenue}>
+          <label htmlFor="venue" className="block text-sm font-medium">
+            Venue
+          </label>
+          <Select
+            name="venueId"
+            value={selectedVenue}
+            onValueChange={setSelectedVenue}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a venue" />
             </SelectTrigger>
@@ -155,9 +192,11 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="screen" className="block font-medium text-sm">Screen</label>
-          <Select 
-            name="screenId" 
+          <label htmlFor="screen" className="block text-sm font-medium">
+            Screen
+          </label>
+          <Select
+            name="screenId"
             value={selectedScreen}
             onValueChange={setSelectedScreen}
           >
@@ -176,23 +215,24 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="screeningDate" className="block font-medium text-sm">Screening Date & Time</label>
+          <label htmlFor="screeningDate" className="block text-sm font-medium">
+            Screening Date & Time
+          </label>
           <div className="flex gap-4">
             <div className="flex-1">
               <DatePicker
                 selected={screeningDate}
                 onChange={(date: Date) => setScreeningDate(date)}
                 dateFormat="dd/MM/yyyy"
-                className="ring-1 ring-inset ring-gray-300 px-3.5 py-2 placeholder:text-gray-400 w-full text-gray-900 border-0 rounded-md shadow-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholderText="Select date (DD/MM/YYYY)"
                 required
               />
             </div>
             <div className="flex-1">
-              <Input
-                type="time"
+              <TimeInput
                 name="screeningTime"
-                defaultValue="19:00"
+                defaultValue="7:00"
                 required
               />
             </div>
@@ -200,19 +240,49 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="deadlineDate" className="block font-medium text-sm">Campaign Deadline</label>
-          <DatePicker
-            selected={deadlineDate}
-            onChange={(date: Date) => setDeadlineDate(date)}
-            dateFormat="dd/MM/yyyy"
-            className="ring-1 ring-inset ring-gray-300 px-3.5 py-2 placeholder:text-gray-400 w-full text-gray-900 border-0 rounded-md shadow-sm focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholderText="Select date (DD/MM/YYYY)"
-            required
-          />
+          <label htmlFor="deadlineTime" className="block text-sm font-medium">
+            Campaign Deadline
+          </label>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Input
+                type="number"
+                id="deadlineTimeAmount"
+                value={deadlineTimeAmount}
+                onChange={(e) => setDeadlineTimeAmount(Number(e.target.value))}
+                min={1}
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <Select
+                value={deadlineTimeUnit}
+                onValueChange={(value: TimeUnit) => setDeadlineTimeUnit(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="days">Days</SelectItem>
+                  <SelectItem value="weeks">Weeks</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-2">
+              <p className="text-sm text-muted-foreground">
+                Deadline: {calculateDeadlineDate().toLocaleDateString('en-GB')}
+              </p>
+            </div>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Time before screening date when campaign will close
+          </p>
         </div>
 
         <div>
-          <label htmlFor="ticketCap" className="block font-medium text-sm">Ticket Cap</label>
+          <label htmlFor="ticketCap" className="block text-sm font-medium">
+            Ticket Cap
+          </label>
           <Input
             type="number"
             id="ticketCap"
@@ -224,7 +294,9 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="fundingTarget" className="block font-medium text-sm">Funding Target (£)</label>
+          <label htmlFor="fundingTarget" className="block text-sm font-medium">
+            Funding Target (£)
+          </label>
           <Input
             type="number"
             id="fundingTarget"
@@ -237,7 +309,9 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label htmlFor="charity" className="block font-medium text-sm">Charity</label>
+          <label htmlFor="charity" className="block text-sm font-medium">
+            Charity
+          </label>
           <Select name="charityId" defaultValue="none">
             <SelectTrigger>
               <SelectValue placeholder="Select a charity" />
@@ -254,13 +328,15 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         </div>
 
         <div>
-          <label className="block mb-2 font-medium text-sm">Menu Items</label>
+          <label className="mb-2 block text-sm font-medium">Menu Items</label>
           {currentVenue?.menuItems.length === 0 ? (
-            <p className="text-sm text-gray-500">No menu items available for this venue.</p>
+            <p className="text-sm text-gray-500">
+              No menu items available for this venue.
+            </p>
           ) : (
             <div className="space-y-4">
               {currentVenue?.menuItems.map((menuItem) => (
-                <div key={menuItem.id} className="items-center flex space-x-2">
+                <div key={menuItem.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`menuItem-${menuItem.id}`}
                     name="menuItemIds[]"
@@ -268,7 +344,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
                   />
                   <label
                     htmlFor={`menuItem-${menuItem.id}`}
-                    className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-medium text-sm leading-none"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     {menuItem.name} - £{Number(menuItem.price).toFixed(2)}
                   </label>
@@ -278,34 +354,28 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
           )}
         </div>
 
-        <div className="items-center flex gap-2">
-          <Checkbox
-            id="isFeatured"
-            name="isFeatured"
-          />
+        <div className="flex items-center gap-2">
+          <Checkbox id="isFeatured" name="isFeatured" />
           <label
             htmlFor="isFeatured"
-            className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-medium text-sm leading-none"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Feature this campaign
           </label>
         </div>
 
-        <div className="items-center flex gap-2">
-          <Checkbox
-            id="isTest"
-            name="isTest"
-          />
+        <div className="flex items-center gap-2">
+          <Checkbox id="isTest" name="isTest" />
           <label
             htmlFor="isTest"
-            className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-medium text-sm leading-none"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Test campaign
           </label>
         </div>
       </div>
 
-      <div className="justify-end flex gap-4">
+      <div className="flex justify-end gap-4">
         <Button
           type="button"
           variant="outline"
@@ -319,4 +389,4 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
       </div>
     </form>
   )
-} 
+}

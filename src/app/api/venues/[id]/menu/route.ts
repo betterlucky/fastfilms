@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
 export async function GET(
   request: Request,
@@ -10,7 +10,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const menuItems = await prisma.menuItem.findMany({
@@ -28,9 +28,9 @@ export async function GET(
 
     return NextResponse.json(menuItems)
   } catch (error) {
-    console.error("Error fetching menu items:", error)
+    console.error('Error fetching menu items:', error)
     return NextResponse.json(
-      { error: "Failed to fetch menu items" },
+      { error: 'Failed to fetch menu items' },
       { status: 500 }
     )
   }
@@ -42,8 +42,8 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (session?.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (session?.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const data = await request.json()
@@ -57,13 +57,13 @@ export async function POST(
         isActive: data.isActive,
         venue: {
           connect: {
-            id: params.id
-          }
+            id: params.id,
+          },
         },
         options: {
           create: data.options.map((option: any) => ({
             name: option.name,
-            description: option.description || "",
+            description: option.description || '',
             isRequired: option.isRequired,
             minChoices: option.minChoices,
             maxChoices: option.maxChoices,
@@ -87,9 +87,9 @@ export async function POST(
 
     return NextResponse.json(menuItem)
   } catch (error) {
-    console.error("Error creating menu item:", error)
+    console.error('Error creating menu item:', error)
     return NextResponse.json(
-      { error: "Failed to create menu item" },
+      { error: 'Failed to create menu item' },
       { status: 500 }
     )
   }
@@ -101,8 +101,8 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (session?.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (session?.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const data = await request.json()
@@ -130,7 +130,7 @@ export async function PUT(
         options: {
           create: data.options.map((option: any) => ({
             name: option.name,
-            description: option.description || "",
+            description: option.description || '',
             isRequired: option.isRequired,
             minChoices: option.minChoices,
             maxChoices: option.maxChoices,
@@ -154,9 +154,9 @@ export async function PUT(
 
     return NextResponse.json(menuItem)
   } catch (error) {
-    console.error("Error updating menu item:", error)
+    console.error('Error updating menu item:', error)
     return NextResponse.json(
-      { error: "Failed to update menu item" },
+      { error: 'Failed to update menu item' },
       { status: 500 }
     )
   }
@@ -168,8 +168,8 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (session?.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (session?.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Delete the menu item (cascade will handle related records)
@@ -181,10 +181,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error deleting menu item:", error)
+    console.error('Error deleting menu item:', error)
     return NextResponse.json(
-      { error: "Failed to delete menu item" },
+      { error: 'Failed to delete menu item' },
       { status: 500 }
     )
   }
-} 
+}

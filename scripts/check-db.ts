@@ -2,7 +2,7 @@ import { main } from './prisma-setup'
 
 async function checkDb() {
   const client = await main()
-  
+
   try {
     // Get Venue table info
     const tableInfo = await client.$queryRaw`
@@ -17,7 +17,6 @@ async function checkDb() {
     // Get existing venues
     const venues = await client.venue.findMany()
     console.log('\nExisting venues:', venues)
-
   } catch (error) {
     console.error('Error checking database:', error)
   } finally {
@@ -25,4 +24,4 @@ async function checkDb() {
   }
 }
 
-checkDb() 
+checkDb()

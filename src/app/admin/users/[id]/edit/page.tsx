@@ -1,9 +1,9 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { UserForm } from "./user-form"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { UserForm } from './user-form'
 
 export default async function EditUserPage({
   params,
@@ -13,7 +13,7 @@ export default async function EditUserPage({
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.isAdmin) {
-    redirect("/")
+    redirect('/')
   }
 
   const user = await prisma.user.findUnique({
@@ -23,12 +23,12 @@ export default async function EditUserPage({
   })
 
   if (!user) {
-    redirect("/admin/users")
+    redirect('/admin/users')
   }
 
   return (
-    <div className="container py-10 mx-auto">
-      <h1 className="mb-8 font-bold text-3xl">Edit User</h1>
+    <div className="container mx-auto py-10">
+      <h1 className="mb-8 text-3xl font-bold">Edit User</h1>
       <Card>
         <CardHeader>
           <CardTitle>User Details</CardTitle>
@@ -39,4 +39,4 @@ export default async function EditUserPage({
       </Card>
     </div>
   )
-} 
+}

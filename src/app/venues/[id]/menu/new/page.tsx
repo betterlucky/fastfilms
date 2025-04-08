@@ -1,15 +1,19 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import MenuItemForm from "../MenuItemForm"
-import { Button } from "@/components/ui/button"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import MenuItemForm from '../MenuItemForm'
+import { Button } from '@/components/ui/button'
 
-export default async function NewMenuItemPage({ params }: { params: { id: string } }) {
+export default async function NewMenuItemPage({
+  params,
+}: {
+  params: { id: string }
+}) {
   const session = await getServerSession(authOptions)
-  const isAdmin = session?.user?.role === "ADMIN"
-  
+  const isAdmin = session?.user?.role === 'ADMIN'
+
   if (!isAdmin) {
     return <div>Unauthorized</div>
   }
@@ -19,23 +23,25 @@ export default async function NewMenuItemPage({ params }: { params: { id: string
   })
 
   if (!venue) {
-    redirect("/venues")
+    redirect('/venues')
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="max-w-4xl mx-auto">
+    <div className="container mx-auto py-8">
+      <div className="mx-auto max-w-4xl">
         <div className="grid gap-8">
           <Card>
             <CardHeader>
               <CardTitle>Add Menu Item for {venue.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="justify-between items-center flex mb-8">
-                <h1 className="font-bold text-3xl">New Menu Item</h1>
-                <Button 
+              <div className="mb-8 flex items-center justify-between">
+                <h1 className="text-3xl font-bold">New Menu Item</h1>
+                <Button
                   variant="outline"
-                  onClick={() => window.location.href = `/venues/${params.id}/menu`}
+                  onClick={() =>
+                    (window.location.href = `/venues/${params.id}/menu`)
+                  }
                 >
                   Back to Menu
                 </Button>
@@ -47,4 +53,4 @@ export default async function NewMenuItemPage({ params }: { params: { id: string
       </div>
     </div>
   )
-} 
+}

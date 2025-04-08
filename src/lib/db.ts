@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -6,7 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient()
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma 
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export async function getCampaign(id: string) {
   const result = await prisma.$queryRaw`
@@ -98,21 +98,25 @@ export async function getCampaign(id: string) {
     currentTickets: result[0].currentTickets,
     status: result[0].status,
     isFeatured: result[0].isFeatured,
-    screen: result[0]["screen.name"] ? {
-      name: result[0]["screen.name"],
-      capacity: result[0]["screen.capacity"]
-    } : null,
+    screen: result[0]['screen.name']
+      ? {
+          name: result[0]['screen.name'],
+          capacity: result[0]['screen.capacity'],
+        }
+      : null,
     venue: {
-      name: result[0]["venue.name"],
-      address: result[0]["venue.address"],
-      city: result[0]["venue.city"],
-      postcode: result[0]["venue.postcode"]
+      name: result[0]['venue.name'],
+      address: result[0]['venue.address'],
+      city: result[0]['venue.city'],
+      postcode: result[0]['venue.postcode'],
     },
-    charity: result[0]["charity.name"] ? {
-      name: result[0]["charity.name"],
-      description: result[0]["charity.description"],
-      logoPath: result[0]["charity.logoPath"]
-    } : null,
-    menuItems: result[0].menuItems || []
+    charity: result[0]['charity.name']
+      ? {
+          name: result[0]['charity.name'],
+          description: result[0]['charity.description'],
+          logoPath: result[0]['charity.logoPath'],
+        }
+      : null,
+    menuItems: result[0].menuItems || [],
   }
-} 
+}

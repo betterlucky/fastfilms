@@ -1,14 +1,14 @@
 'use server'
 
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
-import { revalidatePath } from "next/cache"
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 
 export async function handleAddScreen(formData: FormData) {
   const session = await getServerSession(authOptions)
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized")
+  if (session?.user?.role !== 'ADMIN') {
+    throw new Error('Unauthorized')
   }
 
   const venueId = formData.get('venueId') as string
@@ -28,8 +28,8 @@ export async function handleAddScreen(formData: FormData) {
 
 export async function handleUpdateScreen(formData: FormData) {
   const session = await getServerSession(authOptions)
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized")
+  if (session?.user?.role !== 'ADMIN') {
+    throw new Error('Unauthorized')
   }
 
   const screenId = formData.get('screenId') as string
@@ -50,8 +50,8 @@ export async function handleUpdateScreen(formData: FormData) {
 
 export async function handleDeleteScreen(formData: FormData) {
   const session = await getServerSession(authOptions)
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized")
+  if (session?.user?.role !== 'ADMIN') {
+    throw new Error('Unauthorized')
   }
 
   const screenId = formData.get('screenId') as string
@@ -62,4 +62,4 @@ export async function handleDeleteScreen(formData: FormData) {
   })
 
   revalidatePath(`/venues/${venueId}/screens`)
-} 
+}

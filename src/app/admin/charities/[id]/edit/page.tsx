@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import Link from "next/link"
-import Image from "next/image"
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import Link from 'next/link'
+import Image from 'next/image'
 
 interface Charity {
   id: string
@@ -17,7 +17,11 @@ interface Charity {
   logoPath: string | null
 }
 
-export default function EditCharityPage({ params }: { params: { id: string } }) {
+export default function EditCharityPage({
+  params,
+}: {
+  params: { id: string }
+}) {
   const router = useRouter()
   const [charity, setCharity] = useState<Charity | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -26,9 +30,9 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
 
   useEffect(() => {
     fetch(`/api/admin/charities/${params.id}`)
-      .then(res => res.json())
-      .then(data => setCharity(data))
-      .catch(err => setError("Failed to load charity"))
+      .then((res) => res.json())
+      .then((data) => setCharity(data))
+      .catch((err) => setError('Failed to load charity'))
   }, [params.id])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -39,25 +43,25 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
     try {
       const formData = new FormData(e.currentTarget)
       const response = await fetch(`/api/admin/charities/${params.id}`, {
-        method: "PUT",
+        method: 'PUT',
         body: formData,
       })
 
       if (!response.ok) {
-        throw new Error("Failed to update charity")
+        throw new Error('Failed to update charity')
       }
 
-      router.push("/admin/charities")
+      router.push('/admin/charities')
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setIsLoading(false)
     }
   }
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this charity?")) {
+    if (!confirm('Are you sure you want to delete this charity?')) {
       return
     }
 
@@ -66,17 +70,17 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
 
     try {
       const response = await fetch(`/api/admin/charities/${params.id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       })
 
       if (!response.ok) {
-        throw new Error("Failed to delete charity")
+        throw new Error('Failed to delete charity')
       }
 
-      router.push("/admin/charities")
+      router.push('/admin/charities')
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
+      setError(err instanceof Error ? err.message : 'Something went wrong')
       setIsDeleting(false)
     }
   }
@@ -86,20 +90,20 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <div className="justify-between items-center flex mb-8">
-        <h1 className="font-bold text-3xl">Edit Charity</h1>
+    <div className="container mx-auto py-8">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Edit Charity</h1>
         <div className="flex gap-2">
-          <Button 
-            variant="destructive" 
+          <Button
+            variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
           >
-            {isDeleting ? "Deleting..." : "Delete Charity"}
+            {isDeleting ? 'Deleting...' : 'Delete Charity'}
           </Button>
-          <Button 
+          <Button
             variant="outline"
-            onClick={() => window.location.href = "/admin/charities"}
+            onClick={() => (window.location.href = '/admin/charities')}
           >
             Back to Charities
           </Button>
@@ -113,7 +117,7 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block mb-1 font-medium text-sm">
+              <label htmlFor="name" className="mb-1 block text-sm font-medium">
                 Name
               </label>
               <Input
@@ -125,30 +129,33 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
             </div>
 
             <div>
-              <label htmlFor="description" className="block mb-1 font-medium text-sm">
+              <label
+                htmlFor="description"
+                className="mb-1 block text-sm font-medium"
+              >
                 Description
               </label>
               <Textarea
                 id="description"
                 name="description"
-                defaultValue={charity.description || ""}
+                defaultValue={charity.description || ''}
               />
             </div>
 
             <div>
-              <label htmlFor="url" className="block mb-1 font-medium text-sm">
+              <label htmlFor="url" className="mb-1 block text-sm font-medium">
                 Website URL
               </label>
               <Input
                 id="url"
                 name="url"
                 type="url"
-                defaultValue={charity.url || ""}
+                defaultValue={charity.url || ''}
               />
             </div>
 
             <div>
-              <label htmlFor="logo" className="block mb-1 font-medium text-sm">
+              <label htmlFor="logo" className="mb-1 block text-sm font-medium">
                 Logo
               </label>
               {charity.logoPath && (
@@ -166,23 +173,14 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
                   </p>
                 </div>
               )}
-              <Input
-                id="logo"
-                name="logo"
-                type="file"
-                accept="image/*"
-              />
+              <Input id="logo" name="logo" type="file" accept="image/*" />
             </div>
 
-            {error && (
-              <div className="text-sm text-red-600">
-                {error}
-              </div>
-            )}
+            {error && <div className="text-sm text-red-600">{error}</div>}
 
-            <div className="justify-end flex">
+            <div className="flex justify-end">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Changes"}
+                {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>
@@ -190,4 +188,4 @@ export default function EditCharityPage({ params }: { params: { id: string } }) 
       </Card>
     </div>
   )
-} 
+}

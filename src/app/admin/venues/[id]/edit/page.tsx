@@ -1,13 +1,13 @@
-import { Metadata } from "next"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect, notFound } from "next/navigation"
-import { prisma } from "@/lib/db"
-import { VenueForm } from "@/components/admin/venue-form"
+import { Metadata } from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect, notFound } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { VenueForm } from '@/components/admin/venue-form'
 
 export const metadata: Metadata = {
-  title: "Edit Venue",
-  description: "Edit cinema venue details",
+  title: 'Edit Venue',
+  description: 'Edit cinema venue details',
 }
 
 export default async function EditVenuePage({
@@ -26,13 +26,13 @@ export default async function EditVenuePage({
   })
 
   if (!venue) {
-    redirect("/admin/venues")
+    redirect('/admin/venues')
   }
 
   return (
-    <div className="container py-10 mx-auto">
-      <h1 className="mb-8 font-bold text-3xl">Edit Venue</h1>
+    <div className="container mx-auto py-10">
+      <h1 className="mb-8 text-3xl font-bold">Edit Venue</h1>
       <VenueForm initialData={venue} venueId={venue.id} />
     </div>
   )
-} 
+}

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
 export async function PUT(
   request: Request,
@@ -9,8 +9,8 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (session?.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (session?.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const data = await request.json()
@@ -22,7 +22,7 @@ export async function PUT(
 
     if (!menuItem || menuItem.venueId !== params.id) {
       return NextResponse.json(
-        { error: "Menu item not found" },
+        { error: 'Menu item not found' },
         { status: 404 }
       )
     }
@@ -42,7 +42,7 @@ export async function PUT(
           // Create new options with their choices
           create: data.options.map((option: any) => ({
             name: option.name,
-            description: option.description || "",
+            description: option.description || '',
             isRequired: option.isRequired,
             minChoices: option.minChoices,
             maxChoices: option.maxChoices,
@@ -66,10 +66,10 @@ export async function PUT(
 
     return NextResponse.json(updatedMenuItem)
   } catch (error) {
-    console.error("Error updating menu item:", error)
+    console.error('Error updating menu item:', error)
     return NextResponse.json(
-      { error: "Failed to update menu item" },
+      { error: 'Failed to update menu item' },
       { status: 500 }
     )
   }
-} 
+}
