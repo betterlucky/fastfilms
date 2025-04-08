@@ -44,7 +44,8 @@ export async function GET() {
 
       return {
         ...ticket,
-        screeningDate: screeningDate.toISOString()
+        screeningDate: screeningDate.toISOString(),
+        stripePaymentIntentId: ticket.stripePaymentIntentId || null
       }
     })
 

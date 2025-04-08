@@ -16,6 +16,7 @@ interface Ticket {
     }
   }
   screeningDate: string
+  stripePaymentIntentId: string
 }
 
 interface GroupedTickets {
@@ -43,9 +44,9 @@ export default function TicketsPage() {
         }
         const tickets: Ticket[] = await response.json()
         
-        // Group tickets by campaign
+        // Group tickets by transaction (stripePaymentIntentId)
         const grouped = tickets.reduce((acc: GroupedTickets, ticket) => {
-          const key = `${ticket.campaign.id}-${ticket.screeningDate}`
+          const key = ticket.stripePaymentIntentId || ticket.id // Use ticket ID as fallback for test tickets
           if (!acc[key]) {
             acc[key] = {
               movieTitle: ticket.campaign.movieTitle,
@@ -224,9 +225,10 @@ export default function TicketsPage() {
                     </dd>
                   </div>
                   <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
-                    {ticket.tickets.map((ticketId) => (
-                      <ResendConfirmationButton key={ticketId} ticketId={ticketId} />
-                    ))}
+                    <ResendConfirmationButton 
+                      ticketIds={ticket.tickets} 
+                      className="w-full"
+                    />
                   </div>
                 </dl>
               </div>
