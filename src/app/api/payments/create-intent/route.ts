@@ -45,6 +45,9 @@ export async function POST(request: NextRequest) {
   const body = (await request.json()) as RequestBody
   const { campaignId, numTickets, menuSelections = [] } = body
 
+  // Ensure menuSelections is an array
+  const validMenuSelections = Array.isArray(menuSelections) ? menuSelections : []
+
   try {
     const campaign = await prisma.campaign.findUnique({
       where: { id: campaignId },
@@ -67,12 +70,12 @@ export async function POST(request: NextRequest) {
     const menuItems = await prisma.menuItem.findMany({
       where: {
         id: {
-          in: menuSelections.map((selection) => selection.menuItemId),
+          in: validMenuSelections.map((selection) => selection.menuItemId),
         },
       },
     })
 
-    const foodOrdersTotal = menuSelections.reduce((total, selection) => {
+    const foodOrdersTotal = validMenuSelections.reduce((total, selection) => {
       const menuItem = menuItems.find(
         (item) => item.id === selection.menuItemId
       )
@@ -102,9 +105,9 @@ export async function POST(request: NextRequest) {
               }),
             },
             orders:
-              menuSelections.length > 0
+              validMenuSelections.length > 0
                 ? {
-                    create: menuSelections.map((selection) => ({
+                    create: validMenuSelections.map((selection) => ({
                       menuItemId: selection.menuItemId,
                       quantity: selection.quantity,
                     })),
@@ -179,7 +182,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         campaignId: campaign.id,
         numTickets,
-        menuSelections: JSON.stringify(menuSelections),
+        menuSelections: JSON.stringify(validMenuSelections),
       },
     })
 
@@ -199,9 +202,9 @@ export async function POST(request: NextRequest) {
           }),
         },
         orders:
-          menuSelections.length > 0
+          validMenuSelections.length > 0
             ? {
-                create: menuSelections.map((selection) => ({
+                create: validMenuSelections.map((selection) => ({
                   menuItemId: selection.menuItemId,
                   quantity: selection.quantity,
                 })),

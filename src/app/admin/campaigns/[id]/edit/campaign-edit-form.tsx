@@ -56,7 +56,6 @@ const formSchema = z.object({
   ticketCap: z.number().min(0, 'Ticket cap must be positive'),
   screeningDate: z.date(),
   deadlineDate: z.date(),
-  screeningTime: z.string().min(1, 'Screening time is required'),
   status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED', 'FAILED']),
   isTest: z.boolean(),
 })
@@ -69,12 +68,6 @@ export function CampaignEditForm({
   const router = useRouter()
   const [selectedVenue, setSelectedVenue] = useState(campaign.venue.id)
   const [selectedScreen, setSelectedScreen] = useState(campaign.screenId)
-  const [screeningDate, setScreeningDate] = useState(
-    new Date(campaign.screeningDate)
-  )
-  const [deadlineDate, setDeadlineDate] = useState(
-    new Date(campaign.deadlineDate)
-  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const currentVenue = venues.find((v) => v.id === selectedVenue)
@@ -89,7 +82,6 @@ export function CampaignEditForm({
       ticketCap: campaign.ticketCap,
       screeningDate: new Date(campaign.screeningDate),
       deadlineDate: new Date(campaign.deadlineDate),
-      screeningTime: campaign.screeningTime,
       status: campaign.status as 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'FAILED',
       isTest: campaign.isTest,
     },
@@ -226,7 +218,7 @@ export function CampaignEditForm({
             name="screeningDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Screening Date</FormLabel>
+                <FormLabel>Screening Date & Time</FormLabel>
                 <FormControl>
                   <DatePicker
                     selected={field.value}
@@ -268,22 +260,6 @@ export function CampaignEditForm({
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="screeningTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Screening Time</FormLabel>
-                <FormControl>
-                  <Input
-                    type="time"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="status"
