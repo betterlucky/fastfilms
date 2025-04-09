@@ -89,6 +89,14 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
         throw new Error('Please fill in all required fields')
       }
 
+      if (!selectedVenue) {
+        throw new Error('Please select a venue')
+      }
+
+      if (!screeningDate) {
+        throw new Error('Please select a screening date')
+      }
+
       const response = await fetch('/api/admin/campaigns', {
         method: 'POST',
         headers: {
