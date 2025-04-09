@@ -1,5 +1,6 @@
 import { prisma } from './db'
 import { formatPrice, formatDate, calculateProgress } from './utils'
+import { settings } from './settings'
 
 export async function getFeaturedCampaign() {
   // First try to get the manually featured campaign that's still active and not past its deadline
@@ -10,6 +11,7 @@ export async function getFeaturedCampaign() {
       deadlineDate: {
         gt: new Date(),
       },
+      ...(settings.includeTestCampaigns ? {} : { isTest: false }),
     },
     select: {
       id: true,
@@ -54,6 +56,7 @@ export async function getFeaturedCampaign() {
         screeningDate: {
           gt: new Date(),
         },
+        ...(settings.includeTestCampaigns ? {} : { isTest: false }),
       },
       orderBy: {
         screeningDate: 'asc',
@@ -150,6 +153,7 @@ export async function getCampaigns(includeFeatured: boolean = false) {
       deadlineDate: {
         gt: new Date(),
       },
+      ...(settings.includeTestCampaigns ? {} : { isTest: false }),
     },
     orderBy: [
       {

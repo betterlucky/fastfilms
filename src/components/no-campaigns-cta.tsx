@@ -178,13 +178,11 @@ export function NoCampaignsCTA() {
               </h3>
             </div>
             <p className="text-muted-foreground text-sm">
-              Once enough tickets are pledged, the screening is confirmed.
+              
             </p>
           </div>
         </div>
-        <Button onClick={() => router.push('/campaigns/new')} className="mt-8">
-          Start a Campaign
-        </Button>
+        
       </div>
 
       <div className="text-center">
@@ -192,17 +190,7 @@ export function NoCampaignsCTA() {
         <h3 className="mt-2 text-sm font-semibold text-gray-900">
           No campaigns
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Get started by creating a new campaign.
-        </p>
-        <div className="mt-6">
-          <Button asChild>
-            <Link href="/admin/campaigns/new">
-              <PlusIcon className="mr-2 size-4" />
-              New Campaign
-            </Link>
-          </Button>
-        </div>
+
       </div>
     </div>
   )
