@@ -23,9 +23,7 @@ export async function GET(request: Request) {
 
     if (result.guestListsSent === 0) {
       console.log('No screenings found for today, no guest lists needed')
-      return new NextResponse('No guest lists needed to be sent today', {
-        status: 204,
-      })
+      return new NextResponse(null, { status: 204 })
     }
 
     console.log(`Successfully sent ${result.guestListsSent} guest list(s)`)
