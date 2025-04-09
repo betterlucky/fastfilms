@@ -84,14 +84,26 @@ export const columns: ColumnDef<
                 )
               ) {
                 try {
-                  const response = await fetch(
-                    `/api/admin/campaigns/${campaign.id}`,
-                    {
-                      method: 'DELETE',
-                    }
-                  )
+                  const endpoint = campaign.isTest 
+                    ? `/api/admin/campaigns/cleanup-test`
+                    : `/api/admin/campaigns/${campaign.id}`
+
+                  const response = await fetch(endpoint, {
+                    method: campaign.isTest ? 'POST' : 'DELETE',
+                    headers: campaign.isTest ? { 'Content-Type': 'application/json' } : undefined,
+                    body: campaign.isTest ? JSON.stringify({ campaignId: campaign.id }) : undefined,
+                  })
 
                   if (response.ok) {
+                    const data = await response.json()
+                    if (data.statistics) {
+                      alert(`Campaign deleted successfully.\n\nStatistics:\n` +
+                        `Tickets: ${data.statistics.tickets}\n` +
+                        `Purchases: ${data.statistics.purchases}\n` +
+                        `Orders: ${data.statistics.orders}\n` +
+                        `Order Choices: ${data.statistics.orderChoices}\n` +
+                        `Menu Items: ${data.statistics.menuItems}`)
+                    }
                     window.location.reload()
                   } else {
                     const error = await response.text()
