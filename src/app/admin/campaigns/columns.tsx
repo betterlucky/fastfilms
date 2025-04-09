@@ -76,8 +76,8 @@ export const columns: ColumnDef<
             <Link href={`/admin/campaigns/${campaign.id}/edit`}>Edit</Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/admin/campaigns/${campaign.id}/tickets`}>
-              Tickets
+            <Link href={`/admin/campaigns/${campaign.id}/purchases`}>
+              Purchases
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>

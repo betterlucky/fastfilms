@@ -6,7 +6,6 @@ import { DataTable } from '@/components/ui/data-table'
 import { columns } from './columns'
 import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -45,9 +44,6 @@ export default async function CampaignsPage() {
     },
   })
 
-  const liveCampaigns = campaigns.filter((campaign) => !campaign.isTest)
-  const testCampaigns = campaigns.filter((campaign) => campaign.isTest)
-
   return (
     <div className="container mx-auto py-10">
       <div className="mb-6 flex items-center justify-between">
@@ -57,18 +53,7 @@ export default async function CampaignsPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="live" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="live">Live Campaigns</TabsTrigger>
-          <TabsTrigger value="test">Test Campaigns</TabsTrigger>
-        </TabsList>
-        <TabsContent value="live">
-          <DataTable columns={columns} data={liveCampaigns} />
-        </TabsContent>
-        <TabsContent value="test">
-          <DataTable columns={columns} data={testCampaigns} />
-        </TabsContent>
-      </Tabs>
+      <DataTable columns={columns} data={campaigns} />
     </div>
   )
 }
