@@ -4,7 +4,6 @@ on:
   schedule:
     # Run at 6 AM UTC every day
     - cron: '0 6 * * *'
-  # Allow manual triggering
   workflow_dispatch:
 
 jobs:
@@ -20,16 +19,19 @@ jobs:
           # Make the script fail on any error
           set -e
           
-          # Send the request and capture both response and status code
-          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms.vercel.app/api/cron/send-guest-lists" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          # Send the request and write response to a temporary file
+          curl -s -w "\n%{http_code}" -X GET "https://fastfilms.vercel.app/api/cron/send-guest-lists" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" > /tmp/response.txt
           
           # Split response into body and status code
-          body=$(echo "$response" | head -n -1)
-          status_code=$(echo "$response" | tail -n 1)
+          body=$(head -n -1 /tmp/response.txt)
+          status_code=$(tail -n 1 /tmp/response.txt)
           
           # Log the response for debugging
           echo "Response body: $body"
           echo "Status code: $status_code"
+          
+          # Clean up
+          rm -f /tmp/response.txt
           
           if [ "$status_code" -eq 200 ]; then
             echo "✅ Guest lists processed successfully"
