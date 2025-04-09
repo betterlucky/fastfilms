@@ -56,6 +56,9 @@ const formSchema = z.object({
   ticketCap: z.number().min(0, 'Ticket cap must be positive'),
   screeningDate: z.date(),
   deadlineDate: z.date(),
+  screeningTime: z.string().min(1, 'Screening time is required'),
+  status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED', 'FAILED']),
+  isTest: z.boolean(),
 })
 
 export function CampaignEditForm({
@@ -86,39 +89,29 @@ export function CampaignEditForm({
       ticketCap: campaign.ticketCap,
       screeningDate: new Date(campaign.screeningDate),
       deadlineDate: new Date(campaign.deadlineDate),
+      screeningTime: campaign.screeningTime,
+      status: campaign.status as 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'FAILED',
+      isTest: campaign.isTest,
     },
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitting(true)
-      const formData = new FormData()
-
-      // Add form values
-      Object.entries(values).forEach(([key, value]) => {
-        if (value instanceof Date) {
-          formData.append(key, value.toISOString().slice(0, 16))
-        } else {
-          formData.append(key, value.toString())
-        }
-      })
-
-      // Add additional form data
-      formData.append('customBlurb', '')
-      formData.append('posterPath', '')
-      formData.append('venueId', selectedVenue)
-      formData.append('screenId', selectedScreen || 'unassign')
-      formData.append('screeningTime', '')
-      formData.append('charityId', campaign.charityId || 'none')
-      formData.append(
-        'menuItemIds',
-        JSON.stringify(campaign.menuItems.map((item) => item.menuItem.id))
-      )
-      formData.append('isFeatured', 'on')
 
       const response = await fetch(`/api/admin/campaigns/${campaign.id}`, {
         method: 'PUT',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...values,
+          venueId: selectedVenue,
+          screenId: selectedScreen || 'unassign',
+          charityId: campaign.charityId || 'none',
+          menuItemIds: campaign.menuItems.map((item) => item.menuItem.id),
+          isFeatured: true,
+        }),
       })
 
       if (!response.ok) {
@@ -235,15 +228,15 @@ export function CampaignEditForm({
               <FormItem>
                 <FormLabel>Screening Date</FormLabel>
                 <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
-                    value={
-                      field.value
-                        ? new Date(field.value).toISOString().slice(0, 16)
-                        : ''
-                    }
-                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                  <DatePicker
+                    selected={field.value}
+                    onChange={(date) => field.onChange(date)}
+                    showTimeSelect
+                    dateFormat="dd/MM/yyyy HH:mm"
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    placeholderText="Select date and time"
                   />
                 </FormControl>
                 <FormMessage />
@@ -257,15 +250,15 @@ export function CampaignEditForm({
               <FormItem>
                 <FormLabel>Deadline Date</FormLabel>
                 <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
-                    value={
-                      field.value
-                        ? new Date(field.value).toISOString().slice(0, 16)
-                        : ''
-                    }
-                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                  <DatePicker
+                    selected={field.value}
+                    onChange={(date) => field.onChange(date)}
+                    showTimeSelect
+                    dateFormat="dd/MM/yyyy HH:mm"
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    placeholderText="Select date and time"
                   />
                 </FormControl>
                 <FormMessage />
@@ -273,6 +266,72 @@ export function CampaignEditForm({
             )}
           />
         </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="screeningTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Screening Time</FormLabel>
+                <FormControl>
+                  <Input
+                    type="time"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="ACTIVE">Active</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    <SelectItem value="FAILED">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="isTest"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Test Campaign</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  Mark this campaign as a test campaign
+                </p>
+              </div>
+            </FormItem>
+          )}
+        />
 
         <div className="flex justify-end gap-4">
           <Button

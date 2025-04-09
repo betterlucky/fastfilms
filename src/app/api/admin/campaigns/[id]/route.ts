@@ -18,8 +18,6 @@ export async function PUT(
       title,
       description,
       movieTitle,
-      customBlurb,
-      posterPath,
       venueId,
       screenId,
       screeningDate,
@@ -30,6 +28,8 @@ export async function PUT(
       charityId,
       menuItemIds,
       isFeatured,
+      status,
+      isTest,
     } = body
 
     // Update campaign
@@ -39,17 +39,17 @@ export async function PUT(
         title,
         description,
         movieTitle,
-        customBlurb,
-        posterPath,
         venueId,
-        screenId,
+        screenId: screenId === 'unassign' ? null : screenId,
         screeningDate: new Date(screeningDate),
         screeningTime,
         deadlineDate: new Date(deadlineDate),
         ticketCap,
         fundingTarget,
-        charityId,
+        charityId: charityId === 'none' ? null : charityId,
         isFeatured,
+        status,
+        isTest,
       },
     })
 
