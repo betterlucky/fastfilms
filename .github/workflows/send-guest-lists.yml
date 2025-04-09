@@ -18,7 +18,7 @@ jobs:
           set -e
           
           # Send the request and capture both response and status code
-          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms-staging.vercel.app/api/cron/send-guest-lists" \
+          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms.vercel.app/api/cron/send-guest-lists" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
           
           # Split response into body and status code
