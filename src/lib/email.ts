@@ -21,7 +21,7 @@ interface SendEmailOptions {
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   if (!process.env.CONTACT_EMAIL || !process.env.EMAIL_HOST_PASSWORD) {
     console.warn('Email credentials not found. Skipping email send.')
-    return
+    return false
   }
 
   try {
@@ -37,9 +37,10 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
       subject,
       html,
     })
+    return true
   } catch (error) {
     console.error('Failed to send email:', error)
-    throw error // Re-throw to handle in the calling code
+    return false
   }
 }
 
@@ -478,25 +479,4 @@ export async function sendScreenConfirmationEmail(
     subject: `Screening Confirmed: ${campaignTitle}`,
     html,
   })
-}
-
-export async function sendEmailWithRetry(
-  to: string,
-  subject: string,
-  html: string,
-  retries = 3
-): Promise<boolean> {
-  for (let i = 0; i < retries; i++) {
-    try {
-      await sendEmail({ to, subject, html })
-      return true
-    } catch (error) {
-      if (i === retries - 1) {
-        console.error('Failed to send email after retries:', error)
-        return false
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i))) // Exponential backoff
-    }
-  }
-  return false
 }
