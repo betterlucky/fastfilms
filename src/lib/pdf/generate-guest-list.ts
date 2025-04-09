@@ -143,8 +143,29 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       doc.text(`Total Guests: ${data.tickets.length}`, MARGIN + 5, yPos)
       yPos += 15
 
-      // Sort tickets by user name
-      const sortedTickets = [...data.tickets].sort((a, b) =>
+      // Group tickets by purchase
+      const groupedTickets = data.tickets.reduce((acc, ticket) => {
+        const purchaseId = ticket.purchase?.id || 'no-purchase'
+        if (!acc[purchaseId]) {
+          acc[purchaseId] = {
+            user: ticket.user,
+            tickets: [],
+            orders: ticket.purchase?.orders || []
+          }
+        }
+        acc[purchaseId].tickets.push(ticket)
+        return acc
+      }, {} as Record<string, {
+        user: Pick<User, 'name' | 'email'>
+        tickets: Ticket[]
+        orders: {
+          id: string
+          quantity: number
+        }[]
+      }>)
+
+      // Sort groups by user name
+      const sortedGroups = Object.values(groupedTickets).sort((a, b) =>
         (a.user.name || '').localeCompare(b.user.name || '')
       )
 
@@ -152,14 +173,15 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       doc.setFillColor(230, 230, 230)
       doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
       doc.setFontSize(11)
-      doc.text('Guest Name', MARGIN + 5, yPos + 5.5)
+      doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
       doc.text('Email', MARGIN + 80, yPos + 5.5)
-      doc.text('Preorders', MARGIN + 150, yPos + 5.5)
+      doc.text('Party Size', MARGIN + 150, yPos + 5.5)
+      doc.text('Preorders', MARGIN + 180, yPos + 5.5)
       yPos += 12
 
-      // Add guests
+      // Add guest groups
       doc.setFontSize(10)
-      sortedTickets.forEach((ticket, index) => {
+      sortedGroups.forEach((group, index) => {
         // Add zebra striping
         if (index % 2 === 0) {
           doc.setFillColor(250, 250, 250)
@@ -177,18 +199,18 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
           doc.setFillColor(230, 230, 230)
           doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
           doc.setFontSize(11)
-          doc.text('Guest Name', MARGIN + 5, yPos + 5.5)
+          doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
           doc.text('Email', MARGIN + 80, yPos + 5.5)
-          doc.text('Preorders', MARGIN + 150, yPos + 5.5)
+          doc.text('Party Size', MARGIN + 150, yPos + 5.5)
+          doc.text('Preorders', MARGIN + 180, yPos + 5.5)
           yPos += 12
           doc.setFontSize(10)
         }
 
-        doc.text(ticket.user.name || 'Guest', MARGIN + 5, yPos)
-        doc.text(ticket.user.email, MARGIN + 80, yPos)
-        if (ticket.purchase?.orders.length > 0) {
-          doc.text('Yes - see preorder sheet', MARGIN + 150, yPos)
-        }
+        doc.text(group.user.name || 'Guest', MARGIN + 5, yPos)
+        doc.text(group.user.email, MARGIN + 80, yPos)
+        doc.text(group.tickets.length.toString(), MARGIN + 150, yPos)
+        doc.text(group.orders.length > 0 ? 'Yes' : 'No', MARGIN + 180, yPos)
         yPos += 8
       })
 
@@ -238,6 +260,13 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
       })}`, MARGIN + 5, yPos)
       yPos += 15
 
+      // Group orders by menu item and choices
+      const orderSummary = new Map<string, number>()
+      data.orders.forEach((order) => {
+        const key = `${order.menuItem.name}${order.choices.length > 0 ? ' - ' + order.choices.map(c => `${c.option.name}: ${c.selectedChoice.name}`).join(', ') : ''}`
+        orderSummary.set(key, (orderSummary.get(key) || 0) + order.quantity)
+      })
+
       // Order Summary section
       doc.setFillColor(230, 230, 230)
       doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
@@ -245,15 +274,9 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
       doc.text('Order Summary', MARGIN + 5, yPos + 5.5)
       yPos += 12
 
-      // Calculate and display summary
-      const summary = new Map<string, number>()
-      data.orders.forEach((order) => {
-        const key = order.menuItem.name
-        summary.set(key, (summary.get(key) || 0) + order.quantity)
-      })
-
+      // Display summary
       doc.setFontSize(11)
-      summary.forEach((quantity, item) => {
+      orderSummary.forEach((quantity, item) => {
         doc.text(`${item}`, MARGIN + 5, yPos)
         doc.text(`${quantity}`, MARGIN + CONTENT_WIDTH - 15, yPos, {
           align: 'right',
@@ -262,21 +285,26 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
       })
       yPos += 15
 
+      // Group orders by user
+      const userOrders = new Map<string, typeof data.orders>()
+      data.orders.forEach((order) => {
+        const key = order.user.email
+        if (!userOrders.has(key)) {
+          userOrders.set(key, [])
+        }
+        userOrders.get(key)!.push(order)
+      })
+
       // Individual Orders section
       doc.setFillColor(230, 230, 230)
       doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
       doc.setFontSize(14)
-      doc.text('Individual Orders', MARGIN + 5, yPos + 5.5)
+      doc.text('Orders by Party', MARGIN + 5, yPos + 5.5)
       yPos += 12
 
-      // Sort orders by user name
-      const sortedOrders = [...data.orders].sort((a, b) =>
-        (a.user.name || '').localeCompare(b.user.name || '')
-      )
-
-      // Add orders
+      // Add orders by user
       doc.setFontSize(11)
-      sortedOrders.forEach((order, index) => {
+      userOrders.forEach((orders, email) => {
         // Check if we need a new page
         if (yPos > 250) {
           doc.addPage()
@@ -284,33 +312,37 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
           yPos = 50
         }
 
-        // Order box with light background
-        const boxHeight = 12 + order.choices.length * 6
+        // User box with light background
+        const user = orders[0].user
+        const boxHeight = 12 + orders.length * 12
         doc.setFillColor(250, 250, 250)
         doc.roundedRect(MARGIN, yPos - 4, CONTENT_WIDTH, boxHeight, 2, 2, 'F')
 
-        // Order details
+        // User details
         doc.setFontSize(11)
-        doc.text(`${order.user.name || 'Guest'}`, MARGIN + 5, yPos)
-        doc.text(order.user.email, MARGIN + 80, yPos)
-        yPos += 6
+        doc.text(`${user.name || 'Guest'}`, MARGIN + 5, yPos)
+        doc.text(email, MARGIN + 80, yPos)
+        yPos += 8
 
+        // Orders
         doc.setFontSize(10)
-        doc.text(`${order.quantity}x ${order.menuItem.name}`, MARGIN + 10, yPos)
-        yPos += 6
+        orders.forEach((order) => {
+          doc.text(`${order.quantity}x ${order.menuItem.name}`, MARGIN + 10, yPos)
+          yPos += 6
+          if (order.choices.length > 0) {
+            order.choices.forEach((choice) => {
+              doc.text(
+                `${choice.option.name}: ${choice.selectedChoice.name}`,
+                MARGIN + 15,
+                yPos
+              )
+              yPos += 6
+            })
+          }
+          yPos += 2
+        })
 
-        if (order.choices.length > 0) {
-          order.choices.forEach((choice) => {
-            doc.text(
-              `${choice.option.name}: ${choice.selectedChoice.name}`,
-              MARGIN + 15,
-              yPos
-            )
-            yPos += 6
-          })
-        }
-
-        yPos += 4 // Space between orders
+        yPos += 4 // Space between user groups
       })
 
       // Add page numbers
