@@ -79,32 +79,26 @@ export function generateTicketConfirmationEmail(data: {
     }).format(amount)
   }
 
-  const foodOrdersHtml =
-    foodOrders.length > 0
-      ? `
+  const foodOrdersHtml = foodOrders.length > 0
+    ? `
       <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
         <h2 style="margin: 0 0 16px 0; color: #111827;">Your Pre-orders</h2>
-        ${foodOrders
-          .map(
-            (order) => `
-          <div style="margin-bottom: 8px;">
-            <p style="margin: 0;">
-              ${order.quantity}x ${order.name} (${formatPrice(order.price)})
-              ${
-                order.options?.length
-                  ? `<br><span style="color: #6b7280; margin-left: 20px;">
-                  ${order.options.map((opt) => `${opt.name}: ${opt.choice}`).join(', ')}
-                </span>`
-                  : ''
-              }
+        ${foodOrders.map(order => `
+          <div style="margin-bottom: 12px;">
+            <p style="margin: 0; display: flex; justify-content: space-between;">
+              <span>${order.quantity}x ${order.name}</span>
+              <span>${formatPrice(order.price * order.quantity)}</span>
             </p>
+            ${order.options?.length
+              ? `<p style="margin: 4px 0 0 20px; color: #6b7280; font-size: 14px;">
+                  ${order.options.map(opt => `${opt.name}: ${opt.choice}`).join(', ')}
+                </p>`
+              : ''}
           </div>
-        `
-          )
-          .join('')}
+        `).join('')}
       </div>
     `
-      : ''
+    : ''
 
   return `
     <!DOCTYPE html>
@@ -139,14 +133,47 @@ export function generateTicketConfirmationEmail(data: {
                 hour12: false
               }
             )}</p>
-            <p style="margin: 8px 0;"><strong>Regular Tickets:</strong> ${regularTickets}</p>
-            ${pifTickets > 0 ? `<p style="margin: 8px 0;"><strong>Pay It Forward Tickets:</strong> ${pifTickets}</p>` : ''}
-            <p style="margin: 8px 0;"><strong>Total Paid:</strong> ${formatPrice(totalAmount)}</p>
+          </div>
+
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
+            <h2 style="margin: 0 0 16px 0; color: #111827;">Ticket Summary</h2>
+            ${regularTickets > 0
+              ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
+                  <span>${regularTickets} Regular Tickets</span>
+                  <span>${formatPrice((totalAmount - (pifTickets * 15)) / regularTickets)} each</span>
+                </p>`
+              : ''}
+            ${pifTickets > 0
+              ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
+                  <span>${pifTickets} Pay It Forward Tickets</span>
+                  <span>£15.00 each</span>
+                </p>`
+              : ''}
+            <p style="margin: 8px 0; color: #6b7280;">Total: ${ticketQuantity} tickets</p>
           </div>
           
           ${foodOrdersHtml}
 
-          <p>Please arrive at least 15 minutes before the screening time. You'll need to show this email as proof of purchase.</p>
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
+            <h2 style="margin: 0 0 16px 0; color: #111827;">Total Cost</h2>
+            <p style="margin: 8px 0; display: flex; justify-content: space-between;">
+              <span>Tickets Subtotal</span>
+              <span>${formatPrice(totalAmount - (foodOrders.reduce((sum, order) => sum + (order.price * order.quantity), 0)))}</span>
+            </p>
+            ${foodOrders.length > 0
+              ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
+                  <span>Pre-orders Subtotal</span>
+                  <span>${formatPrice(foodOrders.reduce((sum, order) => sum + (order.price * order.quantity), 0))}</span>
+                </p>`
+              : ''}
+            <div style="margin: 12px 0; border-top: 1px solid #e5e7eb;"></div>
+            <p style="margin: 8px 0; display: flex; justify-content: space-between; font-weight: 600;">
+              <span>Total Paid</span>
+              <span>${formatPrice(totalAmount)}</span>
+            </p>
+          </div>
+
+          <p style="margin-top: 24px;">Please arrive at least 15 minutes before the screening time. You'll need to show this email as proof of purchase.</p>
           
           <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
             <p style="color: #6b7280; font-size: 14px;">
