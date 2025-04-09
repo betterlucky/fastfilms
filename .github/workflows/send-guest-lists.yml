@@ -11,11 +11,12 @@ jobs:
     steps:
       - name: Send Guest Lists
         shell: bash
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           set -x
           set -e
-          secret="${{ secrets.CRON_SECRET }}"
-          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms.vercel.app/api/cron/send-guest-lists" -H "Authorization: Bearer $secret")
+          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms.vercel.app/api/cron/send-guest-lists" -H "Authorization: Bearer $CRON_SECRET")
           body=$(echo "$response" | head -n -1)
           status_code=$(echo "$response" | tail -n 1)
           echo "Response body: $body"
