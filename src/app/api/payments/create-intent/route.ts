@@ -10,14 +10,20 @@ import { Prisma, PurchaseStatus } from '@prisma/client'
 import type { PrismaClient } from '@prisma/client'
 
 interface MenuSelection {
-  menuItemId: string
-  quantity: number
+  [menuItemId: string]: {
+    quantity: number
+    options: {
+      [optionId: string]: string[][] // array of arrays of selected choice IDs, one array per quantity
+    }
+  }
 }
 
 interface RequestBody {
   campaignId: string
-  numTickets: number
-  menuSelections?: MenuSelection[]
+  quantity: number
+  ticketPrice: number
+  payItForwardTickets: number
+  menuSelections: MenuSelection
 }
 
 // Helper function to validate total amount
@@ -42,21 +48,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = (await request.json()) as RequestBody
-  const { campaignId, numTickets, menuSelections = [] } = body
-
-  // Validate numTickets
-  if (typeof numTickets !== 'number' || numTickets <= 0) {
-    return NextResponse.json(
-      { error: 'Invalid number of tickets' },
-      { status: 400 }
-    )
-  }
-
-  // Ensure menuSelections is an array
-  const validMenuSelections = Array.isArray(menuSelections) ? menuSelections : []
-
   try {
+    const body = (await request.json()) as RequestBody
+    const { campaignId, quantity, ticketPrice, payItForwardTickets = 0, menuSelections = {} } = body
+
+    console.log('Received request body:', body)
+
+    // Validate quantity
+    if (typeof quantity !== 'number' || quantity < 0) {
+      console.log('Invalid quantity:', quantity)
+      return NextResponse.json(
+        { error: 'Invalid number of tickets' },
+        { status: 400 }
+      )
+    }
+
+    // Convert menu selections to the format expected by the database
+    const validMenuSelections = Object.entries(menuSelections).map(([menuItemId, selection]) => ({
+      menuItemId,
+      quantity: selection.quantity,
+    }))
+
     const campaign = await prisma.campaign.findUnique({
       where: { id: campaignId },
       include: {
@@ -90,7 +102,7 @@ export async function POST(request: NextRequest) {
       return total + Number(menuItem?.price || 0) * selection.quantity
     }, 0)
 
-    const ticketsTotal = numTickets * Number(campaign.fundingTarget)
+    const ticketsTotal = (quantity + payItForwardTickets) * ticketPrice
     const totalAmount = ticketsTotal + foodOrdersTotal
 
     // Validate the calculated total
@@ -105,12 +117,20 @@ export async function POST(request: NextRequest) {
             totalAmount: new Prisma.Decimal(0),
             status: PurchaseStatus.CONFIRMED,
             tickets: {
-              create: Array(numTickets).fill({
-                userId: session.user.id,
-                campaignId: campaign.id,
-                status: 'CONFIRMED',
-                pricePaid: new Prisma.Decimal(0),
-              }),
+              create: [
+                ...Array(quantity).fill({
+                  userId: session.user.id,
+                  campaignId: campaign.id,
+                  status: 'CONFIRMED',
+                  pricePaid: new Prisma.Decimal(ticketPrice),
+                }),
+                ...Array(payItForwardTickets).fill({
+                  userId: session.user.id,
+                  campaignId: campaign.id,
+                  status: 'PAY_IT_FORWARD',
+                  pricePaid: new Prisma.Decimal(ticketPrice),
+                }),
+              ],
             },
             orders:
               validMenuSelections.length > 0
@@ -142,7 +162,7 @@ export async function POST(request: NextRequest) {
           where: { id: campaign.id },
           data: {
             currentTickets: {
-              increment: numTickets,
+              increment: quantity + payItForwardTickets,
             },
           },
         })
@@ -155,10 +175,10 @@ export async function POST(request: NextRequest) {
         movieTitle: campaign.movieTitle,
         venueName: campaign.venue.name,
         screeningDate: campaign.screeningDate,
-        ticketQuantity: numTickets,
+        ticketQuantity: quantity + payItForwardTickets,
         totalAmount: 0,
-        regularTickets: numTickets,
-        pifTickets: 0,
+        regularTickets: quantity,
+        pifTickets: payItForwardTickets,
         foodOrders: purchase.orders.map((order) => ({
           name: order.menuItem.name,
           quantity: order.quantity,
@@ -180,6 +200,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         purchase,
+        ticketIds: purchase.tickets.map(t => t.id),
+        clientSecret: 'test_mode',
       })
     }
 
@@ -189,7 +211,8 @@ export async function POST(request: NextRequest) {
       metadata: {
         userId: session.user.id,
         campaignId: campaign.id,
-        numTickets,
+        quantity,
+        payItForwardTickets,
         menuSelections: JSON.stringify(validMenuSelections),
       },
     })
@@ -202,12 +225,20 @@ export async function POST(request: NextRequest) {
         status: PurchaseStatus.PENDING,
         stripePaymentIntentId: paymentIntent.id,
         tickets: {
-          create: Array(numTickets).fill({
-            userId: session.user.id,
-            campaignId: campaign.id,
-            status: 'PENDING',
-            pricePaid: new Prisma.Decimal(campaign.fundingTarget),
-          }),
+          create: [
+            ...Array(quantity).fill({
+              userId: session.user.id,
+              campaignId: campaign.id,
+              status: 'PENDING',
+              pricePaid: new Prisma.Decimal(ticketPrice),
+            }),
+            ...Array(payItForwardTickets).fill({
+              userId: session.user.id,
+              campaignId: campaign.id,
+              status: 'PAY_IT_FORWARD',
+              pricePaid: new Prisma.Decimal(ticketPrice),
+            }),
+          ],
         },
         orders:
           validMenuSelections.length > 0
@@ -228,6 +259,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       purchase,
+      ticketIds: purchase.tickets.map(t => t.id),
     })
   } catch (error) {
     console.error('Error creating payment intent:', error)
