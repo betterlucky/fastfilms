@@ -21,9 +21,15 @@ jobs:
           status_code=$(echo "$response" | tail -n 1)
           echo "Response body: $body"
           echo "Status code: $status_code"
+          
           if [ "$status_code" -eq 200 ]; then
-            echo "✅ Guest lists processed successfully"
-            echo "$body"
+            # Check if no guest lists were needed
+            if echo "$body" | grep -q '"guestListsSent":0'; then
+              echo "✅ No guest lists needed to be sent today"
+            else
+              echo "✅ Guest lists processed successfully"
+              echo "$body"
+            fi
             exit 0
           elif [ "$status_code" -eq 204 ]; then
             echo "✅ No guest lists needed to be sent today"
