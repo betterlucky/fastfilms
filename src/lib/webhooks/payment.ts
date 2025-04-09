@@ -4,7 +4,7 @@ import {
   PurchaseStatus,
   TicketStatus,
 } from '@prisma/client'
-import { sendEmail, sendEmailWithRetry } from '@/lib/email'
+import { sendEmail } from '@/lib/email'
 import { prisma } from '@/lib/db'
 import { Stripe } from 'stripe'
 import { NextResponse } from 'next/server'
@@ -178,11 +178,11 @@ export async function handlePaymentSuccess(
     }
 
     const emailHtml = generateTicketConfirmationEmail(emailData)
-    const emailSent = await sendEmailWithRetry(
-      tickets[0].user.email,
-      `Your tickets for ${tickets[0].campaign.movieTitle}`,
-      emailHtml
-    )
+    const emailSent = await sendEmail({
+      to: tickets[0].user.email,
+      subject: `Your tickets for ${tickets[0].campaign.movieTitle}`,
+      html: emailHtml
+    })
 
     if (!emailSent) {
       console.error('Failed to send confirmation email after retries')

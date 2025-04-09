@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -14,47 +12,43 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
 
 interface AllocateTicketDialogProps {
   ticket: {
     id: string
-    campaign: {
-      title: string
-      movieTitle: string
-      screeningDate: string
-    }
+    status: string
   }
+  purchaseId: string
 }
 
-export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+export function AllocateTicketDialog({ ticket, purchaseId }: AllocateTicketDialogProps) {
   const [open, setOpen] = useState(false)
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const handleAllocate = async () => {
+    if (!email) {
+      toast({
+        title: 'Error',
+        description: 'Please enter an email address',
+        variant: 'destructive',
+      })
+      return
+    }
 
+    setLoading(true)
     try {
-      // First find the user by email
-      const userResponse = await fetch(
-        `/api/users/by-email?email=${encodeURIComponent(email)}`
-      )
-      if (!userResponse.ok) {
-        throw new Error('User not found')
-      }
-      const user = await userResponse.json()
-
-      // Then allocate the ticket
-      const response = await fetch('/api/admin/tickets/allocate', {
+      const response = await fetch(`/api/tickets/${ticket.id}/allocate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ticketId: ticket.id,
-          userId: user.id,
+          email,
+          purchaseId,
         }),
       })
 
@@ -64,65 +58,45 @@ export function AllocateTicketDialog({ ticket }: AllocateTicketDialogProps) {
 
       toast({
         title: 'Success',
-        description: 'Ticket has been allocated successfully',
+        description: 'Ticket allocated successfully',
       })
       setOpen(false)
+      router.refresh()
     } catch (error) {
       toast({
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to allocate ticket',
+        description: 'Failed to allocate ticket',
         variant: 'destructive',
       })
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Allocate
-        </Button>
+        <Button variant="outline">Allocate Ticket</Button>
       </DialogTrigger>
-      <DialogContent className="bg-white sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-gray-900">
-            Allocate Pay It Forward Ticket
-          </DialogTitle>
-          <DialogDescription className="text-gray-600">
-            Enter the email address of the user you want to allocate this ticket
-            to. The ticket is for {ticket.campaign.movieTitle} on{' '}
-            {new Date(ticket.campaign.screeningDate).toLocaleDateString()}.
-          </DialogDescription>
+          <DialogTitle>Allocate Pay It Forward Ticket</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right text-gray-700">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="col-span-3 bg-white text-gray-900"
-                required
-              />
-            </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Recipient Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter recipient's email"
+            />
           </div>
-          <DialogFooter>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 text-white"
-            >
-              {isLoading ? 'Allocating...' : 'Allocate Ticket'}
-            </Button>
-          </DialogFooter>
-        </form>
+          <Button onClick={handleAllocate} disabled={loading}>
+            {loading ? 'Allocating...' : 'Allocate Ticket'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

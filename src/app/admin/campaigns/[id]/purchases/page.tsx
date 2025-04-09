@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { DataTable } from '@/components/ui/data-table'
-import { columns } from './columns'
+import { columns } from '@/app/admin/campaigns/[id]/purchases/columns'
 import { Decimal } from '@prisma/client/runtime/library'
 
 // Helper function to convert Decimal to number
@@ -15,7 +15,7 @@ const convertDecimal = (value: Decimal | null | undefined) => {
   return Number(value)
 }
 
-export default async function CampaignTicketsPage({
+export default async function CampaignPurchasesPage({
   params: { id },
 }: {
   params: { id: string }
@@ -28,7 +28,7 @@ export default async function CampaignTicketsPage({
   const campaign = await prisma.campaign.findUnique({
     where: { id },
     include: {
-      tickets: {
+      purchases: {
         include: {
           user: {
             select: {
@@ -36,28 +36,21 @@ export default async function CampaignTicketsPage({
               email: true,
             },
           },
-          campaign: {
-            select: {
-              title: true,
-              movieTitle: true,
-              screeningDate: true,
-            },
-          },
-          purchase: {
+          tickets: true,
+          orders: {
             include: {
-              orders: {
+              menuItem: true,
+              choices: {
                 include: {
-                  menuItem: true,
-                  choices: {
-                    include: {
-                      option: true,
-                      selectedChoice: true,
-                    },
-                  },
+                  option: true,
+                  selectedChoice: true,
                 },
               },
             },
           },
+        },
+        where: {
+          status: 'CONFIRMED',
         },
         orderBy: {
           createdAt: 'desc',
@@ -65,7 +58,11 @@ export default async function CampaignTicketsPage({
       },
       _count: {
         select: {
-          tickets: true,
+          purchases: {
+            where: {
+              status: 'CONFIRMED',
+            },
+          },
         },
       },
     },
@@ -75,54 +72,67 @@ export default async function CampaignTicketsPage({
     redirect('/admin/campaigns')
   }
 
-  // Convert Decimal values to numbers in tickets and orders
-  const processedTickets = campaign.tickets.map((ticket) => ({
-    ...ticket,
-    pricePaid: convertDecimal(ticket.pricePaid),
-    orders:
-      ticket.purchase?.orders.map((order) => ({
-        ...order,
-        menuItem: order.menuItem
-          ? {
-              ...order.menuItem,
-              price: convertDecimal(order.menuItem.price),
-            }
-          : null,
-      })) || [],
+  // Process purchases with their tickets and orders
+  const processedPurchases = campaign.purchases.map((purchase) => ({
+    ...purchase,
+    totalAmount: convertDecimal(purchase.totalAmount),
+    tickets: purchase.tickets.map((ticket) => ({
+      ...ticket,
+      pricePaid: convertDecimal(ticket.pricePaid),
+    })),
+    orders: purchase.orders.map((order) => ({
+      ...order,
+      menuItem: {
+        ...order.menuItem,
+        price: convertDecimal(order.menuItem.price),
+      },
+    })),
   }))
 
-  // Calculate ticket statistics
-  const totalTickets = campaign._count.tickets
-  const totalRevenue = processedTickets.reduce(
-    (sum, ticket) => sum + ticket.pricePaid,
+  // Calculate statistics
+  const totalPurchases = campaign._count.purchases
+  const totalRevenue = processedPurchases.reduce(
+    (sum, purchase) => sum + purchase.totalAmount,
     0
   )
-  const payItForwardTickets = processedTickets.filter(
-    (ticket) => ticket.status === 'PAY_IT_FORWARD'
-  ).length
-  const standardTickets = processedTickets.filter(
-    (ticket) => ticket.status === 'CONFIRMED'
-  ).length
+  const totalTickets = processedPurchases.reduce(
+    (sum, purchase) => sum + purchase.tickets.length,
+    0
+  )
+  const payItForwardTickets = processedPurchases.reduce(
+    (sum, purchase) =>
+      sum + purchase.tickets.filter((t) => t.status === 'PAY_IT_FORWARD').length,
+    0
+  )
+  const standardTickets = processedPurchases.reduce(
+    (sum, purchase) =>
+      sum + purchase.tickets.filter((t) => t.status === 'CONFIRMED').length,
+    0
+  )
+  const totalPreOrders = processedPurchases.reduce(
+    (sum, purchase) => sum + purchase.orders.length,
+    0
+  )
 
   return (
     <div className="container mx-auto py-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Campaign Tickets</h1>
+          <h1 className="text-3xl font-bold">Campaign Purchases</h1>
           <Button variant="outline" asChild>
             <Link href="/admin/campaigns">Back to Campaigns</Link>
           </Button>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
+        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-5">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Tickets
+                Total Purchases
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalTickets}</div>
+              <div className="text-2xl font-bold">{totalPurchases}</div>
             </CardContent>
           </Card>
 
@@ -160,17 +170,28 @@ export default async function CampaignTicketsPage({
               <div className="text-2xl font-bold">{payItForwardTickets}</div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Pre-orders
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalPreOrders}</div>
+            </CardContent>
+          </Card>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Ticket Details</CardTitle>
+            <CardTitle>Purchase Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTable columns={columns} data={processedTickets} />
+            <DataTable columns={columns} data={processedPurchases} />
           </CardContent>
         </Card>
       </div>
     </div>
   )
-}
+} 
