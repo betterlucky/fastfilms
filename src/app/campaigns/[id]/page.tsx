@@ -42,11 +42,15 @@ export default async function CampaignPage({
       charityId: true,
       menuItems: {
         select: {
-          id: true,
-          name: true,
-          description: true,
-          price: true,
-          category: true,
+          menuItem: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              price: true,
+              category: true,
+            },
+          },
         },
       },
       isTest: true,
@@ -61,14 +65,14 @@ export default async function CampaignPage({
 
   const [availableScreens, charities, venueMenuItems] = await Promise.all([
     prisma.screen.findMany({
-      where: { venueId: campaign.venueId },
+      where: { venueId: campaign.venue.id },
       select: { id: true, name: true, capacity: true },
     }),
     prisma.charity.findMany({
       select: { id: true, name: true },
     }),
     prisma.menuItem.findMany({
-      where: { venueId: campaign.venueId },
+      where: { venueId: campaign.venue.id },
       select: {
         id: true,
         name: true,
