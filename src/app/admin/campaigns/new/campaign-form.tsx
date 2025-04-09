@@ -36,19 +36,19 @@ type TimeUnit = 'days' | 'weeks'
 
 export function CampaignForm({ venues, charities }: CampaignFormProps) {
   const router = useRouter()
-  const [selectedVenue, setSelectedVenue] = useState('')
-  const [selectedScreen, setSelectedScreen] = useState('')
-  const [screeningDate, setScreeningDate] = useState(new Date())
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedVenue, setSelectedVenue] = useState<string>('')
+  const [selectedScreen, setSelectedScreen] = useState<string>('')
+  const [screeningDate, setScreeningDate] = useState<Date | null>(null)
   const [deadlineTimeAmount, setDeadlineTimeAmount] = useState(1)
   const [deadlineTimeUnit, setDeadlineTimeUnit] = useState<TimeUnit>('weeks')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFilm, setSelectedFilm] = useState<TMDBFilm | null>(null)
   const [title, setTitle] = useState('')
   const [movieTitle, setMovieTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [posterPath, setPosterPath] = useState('')
+  const [posterPath, setPosterPath] = useState<string>('')
 
-  const currentVenue = venues.find((v) => v.id === selectedVenue)
+  const currentVenue = venues.find((venue) => venue.id === selectedVenue)
 
   const handleFilmSelect = (film: TMDBFilm) => {
     setSelectedFilm(film)
@@ -63,7 +63,7 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
   }
 
   const calculateDeadlineDate = (): Date => {
-    const deadline = new Date(screeningDate)
+    const deadline = new Date(screeningDate || new Date())
     if (deadlineTimeUnit === 'weeks') {
       deadline.setDate(deadline.getDate() - deadlineTimeAmount * 7)
     } else {
@@ -72,61 +72,53 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
     return deadline
   }
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (isSubmitting) return
-
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setIsSubmitting(true)
-    const formData = new FormData(event.currentTarget)
 
     try {
+      const formData = new FormData(e.currentTarget)
+      const menuItemIds = formData.getAll('menuItemIds[]')
+
       const response = await fetch('/api/admin/campaigns', {
         method: 'POST',
-        body: JSON.stringify({
-          title: title,
-          description: description,
-          movieTitle: movieTitle,
-          customBlurb: formData.get('customBlurb'),
-          venueId: formData.get('venueId'),
-          screenId:
-            formData.get('screenId') === 'unassign'
-              ? null
-              : formData.get('screenId'),
-          screeningDate: screeningDate.toISOString(),
-          deadlineDate: calculateDeadlineDate().toISOString(),
-          ticketCap: Number(formData.get('ticketCap')),
-          fundingTarget: Number(formData.get('fundingTarget')),
-          charityId:
-            formData.get('charityId') === 'none'
-              ? null
-              : formData.get('charityId'),
-          menuItemIds: formData.getAll('menuItemIds[]'),
-          isFeatured: formData.get('isFeatured') === 'on',
-          isTest: formData.get('isTest') === 'on',
-          tmdbId: selectedFilm?.id?.toString() || null,
-          posterPath: posterPath || null,
-        }),
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          title: formData.get('title'),
+          description: formData.get('description'),
+          movieTitle: formData.get('movieTitle'),
+          venueId: selectedVenue,
+          screenId: selectedScreen || null,
+          screeningDate: screeningDate?.toISOString(),
+          deadlineDate: calculateDeadlineDate().toISOString(),
+          ticketCap: parseInt(formData.get('ticketCap') as string),
+          fundingTarget: parseFloat(formData.get('fundingTarget') as string),
+          charityId: formData.get('charityId') === 'none' ? null : formData.get('charityId'),
+          posterPath: formData.get('posterPath') || null,
+          tmdbId: formData.get('tmdbId') || null,
+          isTest: formData.get('isTest') === 'on',
+          menuItemIds: menuItemIds,
+        }),
       })
 
       if (!response.ok) {
         throw new Error('Failed to create campaign')
       }
 
-      router.refresh()
       router.push('/admin/campaigns')
+      router.refresh()
     } catch (error) {
       console.error('Error creating campaign:', error)
-      // TODO: Show error message to user
+      alert('Failed to create campaign')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-4">
         <div>
           <label htmlFor="movieTitle" className="block text-sm font-medium">

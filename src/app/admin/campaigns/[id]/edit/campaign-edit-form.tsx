@@ -48,41 +48,42 @@ interface CampaignEditFormProps {
   charities: Charity[]
 }
 
-const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  movieTitle: z.string().min(1, 'Movie title is required'),
-  description: z.string().min(1, 'Description is required'),
-  fundingTarget: z.number().min(0, 'Funding target must be positive'),
-  ticketCap: z.number().min(0, 'Ticket cap must be positive'),
-  screeningDate: z.date(),
-  deadlineDate: z.date(),
-  status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED', 'FAILED']),
-  isTest: z.boolean(),
-})
-
 export function CampaignEditForm({
   campaign,
   venues,
   charities,
 }: CampaignEditFormProps) {
   const router = useRouter()
-  const [selectedVenue, setSelectedVenue] = useState(campaign.venue.id)
-  const [selectedScreen, setSelectedScreen] = useState(campaign.screenId)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedVenue, setSelectedVenue] = useState(campaign.venue.id)
+  const [selectedScreen, setSelectedScreen] = useState(campaign.screenId || '')
+  const [selectedMenuItems, setSelectedMenuItems] = useState(
+    campaign.menuItems.map((item) => item.menuItem.id)
+  )
 
-  const currentVenue = venues.find((v) => v.id === selectedVenue)
+  const currentVenue = venues.find((venue) => venue.id === selectedVenue)
+
+  const formSchema = z.object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+    movieTitle: z.string().min(1),
+    screeningDate: z.date(),
+    ticketCap: z.number().min(0),
+    fundingTarget: z.number().min(0),
+    status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED', 'FAILED']),
+    isTest: z.boolean(),
+  })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: campaign.title,
-      movieTitle: campaign.movieTitle,
       description: campaign.description,
-      fundingTarget: Number(campaign.fundingTarget),
-      ticketCap: campaign.ticketCap,
+      movieTitle: campaign.movieTitle,
       screeningDate: new Date(campaign.screeningDate),
-      deadlineDate: new Date(campaign.deadlineDate),
-      status: campaign.status as 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'FAILED',
+      ticketCap: campaign.ticketCap,
+      fundingTarget: Number(campaign.fundingTarget),
+      status: campaign.status,
       isTest: campaign.isTest,
     },
   })
@@ -101,7 +102,7 @@ export function CampaignEditForm({
           venueId: selectedVenue,
           screenId: selectedScreen || 'unassign',
           charityId: campaign.charityId || 'none',
-          menuItemIds: campaign.menuItems.map((item) => item.menuItem.id),
+          menuItemIds: selectedMenuItems,
           isFeatured: true,
         }),
       })
@@ -219,28 +220,6 @@ export function CampaignEditForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Screening Date & Time</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    selected={field.value}
-                    onChange={(date) => field.onChange(date)}
-                    showTimeSelect
-                    dateFormat="dd/MM/yyyy HH:mm"
-                    timeFormat="HH:mm"
-                    timeIntervals={15}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2"
-                    placeholderText="Select date and time"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="deadlineDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Deadline Date</FormLabel>
                 <FormControl>
                   <DatePicker
                     selected={field.value}
