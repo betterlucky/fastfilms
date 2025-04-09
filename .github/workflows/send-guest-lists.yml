@@ -14,10 +14,21 @@ jobs:
       - name: Send Guest Lists
         shell: bash
         run: |
+          # Enable debugging
+          set -x
+          
+          # Make the script fail on any error
           set -e
           
           # Send the request and capture both response and status code
-          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms.vercel.app/api/cron/send-guest-lists" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          response=$(
+            curl \
+              -s \
+              -w "\n%{http_code}" \
+              -X GET \
+              "https://fastfilms.vercel.app/api/cron/send-guest-lists" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          )
           
           # Split response into body and status code
           body=$(echo "$response" | head -n -1)
