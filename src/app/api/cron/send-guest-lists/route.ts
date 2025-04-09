@@ -23,7 +23,13 @@ export async function GET(request: Request) {
 
     if (result.guestListsSent === 0) {
       console.log('No screenings found for today, no guest lists needed')
-      return new NextResponse(null, { status: 204 })
+      return new NextResponse(
+        JSON.stringify({
+          message: 'No guest lists needed to be sent today',
+          guestListsSent: 0,
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
     }
 
     console.log(`Successfully sent ${result.guestListsSent} guest list(s)`)
