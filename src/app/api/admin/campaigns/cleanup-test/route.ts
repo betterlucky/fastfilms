@@ -53,10 +53,48 @@ export async function POST(request: Request) {
         prisma.campaignMenuItem.count({ where: { campaignId } }),
       ])
 
-      // Delete all associated data for the test campaign
-      // This will cascade delete tickets, purchases, orders, etc.
-      await prisma.campaign.delete({
-        where: { id: campaignId }
+      // Delete all associated data in the correct order
+      await prisma.$transaction(async (tx) => {
+        // 1. Delete OrderChoices (depends on Order)
+        await tx.orderChoice.deleteMany({
+          where: {
+            order: {
+              purchase: { campaignId }
+            }
+          }
+        })
+
+        // 2. Delete Orders (depends on Purchase)
+        await tx.order.deleteMany({
+          where: {
+            purchase: { campaignId }
+          }
+        })
+
+        // 3. Delete Tickets (depends on Purchase)
+        await tx.ticket.deleteMany({
+          where: { campaignId }
+        })
+
+        // 4. Delete Purchases (depends on Campaign)
+        await tx.purchase.deleteMany({
+          where: { campaignId }
+        })
+
+        // 5. Delete CampaignMenuItems (depends on Campaign)
+        await tx.campaignMenuItem.deleteMany({
+          where: { campaignId }
+        })
+
+        // 6. Delete Comments (depends on Campaign)
+        await tx.comment.deleteMany({
+          where: { campaignId }
+        })
+
+        // 7. Finally delete the campaign
+        await tx.campaign.delete({
+          where: { id: campaignId }
+        })
       })
 
       return NextResponse.json({
@@ -120,17 +158,62 @@ export async function POST(request: Request) {
       prisma.campaignMenuItem.count({ where: { campaignId: { in: campaignIds } } }),
     ])
 
-    // Delete all associated data for test campaigns
-    // This will cascade delete tickets, purchases, orders, etc.
-    const result = await prisma.campaign.deleteMany({
-      where: {
-        id: { in: campaignIds }
-      },
+    // Delete all associated data in the correct order
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete OrderChoices (depends on Order)
+      await tx.orderChoice.deleteMany({
+        where: {
+          order: {
+            purchase: {
+              campaignId: { in: campaignIds }
+            }
+          }
+        }
+      })
+
+      // 2. Delete Orders (depends on Purchase)
+      await tx.order.deleteMany({
+        where: {
+          purchase: {
+            campaignId: { in: campaignIds }
+          }
+        }
+      })
+
+      // 3. Delete Tickets (depends on Purchase)
+      await tx.ticket.deleteMany({
+        where: { campaignId: { in: campaignIds }
+        }
+      })
+
+      // 4. Delete Purchases (depends on Campaign)
+      await tx.purchase.deleteMany({
+        where: { campaignId: { in: campaignIds }
+        }
+      })
+
+      // 5. Delete CampaignMenuItems (depends on Campaign)
+      await tx.campaignMenuItem.deleteMany({
+        where: { campaignId: { in: campaignIds }
+        }
+      })
+
+      // 6. Delete Comments (depends on Campaign)
+      await tx.comment.deleteMany({
+        where: { campaignId: { in: campaignIds }
+        }
+      })
+
+      // 7. Finally delete the campaigns
+      await tx.campaign.deleteMany({
+        where: { id: { in: campaignIds }
+        }
+      })
     })
 
     return NextResponse.json({
-      message: `Successfully deleted ${result.count} test campaigns and their associated data`,
-      campaignsDeleted: result.count,
+      message: `Successfully deleted ${testCampaigns.length} test campaigns and their associated data`,
+      campaignsDeleted: testCampaigns.length,
       statistics: {
         tickets: ticketsCount,
         purchases: purchasesCount,
