@@ -80,15 +80,24 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
       const formData = new FormData(e.currentTarget)
       const menuItemIds = formData.getAll('menuItemIds[]')
 
+      // Ensure required fields are not null
+      const title = formData.get('title') as string || ''
+      const description = formData.get('description') as string || ''
+      const movieTitle = formData.get('movieTitle') as string || ''
+
+      if (!title || !description || !movieTitle) {
+        throw new Error('Please fill in all required fields')
+      }
+
       const response = await fetch('/api/admin/campaigns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: formData.get('title'),
-          description: formData.get('description'),
-          movieTitle: formData.get('movieTitle'),
+          title,
+          description,
+          movieTitle,
           venueId: selectedVenue,
           screenId: selectedScreen || null,
           screeningDate: screeningDate?.toISOString(),
@@ -104,14 +113,15 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create campaign')
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create campaign')
       }
 
       router.push('/admin/campaigns')
       router.refresh()
     } catch (error) {
       console.error('Error creating campaign:', error)
-      alert('Failed to create campaign')
+      alert(error instanceof Error ? error.message : 'Failed to create campaign')
     } finally {
       setIsSubmitting(false)
     }

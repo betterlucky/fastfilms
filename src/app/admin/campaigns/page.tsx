@@ -24,7 +24,9 @@ export default async function CampaignsPage() {
     include: {
       venue: {
         select: {
+          id: true,
           name: true,
+          city: true,
         },
       },
       charity: {

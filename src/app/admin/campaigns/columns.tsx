@@ -8,7 +8,7 @@ import { formatDate } from '@/lib/utils'
 
 export const columns: ColumnDef<
   Campaign & {
-    venue: { name: string }
+    venue: { id: string; name: string; city: string }
     charity: { name: string } | null
     _count: { tickets: number }
   }
@@ -35,8 +35,17 @@ export const columns: ColumnDef<
     header: 'Movie',
   },
   {
-    accessorKey: 'venue.name',
+    accessorKey: 'venue',
     header: 'Venue',
+    cell: ({ row }) => {
+      const venue = row.original.venue
+      return (
+        <div>
+          <div className="font-medium">{venue.name}</div>
+          <div className="text-sm text-gray-500">{venue.city}</div>
+        </div>
+      )
+    },
   },
   {
     accessorKey: 'charity.name',
