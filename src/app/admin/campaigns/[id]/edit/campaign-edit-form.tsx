@@ -30,21 +30,24 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
 
+// Create types for serialized data where Decimal is converted to number
+type SerializedMenuItem = Omit<MenuItem, 'price'> & { price: number }
+type SerializedVenue = Omit<Venue, 'menuItems'> & {
+  screens: Screen[]
+  menuItems: SerializedMenuItem[]
+}
+type SerializedCampaign = Omit<Campaign, 'fundingTarget' | 'currentFunding'> & {
+  fundingTarget: number
+  currentFunding: number
+  venue: SerializedVenue
+  menuItems: {
+    menuItem: SerializedMenuItem
+  }[]
+}
+
 interface CampaignEditFormProps {
-  campaign: Campaign & {
-    venue: Venue & {
-      screens: Screen[]
-      menuItems: MenuItem[]
-    }
-    menuItems: {
-      menuItem: MenuItem
-    }[]
-    charity: Charity | null
-  }
-  venues: (Venue & {
-    screens: Screen[]
-    menuItems: MenuItem[]
-  })[]
+  campaign: SerializedCampaign
+  venues: SerializedVenue[]
   charities: Charity[]
 }
 
@@ -92,6 +95,10 @@ export function CampaignEditForm({
     try {
       setIsSubmitting(true)
 
+      if (!selectedVenue) {
+        throw new Error('Please select a venue')
+      }
+
       const response = await fetch(`/api/admin/campaigns/${campaign.id}`, {
         method: 'PUT',
         headers: {
@@ -100,7 +107,7 @@ export function CampaignEditForm({
         body: JSON.stringify({
           ...values,
           venueId: selectedVenue,
-          screenId: selectedScreen || 'unassign',
+          screenId: selectedScreen === 'unassign' ? null : selectedScreen || null,
           charityId: campaign.charityId || 'none',
           menuItemIds: selectedMenuItems,
           isFeatured: true,
@@ -152,6 +159,51 @@ export function CampaignEditForm({
               </FormItem>
             )}
           />
+        </div>
+
+        <div>
+          <label htmlFor="venue" className="block text-sm font-medium">
+            Venue
+          </label>
+          <Select
+            name="venueId"
+            value={selectedVenue}
+            onValueChange={setSelectedVenue}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a venue" />
+            </SelectTrigger>
+            <SelectContent>
+              {venues.map((venue) => (
+                <SelectItem key={venue.id} value={venue.id}>
+                  {venue.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <label htmlFor="screen" className="block text-sm font-medium">
+            Screen
+          </label>
+          <Select
+            name="screenId"
+            value={selectedScreen}
+            onValueChange={setSelectedScreen}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a screen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="unassign">Unassign Screen</SelectItem>
+              {currentVenue?.screens.map((screen) => (
+                <SelectItem key={screen.id} value={screen.id}>
+                  {screen.name} ({screen.capacity} seats)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

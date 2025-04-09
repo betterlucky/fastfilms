@@ -80,11 +80,6 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
       const formData = new FormData(e.currentTarget)
       const menuItemIds = formData.getAll('menuItemIds[]')
 
-      // Ensure required fields are not null
-      const title = formData.get('title') as string || ''
-      const description = formData.get('description') as string || ''
-      const movieTitle = formData.get('movieTitle') as string || ''
-
       if (!title || !description || !movieTitle) {
         throw new Error('Please fill in all required fields')
       }
@@ -107,16 +102,17 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
           description,
           movieTitle,
           venueId: selectedVenue,
-          screenId: selectedScreen || null,
-          screeningDate: screeningDate?.toISOString(),
+          screenId: selectedScreen === 'unassign' ? null : selectedScreen || null,
+          screeningDate: screeningDate.toISOString(),
           deadlineDate: calculateDeadlineDate().toISOString(),
           ticketCap: parseInt(formData.get('ticketCap') as string),
           fundingTarget: parseFloat(formData.get('fundingTarget') as string),
           charityId: formData.get('charityId') === 'none' ? null : formData.get('charityId'),
-          posterPath: formData.get('posterPath') || null,
-          tmdbId: formData.get('tmdbId') || null,
+          posterPath: posterPath || null,
+          tmdbId: selectedFilm?.id?.toString() || null,
           isTest: formData.get('isTest') === 'on',
           menuItemIds: menuItemIds,
+          isFeatured: formData.get('isFeatured') === 'on'
         }),
       })
 
