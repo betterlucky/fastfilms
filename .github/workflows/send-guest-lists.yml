@@ -21,14 +21,7 @@ jobs:
           set -e
           
           # Send the request and capture both response and status code
-          response=$(
-            curl \
-              -s \
-              -w "\n%{http_code}" \
-              -X GET \
-              "https://fastfilms.vercel.app/api/cron/send-guest-lists" \
-              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
-          )
+          response=$(curl -s -w "\n%{http_code}" -X GET "https://fastfilms.vercel.app/api/cron/send-guest-lists" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
           
           # Split response into body and status code
           body=$(echo "$response" | head -n -1)
@@ -50,4 +43,4 @@ jobs:
             echo "Status code: $status_code"
             echo "Response: $body"
             exit 1
-          fi 
+          fi
