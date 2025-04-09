@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       }
 
       // Get counts before deletion
-      const [ticketsCount, purchasesCount, ordersCount, orderChoicesCount, menuItemsCount] = await Promise.all([
+      const [ticketsCount, purchasesCount, ordersCount, orderChoicesCount, menuItemsCount, ticketResendsCount] = await Promise.all([
         prisma.ticket.count({ where: { campaignId } }),
         prisma.purchase.count({ where: { campaignId } }),
         prisma.order.count({ 
@@ -51,6 +51,11 @@ export async function POST(request: Request) {
           }
         }),
         prisma.campaignMenuItem.count({ where: { campaignId } }),
+        prisma.ticketResend.count({
+          where: {
+            ticket: { campaignId }
+          }
+        })
       ])
 
       // Delete all associated data in the correct order
@@ -71,27 +76,34 @@ export async function POST(request: Request) {
           }
         })
 
-        // 3. Delete Tickets (depends on Purchase)
+        // 3. Delete TicketResends (depends on Ticket)
+        await tx.ticketResend.deleteMany({
+          where: {
+            ticket: { campaignId }
+          }
+        })
+
+        // 4. Delete Tickets (depends on Purchase)
         await tx.ticket.deleteMany({
           where: { campaignId }
         })
 
-        // 4. Delete Purchases (depends on Campaign)
+        // 5. Delete Purchases (depends on Campaign)
         await tx.purchase.deleteMany({
           where: { campaignId }
         })
 
-        // 5. Delete CampaignMenuItems (depends on Campaign)
+        // 6. Delete CampaignMenuItems (depends on Campaign)
         await tx.campaignMenuItem.deleteMany({
           where: { campaignId }
         })
 
-        // 6. Delete Comments (depends on Campaign)
+        // 7. Delete Comments (depends on Campaign)
         await tx.comment.deleteMany({
           where: { campaignId }
         })
 
-        // 7. Finally delete the campaign
+        // 8. Finally delete the campaign
         await tx.campaign.delete({
           where: { id: campaignId }
         })
@@ -105,6 +117,7 @@ export async function POST(request: Request) {
           orders: ordersCount,
           orderChoices: orderChoicesCount,
           menuItems: menuItemsCount,
+          ticketResends: ticketResendsCount,
         },
       })
     }
@@ -129,6 +142,7 @@ export async function POST(request: Request) {
           orders: 0,
           orderChoices: 0,
           menuItems: 0,
+          ticketResends: 0,
         },
       })
     }
@@ -136,7 +150,7 @@ export async function POST(request: Request) {
     // Get counts of associated records before deletion
     const campaignIds = testCampaigns.map(c => c.id)
     
-    const [ticketsCount, purchasesCount, ordersCount, orderChoicesCount, menuItemsCount] = await Promise.all([
+    const [ticketsCount, purchasesCount, ordersCount, orderChoicesCount, menuItemsCount, ticketResendsCount] = await Promise.all([
       prisma.ticket.count({ where: { campaignId: { in: campaignIds } } }),
       prisma.purchase.count({ where: { campaignId: { in: campaignIds } } }),
       prisma.order.count({ 
@@ -156,6 +170,11 @@ export async function POST(request: Request) {
         }
       }),
       prisma.campaignMenuItem.count({ where: { campaignId: { in: campaignIds } } }),
+      prisma.ticketResend.count({
+        where: {
+          ticket: { campaignId: { in: campaignIds } }
+        }
+      })
     ])
 
     // Delete all associated data in the correct order
@@ -180,31 +199,38 @@ export async function POST(request: Request) {
         }
       })
 
-      // 3. Delete Tickets (depends on Purchase)
+      // 3. Delete TicketResends (depends on Ticket)
+      await tx.ticketResend.deleteMany({
+        where: {
+          ticket: { campaignId: { in: campaignIds } }
+        }
+      })
+
+      // 4. Delete Tickets (depends on Purchase)
       await tx.ticket.deleteMany({
         where: { campaignId: { in: campaignIds }
         }
       })
 
-      // 4. Delete Purchases (depends on Campaign)
+      // 5. Delete Purchases (depends on Campaign)
       await tx.purchase.deleteMany({
         where: { campaignId: { in: campaignIds }
         }
       })
 
-      // 5. Delete CampaignMenuItems (depends on Campaign)
+      // 6. Delete CampaignMenuItems (depends on Campaign)
       await tx.campaignMenuItem.deleteMany({
         where: { campaignId: { in: campaignIds }
         }
       })
 
-      // 6. Delete Comments (depends on Campaign)
+      // 7. Delete Comments (depends on Campaign)
       await tx.comment.deleteMany({
         where: { campaignId: { in: campaignIds }
         }
       })
 
-      // 7. Finally delete the campaigns
+      // 8. Finally delete the campaigns
       await tx.campaign.deleteMany({
         where: { id: { in: campaignIds }
         }
@@ -220,6 +246,7 @@ export async function POST(request: Request) {
         orders: ordersCount,
         orderChoices: orderChoicesCount,
         menuItems: menuItemsCount,
+        ticketResends: ticketResendsCount,
       },
     })
   } catch (error) {
