@@ -83,7 +83,7 @@ export function CampaignEditForm({
       screeningDate: new Date(campaign.screeningDate),
       ticketCap: campaign.ticketCap,
       fundingTarget: Number(campaign.fundingTarget),
-      status: campaign.status,
+      status: campaign.status as 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'FAILED',
       isTest: campaign.isTest,
     },
   })
