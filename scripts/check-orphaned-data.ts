@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, PurchaseStatus, TicketStatus } from '@prisma/client'
 
 const prisma = new PrismaClient({
   datasources: {
@@ -7,6 +7,47 @@ const prisma = new PrismaClient({
     }
   }
 })
+
+async function cleanupOrphanedData() {
+  console.log('Cleaning up orphaned data...\n')
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Clean up pending purchases older than 1 hour
+      const oldPendingPurchases = await tx.purchase.updateMany({
+        where: {
+          status: PurchaseStatus.PENDING,
+          createdAt: {
+            lt: new Date(Date.now() - 60 * 60 * 1000)
+          }
+        },
+        data: {
+          status: PurchaseStatus.FAILED
+        }
+      })
+
+      console.log(`Updated ${oldPendingPurchases.count} old pending purchases to FAILED`)
+
+      // Clean up associated tickets
+      const orphanedTickets = await tx.ticket.updateMany({
+        where: {
+          purchase: {
+            status: PurchaseStatus.FAILED
+          }
+        },
+        data: {
+          status: TicketStatus.CANCELLED
+        }
+      })
+
+      console.log(`Updated ${orphanedTickets.count} orphaned tickets to CANCELLED`)
+    })
+
+    console.log('\nCleanup completed successfully')
+  } catch (error) {
+    console.error('Error during cleanup:', error)
+  }
+}
 
 async function checkOrphanedData() {
   console.log('Checking for orphaned data...\n')
@@ -120,15 +161,14 @@ async function checkOrphanedData() {
   if (orphanedComments.length > 0) {
     console.log(orphanedComments)
   }
+}
 
+// Run both check and cleanup
+async function main() {
+  await checkOrphanedData()
+  console.log('\n-------------------\n')
+  await cleanupOrphanedData()
   await prisma.$disconnect()
 }
 
-checkOrphanedData()
-  .catch((e) => {
-    console.error('Error:', e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  }) 
+main().catch(console.error) 

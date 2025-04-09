@@ -127,13 +127,18 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       yPos += 8
       doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
       yPos += 8
-      doc.text(
-        `Date: ${formatDate(data.campaign.screeningDate)}`,
-        MARGIN + 5,
-        yPos
-      )
-      yPos += 8
-      doc.text(`Time: ${data.campaign.screeningTime}`, MARGIN + 5, yPos)
+      doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })}`, MARGIN + 5, yPos)
+      yPos += 10
+      doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })}`, MARGIN + 5, yPos)
       yPos += 8
       doc.text(`Total Guests: ${data.tickets.length}`, MARGIN + 5, yPos)
       yPos += 15
@@ -219,13 +224,18 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
       yPos += 8
       doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
       yPos += 8
-      doc.text(
-        `Date: ${formatDate(data.campaign.screeningDate)}`,
-        MARGIN + 5,
-        yPos
-      )
-      yPos += 8
-      doc.text(`Time: ${data.campaign.screeningTime}`, MARGIN + 5, yPos)
+      doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })}`, MARGIN + 5, yPos)
+      yPos += 10
+      doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })}`, MARGIN + 5, yPos)
       yPos += 15
 
       // Order Summary section

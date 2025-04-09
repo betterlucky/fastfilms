@@ -133,7 +133,6 @@ export async function sendGuestListsForToday(): Promise<{
         movieTitle: campaign.movieTitle,
         venueName: campaign.venue.name,
         screeningDate: campaign.screeningDate,
-        screeningTime: campaign.screeningTime,
         totalTickets: campaign.tickets.length,
         guestList,
       })

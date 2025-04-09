@@ -127,9 +127,8 @@ export async function updateScreeningDateTime(formData: FormData) {
 
   const campaignId = formData.get('campaignId') as string
   const screeningDate = formData.get('screeningDate') as string
-  const screeningTime = formData.get('screeningTime') as string
 
-  if (!screeningDate || !screeningTime) {
+  if (!screeningDate) {
     throw new Error('Missing required fields')
   }
 
@@ -137,7 +136,6 @@ export async function updateScreeningDateTime(formData: FormData) {
     where: { id: campaignId },
     data: {
       screeningDate: new Date(screeningDate),
-      screeningTime,
     },
   })
 

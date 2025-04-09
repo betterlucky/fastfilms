@@ -4,7 +4,7 @@ import {
   PurchaseStatus,
   TicketStatus,
 } from '@prisma/client'
-import { sendEmail } from '@/lib/email'
+import { sendEmail, sendEmailWithRetry } from '@/lib/email'
 import { prisma } from '@/lib/db'
 import { Stripe } from 'stripe'
 import { NextResponse } from 'next/server'
@@ -30,9 +30,8 @@ export async function handlePaymentSuccess(
   }
 
   try {
-    // Update ticket status to confirmed and increment campaign's currentTickets
     await prisma.$transaction(async (tx) => {
-      // First, try to find an existing purchase with this payment intent ID
+      // First, try to find an existing purchase
       const existingPurchase = await tx.purchase.findFirst({
         where: {
           stripePaymentIntentId: paymentIntentId,
@@ -40,7 +39,6 @@ export async function handlePaymentSuccess(
       })
 
       if (existingPurchase) {
-        // If purchase exists, update it
         await tx.purchase.update({
           where: { id: existingPurchase.id },
           data: {
@@ -49,7 +47,6 @@ export async function handlePaymentSuccess(
           },
         })
       } else {
-        // If no purchase exists, create a new one
         await tx.purchase.create({
           data: {
             stripePaymentIntentId: paymentIntentId,
@@ -64,7 +61,7 @@ export async function handlePaymentSuccess(
         })
       }
 
-      // Update ticket status to confirmed
+      // Update tickets in a single query
       await tx.ticket.updateMany({
         where: { id: { in: ticketIds } },
         data: {
@@ -72,7 +69,20 @@ export async function handlePaymentSuccess(
         },
       })
 
-      // Update campaign ticket count
+      // Update campaign with locking
+      const campaign = await tx.campaign.findUnique({
+        where: { id: campaignId },
+        select: { currentTickets: true, ticketCap: true }
+      })
+
+      if (!campaign) {
+        throw new Error('Campaign not found')
+      }
+
+      if (campaign.currentTickets + ticketIds.length > campaign.ticketCap) {
+        throw new Error('Campaign ticket cap would be exceeded')
+      }
+
       await tx.campaign.update({
         where: { id: campaignId },
         data: {
@@ -147,45 +157,46 @@ export async function handlePaymentSuccess(
       }
     }
 
-    // Transform ticket data for customer confirmation email
-    const emailData: EmailData = {
+    // Send confirmation email with retry
+    const emailData = {
       movieTitle: tickets[0].campaign.movieTitle,
       venueName: tickets[0].campaign.venue.name,
       screeningDate: tickets[0].campaign.screeningDate,
       ticketQuantity: tickets.length,
-      totalAmount: amount / 100, // Convert from cents to pounds
-      regularTickets: tickets.filter((t) => t.status === TicketStatus.CONFIRMED)
-        .length,
-      pifTickets: tickets.filter(
-        (t) => t.status === TicketStatus.PAY_IT_FORWARD
-      ).length,
-      foodOrders: tickets.flatMap((ticket) =>
-        (ticket.purchase?.orders || []).map((order) => ({
-          name: order.menuItem.name,
-          quantity: 1,
-          price: Number(order.menuItem.price) / 100,
-          options: order.choices.map((choice) => ({
-            name: choice.option.name,
-            choice: choice.selectedChoice.name,
-          })),
-        }))
-      ),
+      totalAmount: amount,
+      regularTickets: tickets.filter(t => t.status === TicketStatus.CONFIRMED).length,
+      pifTickets: tickets.filter(t => t.status === TicketStatus.PAY_IT_FORWARD).length,
+      foodOrders: tickets[0].purchase?.orders.map((order) => ({
+        name: order.menuItem.name,
+        quantity: order.quantity,
+        price: Number(order.menuItem.price),
+        options: order.choices.map((choice) => ({
+          name: choice.option.name,
+          choice: choice.selectedChoice.name,
+        })),
+      })) || [],
     }
 
-    // Generate and send confirmation email to customer
     const emailHtml = generateTicketConfirmationEmail(emailData)
-    await sendEmail({
-      to: tickets[0].user?.email || '',
-      subject: `Your tickets for ${tickets[0].campaign.movieTitle}`,
-      html: emailHtml,
-    })
+    const emailSent = await sendEmailWithRetry(
+      tickets[0].user.email,
+      `Your tickets for ${tickets[0].campaign.movieTitle}`,
+      emailHtml
+    )
 
-    return { received: true }
+    if (!emailSent) {
+      console.error('Failed to send confirmation email after retries')
+    }
+
+    return {
+      received: true,
+      status: 200,
+    }
   } catch (error) {
-    console.error('Error processing payment:', error)
+    console.error('Error processing payment success:', error)
     return {
       received: false,
-      error: 'Error processing payment',
+      error: error instanceof Error ? error.message : 'Internal server error',
       status: 500,
     }
   }

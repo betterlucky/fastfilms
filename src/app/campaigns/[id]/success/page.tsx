@@ -56,6 +56,25 @@ export default async function SuccessPage({
     redirect('/')
   }
 
+  const formattedDate = new Date(campaign.screeningDate).toLocaleDateString(
+    'en-GB',
+    {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }
+  )
+
+  const formattedTime = new Date(campaign.screeningDate).toLocaleTimeString(
+    'en-GB',
+    {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }
+  )
+
   return (
     <div className="container mx-auto py-8">
       <div className="mx-auto max-w-2xl">
@@ -67,22 +86,27 @@ export default async function SuccessPage({
             <div>
               <h2 className="text-lg font-semibold">{campaign.title}</h2>
               <p className="text-gray-600">
-                {new Date(campaign.screeningDate).toLocaleDateString()} at{' '}
-                {campaign.screeningTime}
+                {formattedDate} at {formattedTime}
               </p>
               <p className="text-gray-600">{campaign.venue.name}</p>
             </div>
 
             <div>
               <h3 className="font-medium">Your Tickets</h3>
-              <p className="text-gray-600">{tickets.length} tickets booked</p>
+              <div className="space-y-2 text-gray-600">
+                <p>{tickets.filter(t => t.status === 'CONFIRMED').length} Regular Tickets</p>
+                {tickets.filter(t => t.status === 'PAY_IT_FORWARD').length > 0 && (
+                  <p>{tickets.filter(t => t.status === 'PAY_IT_FORWARD').length} Pay It Forward Tickets</p>
+                )}
+                <p className="text-sm text-gray-500">Total: {tickets.length} tickets</p>
+              </div>
               {tickets[0].purchase?.orders.length > 0 && (
-                <div className="mt-2">
+                <div className="mt-4">
                   <h3 className="font-medium">Pre-ordered Items</h3>
                   <ul className="list-inside list-disc text-gray-600">
                     {tickets[0].purchase.orders.map((order) => (
                       <li key={order.id}>
-                        {order.quantity}x {order.menuItem.name}
+                        {order.quantity}x {order.menuItem.name} (£{Number(order.menuItem.price).toFixed(2)})
                       </li>
                     ))}
                   </ul>

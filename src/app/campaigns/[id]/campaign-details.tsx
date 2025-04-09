@@ -15,7 +15,6 @@ interface CampaignDetailsProps {
     description: string
     movieTitle: string
     screeningDate: Date
-    screeningTime: string
     ticketCap: number
     currentTickets: number
     customBlurb: string | null
@@ -269,7 +268,11 @@ export default function CampaignDetails({
                     <div>
                       <dt className="text-gray-500">Screening Date</dt>
                       <dd>
-                        {formattedDate} at {campaign.screeningTime}
+                        {formattedDate} at {new Date(campaign.screeningDate).toLocaleTimeString('en-GB', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false
+                        })}
                       </dd>
                     </div>
                     <div>

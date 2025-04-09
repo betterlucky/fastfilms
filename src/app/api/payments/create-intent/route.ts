@@ -176,13 +176,13 @@ export async function POST(request: NextRequest) {
         venueName: campaign.venue.name,
         screeningDate: campaign.screeningDate,
         ticketQuantity: quantity + payItForwardTickets,
-        totalAmount: 0,
+        totalAmount: totalAmount,
         regularTickets: quantity,
         pifTickets: payItForwardTickets,
         foodOrders: purchase.orders.map((order) => ({
           name: order.menuItem.name,
           quantity: order.quantity,
-          price: Number(order.menuItem.price) / 100,
+          price: Number(order.menuItem.price),
           options: order.choices.map((choice) => ({
             name: choice.option.name,
             choice: choice.selectedChoice.name,

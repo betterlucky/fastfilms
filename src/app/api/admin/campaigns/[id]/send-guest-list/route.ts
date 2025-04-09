@@ -131,11 +131,25 @@ export async function POST(
     })
 
     // Send email with PDF attachments
+    const message = `Guest list for ${campaign.movieTitle}
+Date: ${new Date(campaign.screeningDate).toLocaleDateString('en-GB', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})}
+Time: ${new Date(campaign.screeningDate).toLocaleTimeString('en-GB', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+})}
+Total Guests: ${campaign.tickets.length}`
+
     await transporter.sendMail({
       from: process.env.CONTACT_EMAIL,
       to: campaign.venue.contactEmail,
       subject: `Guest List & Preorders - ${campaign.title}`,
-      text: `Please find attached the guest list and preorders for ${campaign.title}.\n\nVenue: ${campaign.venue.name}\nDate: ${formatDate(campaign.screeningDate)}\nTime: ${campaign.screeningTime}\nTotal Guests: ${campaign.tickets.length}`,
+      text: message,
       attachments: [
         {
           filename: `${campaign.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_guestlist.pdf`,

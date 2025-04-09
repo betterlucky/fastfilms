@@ -98,25 +98,23 @@ async function main() {
     // Create test campaign
     const campaign = await prisma.campaign.create({
       data: {
-        title: "Save Cornwall's Wildlife - Special Screening",
-        description:
-          "Join us for a special screening of 'Wild Isles' to support Cornwall Wildlife Trust",
-        movieTitle: 'Wild Isles',
-        venueId: venue.id,
-        screenId: screen.id,
-        charityId: charity.id,
-        screeningDate: new Date('2025-05-15T19:30:00Z'),
-        screeningTime: '19:30',
-        ticketCap: 200,
-        fundingTarget: 1000,
-        deadlineDate: new Date('2025-05-01T19:30:00Z'),
-        isFeatured: true,
-        posterPath: '/movies/wild-isles.jpg',
-        menuItems: {
-          create: menuItems.map((item) => ({
-            menuItemId: item.id,
-          })),
+        title: 'Test Campaign',
+        description: 'A test campaign for development',
+        movieTitle: 'Test Movie',
+        screeningDate: new Date('2024-12-31T19:30:00Z'),
+        ticketCap: 100,
+        currentTickets: 0,
+        customBlurb: 'This is a test campaign for development purposes.',
+        posterPath: '/test-poster.jpg',
+        deadlineDate: new Date('2024-12-24T23:59:59Z'),
+        venue: {
+          connect: {
+            id: venue.id,
+          },
         },
+        isTest: true,
+        currentFunding: '0',
+        fundingTarget: '1000',
       },
     })
 

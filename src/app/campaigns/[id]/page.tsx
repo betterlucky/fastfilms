@@ -20,36 +20,38 @@ export default async function CampaignPage({
       description: true,
       movieTitle: true,
       screeningDate: true,
-      screeningTime: true,
       ticketCap: true,
       currentTickets: true,
-      fundingTarget: true,
-      currentFunding: true,
       customBlurb: true,
       posterPath: true,
       deadlineDate: true,
       screenId: true,
-      charityId: true,
-      venueId: true,
-      isTest: true,
+      screen: {
+        select: {
+          id: true,
+          name: true,
+          capacity: true,
+        },
+      },
       venue: {
         select: {
           id: true,
           name: true,
-          address: true,
-          city: true,
-          postcode: true,
-          phone: true,
-          url: true,
-          contactEmail: true,
         },
       },
-      screen: true,
+      charityId: true,
       menuItems: {
-        include: {
-          menuItem: true,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          category: true,
         },
       },
+      isTest: true,
+      currentFunding: true,
+      fundingTarget: true,
     },
   })
 

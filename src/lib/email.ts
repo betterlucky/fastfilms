@@ -126,9 +126,9 @@ export function generateTicketConfirmationEmail(data: {
               'en-GB',
               {
                 weekday: 'long',
-                year: 'numeric',
-                month: 'long',
                 day: 'numeric',
+                month: 'long',
+                year: 'numeric',
               }
             )}</p>
             <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningDate.toLocaleTimeString(
@@ -136,6 +136,7 @@ export function generateTicketConfirmationEmail(data: {
               {
                 hour: '2-digit',
                 minute: '2-digit',
+                hour12: false
               }
             )}</p>
             <p style="margin: 8px 0;"><strong>Regular Tickets:</strong> ${regularTickets}</p>
@@ -232,7 +233,6 @@ export function generateVenueGuestListEmail(data: {
   movieTitle: string
   venueName: string
   screeningDate: Date
-  screeningTime: string
   totalTickets: number
   guestList: Array<{
     name: string
@@ -252,7 +252,6 @@ export function generateVenueGuestListEmail(data: {
     movieTitle,
     venueName,
     screeningDate,
-    screeningTime,
     totalTickets,
     guestList,
   } = data
@@ -318,7 +317,11 @@ export function generateVenueGuestListEmail(data: {
                 day: 'numeric',
               }
             )}</p>
-            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningTime}</p>
+            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningDate.toLocaleTimeString('en-GB', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            })}</p>
             <p style="margin: 8px 0;"><strong>Total Tickets:</strong> ${totalTickets}</p>
           </div>
 
@@ -357,7 +360,6 @@ export function generateScreenConfirmationEmail(
   venueName: string,
   screenName: string,
   screeningDate: Date,
-  screeningTime: string,
   ticketCount: number,
   orders: OrderItem[] = []
 ) {
@@ -403,7 +405,11 @@ export function generateScreenConfirmationEmail(
             <p style="margin: 8px 0;"><strong>Venue:</strong> ${venueName}</p>
             <p style="margin: 8px 0;"><strong>Screen:</strong> ${screenName}</p>
             <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
-            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningTime}</p>
+            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningDate.toLocaleTimeString('en-GB', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            })}</p>
             <p style="margin: 8px 0;"><strong>Your Tickets:</strong> ${ticketCount}</p>
           </div>
           
@@ -428,7 +434,6 @@ export async function sendScreenConfirmationEmail(
   venueName: string,
   screenName: string,
   screeningDate: Date,
-  screeningTime: string,
   ticketCount: number,
   orders: OrderItem[] = []
 ) {
@@ -437,7 +442,6 @@ export async function sendScreenConfirmationEmail(
     venueName,
     screenName,
     screeningDate,
-    screeningTime,
     ticketCount,
     orders
   )
@@ -447,4 +451,25 @@ export async function sendScreenConfirmationEmail(
     subject: `Screening Confirmed: ${campaignTitle}`,
     html,
   })
+}
+
+export async function sendEmailWithRetry(
+  to: string,
+  subject: string,
+  html: string,
+  retries = 3
+): Promise<boolean> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await sendEmail({ to, subject, html })
+      return true
+    } catch (error) {
+      if (i === retries - 1) {
+        console.error('Failed to send email after retries:', error)
+        return false
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i))) // Exponential backoff
+    }
+  }
+  return false
 }

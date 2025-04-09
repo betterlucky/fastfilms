@@ -49,7 +49,6 @@ export interface TicketWithOrders {
     description: string
     movieTitle: string
     screeningDate: Date
-    screeningTime: string
     venue: {
       id: string
       name: string

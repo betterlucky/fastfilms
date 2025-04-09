@@ -4,24 +4,27 @@ import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+const menuItemSchema = z.object({
+  id: z.string(),
+  price: z.number().min(0),
+})
+
 const campaignSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   movieTitle: z.string().min(1),
-  customBlurb: z.string().optional(),
-  posterPath: z.string().nullable(),
-  tmdbId: z.string().nullable(),
   venueId: z.string().min(1),
-  screenId: z.string().nullable(),
   screeningDate: z.string().or(z.date()),
-  screeningTime: z.string(),
-  deadlineDate: z.string().or(z.date()),
   ticketCap: z.number().min(0),
   fundingTarget: z.number().min(0),
-  charityId: z.string().nullable(),
-  menuItemIds: z.array(z.string()),
-  isFeatured: z.boolean(),
-  isTest: z.boolean(),
+  deadlineDate: z.string().or(z.date()),
+  posterPath: z.string().nullable().optional(),
+  screenId: z.string().nullable().optional(),
+  charityId: z.string().nullable().optional(),
+  customBlurb: z.string().nullable().optional(),
+  tmdbId: z.string().nullable().optional(),
+  isTest: z.boolean().optional(),
+  menuItems: z.array(menuItemSchema).optional(),
 })
 
 export async function POST(request: Request) {
@@ -33,31 +36,29 @@ export async function POST(request: Request) {
 
   try {
     const json = await request.json()
-    const body = campaignSchema.parse(json)
+    const validatedData = campaignSchema.parse(json)
 
     const campaign = await prisma.campaign.create({
       data: {
-        title: body.title,
-        description: body.description,
-        movieTitle: body.movieTitle,
-        customBlurb: body.customBlurb,
-        posterPath: body.posterPath,
-        tmdbId: body.tmdbId,
-        venueId: body.venueId,
-        screenId: body.screenId,
-        screeningDate: new Date(body.screeningDate),
-        screeningTime: body.screeningTime,
-        deadlineDate: new Date(body.deadlineDate),
-        ticketCap: body.ticketCap,
-        fundingTarget: body.fundingTarget,
-        charityId: body.charityId,
-        isFeatured: body.isFeatured,
-        isTest: body.isTest,
-        menuItems: {
-          create: body.menuItemIds.map((menuItemId) => ({
-            menuItemId,
+        title: validatedData.title,
+        description: validatedData.description,
+        movieTitle: validatedData.movieTitle,
+        venueId: validatedData.venueId,
+        screeningDate: new Date(validatedData.screeningDate),
+        ticketCap: validatedData.ticketCap,
+        fundingTarget: validatedData.fundingTarget,
+        deadlineDate: new Date(validatedData.deadlineDate),
+        posterPath: validatedData.posterPath,
+        screenId: validatedData.screenId,
+        charityId: validatedData.charityId,
+        customBlurb: validatedData.customBlurb,
+        tmdbId: validatedData.tmdbId,
+        isTest: validatedData.isTest ?? false,
+        menuItems: validatedData.menuItems ? {
+          create: validatedData.menuItems.map((item) => ({
+            menuItemId: item.id,
           })),
-        },
+        } : undefined,
       },
     })
 
@@ -65,8 +66,14 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[CAMPAIGNS_POST]', error)
     if (error instanceof z.ZodError) {
-      return new NextResponse('Invalid request data', { status: 400 })
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.errors },
+        { status: 400 }
+      )
     }
-    return new NextResponse('Internal error', { status: 500 })
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
   }
 }

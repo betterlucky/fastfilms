@@ -31,13 +31,6 @@ export async function PUT(
       isTest,
     } = body
 
-    // Format the time from the screeningDate
-    const screeningTime = new Date(screeningDate).toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    })
-
     // Update campaign
     const campaign = await prisma.campaign.update({
       where: { id: params.id },
@@ -48,7 +41,6 @@ export async function PUT(
         venueId,
         screenId: screenId === 'unassign' ? null : screenId,
         screeningDate: new Date(screeningDate),
-        screeningTime,
         deadlineDate: new Date(deadlineDate),
         ticketCap,
         fundingTarget,

@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { TicketStatus } from '@prisma/client'
+import { TicketStatus, PurchaseStatus } from '@prisma/client'
 
 export async function GET() {
   try {
@@ -23,7 +23,6 @@ export async function GET() {
             id: true,
             movieTitle: true,
             screeningDate: true,
-            screeningTime: true,
             venue: {
               select: {
                 name: true,
@@ -38,18 +37,12 @@ export async function GET() {
       },
     })
 
-    // Transform the data to combine date and time
-    const transformedTickets = tickets.map((ticket) => {
-      const screeningDate = new Date(ticket.campaign.screeningDate)
-      const [hours, minutes] = ticket.campaign.screeningTime.split(':')
-      screeningDate.setHours(parseInt(hours), parseInt(minutes))
-
-      return {
-        ...ticket,
-        screeningDate: screeningDate.toISOString(),
-        stripePaymentIntentId: ticket.purchase?.stripePaymentIntentId || null,
-      }
-    })
+    // Transform the data
+    const transformedTickets = tickets.map((ticket) => ({
+      ...ticket,
+      screeningDate: ticket.campaign.screeningDate.toISOString(),
+      stripePaymentIntentId: ticket.purchase?.stripePaymentIntentId || null,
+    }))
 
     return NextResponse.json(transformedTickets)
   } catch (error) {
@@ -97,8 +90,8 @@ export async function POST(request: Request) {
           campaignId,
           userId: session.user.id,
           status: campaign.isTest
-            ? TicketStatus.CONFIRMED
-            : TicketStatus.PENDING,
+            ? PurchaseStatus.CONFIRMED
+            : PurchaseStatus.PENDING,
           totalAmount: 0, // Set to 0 for test mode
         },
       })

@@ -10,27 +10,32 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export async function getCampaign(id: string) {
   const result = await prisma.$queryRaw`
-    SELECT 
+    SELECT
       c.id,
       c.title,
       c.description,
-      c."movieTitle",
-      c."posterPath",
-      c."screeningDate",
-      c."screeningTime",
-      c."deadlineDate",
-      c."fundingTarget",
-      c."currentFunding",
-      c."ticketCap",
-      c."currentTickets",
-      c.status,
-      c."isFeatured",
-      s.name as "screen.name",
-      s.capacity as "screen.capacity",
-      v.name as "venue.name",
-      v.address as "venue.address",
-      v.city as "venue.city",
-      v.postcode as "venue.postcode",
+      c.movie_title as "movieTitle",
+      c.screening_date as "screeningDate",
+      c.ticket_cap as "ticketCap",
+      c.current_tickets as "currentTickets",
+      c.custom_blurb as "customBlurb",
+      c.poster_path as "posterPath",
+      c.deadline_date as "deadlineDate",
+      c.screen_id as "screenId",
+      c.venue_id as "venueId",
+      c.charity_id as "charityId",
+      c.is_test as "isTest",
+      c.current_funding as "currentFunding",
+      c.funding_target as "fundingTarget",
+      v.name as "venueName",
+      v.address as "venueAddress",
+      v.city as "venueCity",
+      v.postcode as "venuePostcode",
+      v.phone as "venuePhone",
+      v.url as "venueUrl",
+      v.contact_email as "venueContactEmail",
+      s.name as "screenName",
+      s.capacity as "screenCapacity",
       ch.name as "charity.name",
       ch.description as "charity.description",
       ch."logoPath" as "charity.logoPath",
@@ -70,9 +75,9 @@ export async function getCampaign(id: string) {
         '[]'
       ) as "menuItems"
     FROM "Campaign" c
-    LEFT JOIN "Screen" s ON c."screenId" = s.id
-    JOIN "Venue" v ON c."venueId" = v.id
-    LEFT JOIN "Charity" ch ON c."charityId" = ch.id
+    LEFT JOIN "Screen" s ON c.screen_id = s.id
+    JOIN "Venue" v ON c.venue_id = v.id
+    LEFT JOIN "Charity" ch ON c.charity_id = ch.id
     LEFT JOIN "CampaignMenuItem" cmi ON c.id = cmi."campaignId"
     LEFT JOIN "MenuItem" mi ON cmi."menuItemId" = mi.id
     WHERE c.id = ${id}
@@ -90,25 +95,27 @@ export async function getCampaign(id: string) {
     movieTitle: result[0].movieTitle,
     posterPath: result[0].posterPath,
     screeningDate: result[0].screeningDate,
-    screeningTime: result[0].screeningTime,
     deadlineDate: result[0].deadlineDate,
     fundingTarget: result[0].fundingTarget,
     currentFunding: result[0].currentFunding,
     ticketCap: result[0].ticketCap,
     currentTickets: result[0].currentTickets,
-    status: result[0].status,
-    isFeatured: result[0].isFeatured,
-    screen: result[0]['screen.name']
+    status: result[0].isTest ? 'test' : 'live',
+    isFeatured: false,
+    screen: result[0]['screenName']
       ? {
-          name: result[0]['screen.name'],
-          capacity: result[0]['screen.capacity'],
+          name: result[0]['screenName'],
+          capacity: result[0]['screenCapacity'],
         }
       : null,
     venue: {
-      name: result[0]['venue.name'],
-      address: result[0]['venue.address'],
-      city: result[0]['venue.city'],
-      postcode: result[0]['venue.postcode'],
+      name: result[0]['venueName'],
+      address: result[0]['venueAddress'],
+      city: result[0]['venueCity'],
+      postcode: result[0]['venuePostcode'],
+      phone: result[0]['venuePhone'],
+      url: result[0]['venueUrl'],
+      contactEmail: result[0]['venueContactEmail'],
     },
     charity: result[0]['charity.name']
       ? {
