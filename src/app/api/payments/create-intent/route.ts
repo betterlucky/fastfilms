@@ -45,6 +45,14 @@ export async function POST(request: NextRequest) {
   const body = (await request.json()) as RequestBody
   const { campaignId, numTickets, menuSelections = [] } = body
 
+  // Validate numTickets
+  if (typeof numTickets !== 'number' || numTickets <= 0) {
+    return NextResponse.json(
+      { error: 'Invalid number of tickets' },
+      { status: 400 }
+    )
+  }
+
   // Ensure menuSelections is an array
   const validMenuSelections = Array.isArray(menuSelections) ? menuSelections : []
 
