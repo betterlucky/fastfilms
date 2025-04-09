@@ -30,7 +30,13 @@ export async function GET() {
             },
           },
         },
-        purchase: true,
+        purchase: {
+          select: {
+            id: true,
+            stripePaymentIntentId: true,
+            createdAt: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -42,6 +48,7 @@ export async function GET() {
       ...ticket,
       screeningDate: ticket.campaign.screeningDate.toISOString(),
       stripePaymentIntentId: ticket.purchase?.stripePaymentIntentId || null,
+      purchaseDate: ticket.purchase?.createdAt.toISOString() || null,
     }))
 
     return NextResponse.json(transformedTickets)

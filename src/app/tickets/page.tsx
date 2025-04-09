@@ -18,9 +18,11 @@ interface Ticket {
   screeningDate: string
   purchase: {
     stripePaymentIntentId: string | null
+    createdAt: string
   } | null
   createdAt: string
   userId: string
+  purchaseDate: string | null
 }
 
 interface GroupedTickets {
@@ -30,6 +32,7 @@ interface GroupedTickets {
     screeningDate: string
     count: number
     tickets: string[] // Array of ticket IDs
+    purchaseDate: string | null
   }
 }
 
@@ -70,6 +73,7 @@ export default function TicketsPage() {
               screeningDate: ticket.screeningDate,
               count: 0,
               tickets: [],
+              purchaseDate: ticket.purchaseDate,
             }
           }
           acc[key].count++
@@ -240,6 +244,32 @@ export default function TicketsPage() {
                       {formattedDate} at {formattedTime}
                     </dd>
                   </div>
+                  {ticket.purchaseDate && (
+                    <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
+                      <dt>
+                        <svg
+                          className="h-6 w-5 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </dt>
+                      <dd className="text-sm leading-6 text-gray-900">
+                        Purchased on {new Date(ticket.purchaseDate).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                      </dd>
+                    </div>
+                  )}
                   <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
                     <ResendConfirmationButton
                       ticketIds={ticket.tickets}

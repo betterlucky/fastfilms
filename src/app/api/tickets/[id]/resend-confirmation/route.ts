@@ -200,14 +200,19 @@ export async function POST(
               name: order.menuItem.name,
               quantity: 0,
               price: Number(order.menuItem.price) / 100,
-              options: order.choices.map((choice) => ({
-                name: choice.option.name,
-                choice: choice.selectedChoice.name,
-              })),
+              options: [],
             })
           }
           const item = foodOrdersMap.get(key)
           item.quantity += order.quantity
+          
+          // Add options for this order
+          if (order.choices && order.choices.length > 0) {
+            item.options = order.choices.map((choice) => ({
+              name: choice.option.name,
+              choice: choice.selectedChoice.name,
+            }))
+          }
         })
       }
     })

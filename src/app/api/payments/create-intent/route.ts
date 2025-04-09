@@ -164,6 +164,9 @@ export async function POST(request: NextRequest) {
             currentTickets: {
               increment: quantity + payItForwardTickets,
             },
+            currentFunding: {
+              increment: ticketsTotal,
+            },
           },
         })
 
