@@ -24,7 +24,7 @@ const campaignSchema = z.object({
   customBlurb: z.string().nullable().optional(),
   tmdbId: z.string().nullable().optional(),
   isTest: z.boolean().optional(),
-  menuItems: z.array(menuItemSchema).optional(),
+  menuItemIds: z.array(z.string()).optional(),
 })
 
 export async function POST(request: Request) {
@@ -54,9 +54,9 @@ export async function POST(request: Request) {
         customBlurb: validatedData.customBlurb,
         tmdbId: validatedData.tmdbId,
         isTest: validatedData.isTest ?? false,
-        menuItems: validatedData.menuItems ? {
-          create: validatedData.menuItems.map((item) => ({
-            menuItemId: item.id,
+        menuItems: validatedData.menuItemIds ? {
+          create: validatedData.menuItemIds.map((id) => ({
+            menuItemId: id,
           })),
         } : undefined,
       },

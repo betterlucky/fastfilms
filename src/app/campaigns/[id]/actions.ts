@@ -190,7 +190,10 @@ export async function updateCampaignMenuItems(formData: FormData) {
     where: { id: campaignId },
     data: {
       menuItems: {
-        set: menuItemIds.map((id) => ({ id })),
+        deleteMany: {}, // First delete all existing menu items
+        create: menuItemIds.map((id) => ({
+          menuItemId: id,
+        })),
       },
     },
   })

@@ -92,8 +92,8 @@ export function CampaignForm({ venues, charities }: CampaignFormProps) {
             formData.get('screenId') === 'unassign'
               ? null
               : formData.get('screenId'),
-          screeningDate: screeningDate,
-          deadlineDate: calculateDeadlineDate(),
+          screeningDate: screeningDate.toISOString(),
+          deadlineDate: calculateDeadlineDate().toISOString(),
           ticketCap: Number(formData.get('ticketCap')),
           fundingTarget: Number(formData.get('fundingTarget')),
           charityId:
