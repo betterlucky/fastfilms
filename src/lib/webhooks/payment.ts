@@ -1,3 +1,4 @@
+import { settings } from '@/config/settings'
 import {
   PrismaClient,
   Prisma,
@@ -177,6 +178,7 @@ export async function handlePaymentSuccess(
         totalAmount: amount,
         regularTickets: purchaseTickets.filter(t => t.status === TicketStatus.CONFIRMED).length,
         pifTickets: purchaseTickets.filter(t => t.status === TicketStatus.PAY_IT_FORWARD).length,
+        ticketPrice: Number(purchaseTickets.find(t => t.status === TicketStatus.CONFIRMED)?.pricePaid || settings.minimumTicketPrice),
         foodOrders: purchaseTickets[0].purchase?.orders.map((order) => ({
           name: order.menuItem.name,
           quantity: order.quantity,

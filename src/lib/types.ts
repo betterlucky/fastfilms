@@ -65,6 +65,7 @@ export interface EmailData {
   totalAmount: number
   regularTickets?: number
   pifTickets?: number
+  ticketPrice?: number
   foodOrders?: Array<{
     name: string
     quantity: number

@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { EmailData } from '@/lib/types'
 import { Prisma } from '@prisma/client'
+import { settings } from '@/config/settings'
 
 // Rate limiting: 1 email per 5 minutes
 const RESEND_COOLDOWN = 5 * 60 * 1000 // 5 minutes in milliseconds
@@ -75,6 +76,7 @@ export async function POST(
       totalAmount: Number(targetTicket.purchase.totalAmount),
       regularTickets: tickets.filter(t => t.status === 'CONFIRMED').length,
       pifTickets: tickets.filter(t => t.status === 'PAY_IT_FORWARD').length,
+      ticketPrice: Number(tickets.find(t => t.status === 'CONFIRMED')?.pricePaid || settings.minimumTicketPrice),
       foodOrders: targetTicket.purchase.orders.map(order => ({
         name: order.menuItem.name,
         quantity: order.quantity,

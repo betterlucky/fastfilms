@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
           data: {
             userId: session.user.id,
             campaignId: campaign.id,
-            totalAmount: new Prisma.Decimal(0),
+            totalAmount: new Prisma.Decimal(totalAmount),
             status: PurchaseStatus.CONFIRMED,
             tickets: {
               create: [
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
                   userId: session.user.id,
                   campaignId: campaign.id,
                   status: 'PAY_IT_FORWARD',
-                  pricePaid: new Prisma.Decimal(ticketPrice),
+                  pricePaid: new Prisma.Decimal(settings.minimumTicketPrice),
                 }),
               ],
             },
@@ -138,6 +138,14 @@ export async function POST(request: NextRequest) {
                     create: validMenuSelections.map((selection) => ({
                       menuItemId: selection.menuItemId,
                       quantity: selection.quantity,
+                      choices: {
+                        create: Object.entries(menuSelections[selection.menuItemId].options).flatMap(([optionId, choiceArrays]) =>
+                          choiceArrays.map(choices => ({
+                            optionId,
+                            selectedChoiceId: choices[0], // Take the first choice for each option
+                          }))
+                        ),
+                      },
                     })),
                   }
                 : undefined,
@@ -182,6 +190,7 @@ export async function POST(request: NextRequest) {
         totalAmount: totalAmount,
         regularTickets: quantity,
         pifTickets: payItForwardTickets,
+        ticketPrice: ticketPrice,
         foodOrders: purchase.orders.map((order) => ({
           name: order.menuItem.name,
           quantity: order.quantity,
@@ -239,7 +248,7 @@ export async function POST(request: NextRequest) {
               userId: session.user.id,
               campaignId: campaign.id,
               status: 'PAY_IT_FORWARD',
-              pricePaid: new Prisma.Decimal(ticketPrice),
+              pricePaid: new Prisma.Decimal(settings.minimumTicketPrice),
             }),
           ],
         },
@@ -249,6 +258,14 @@ export async function POST(request: NextRequest) {
                 create: validMenuSelections.map((selection) => ({
                   menuItemId: selection.menuItemId,
                   quantity: selection.quantity,
+                  choices: {
+                    create: Object.entries(menuSelections[selection.menuItemId].options).flatMap(([optionId, choiceArrays]) =>
+                      choiceArrays.map(choices => ({
+                        optionId,
+                        selectedChoiceId: choices[0], // Take the first choice for each option
+                      }))
+                    ),
+                  },
                 })),
               }
             : undefined,

@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import { formatPrice } from './utils'
+import { settings } from '@/config/settings'
 
 // Create a transporter using Gmail SMTP with secure settings
 const transporter = nodemailer.createTransport({
@@ -52,6 +53,7 @@ export function generateTicketConfirmationEmail(data: {
   totalAmount: number
   regularTickets?: number
   pifTickets?: number
+  ticketPrice?: number
   foodOrders?: Array<{
     name: string
     quantity: number
@@ -70,6 +72,7 @@ export function generateTicketConfirmationEmail(data: {
     totalAmount,
     regularTickets = 0,
     pifTickets = 0,
+    ticketPrice = settings.minimumTicketPrice,
     foodOrders = [],
   } = data
 
@@ -143,13 +146,13 @@ export function generateTicketConfirmationEmail(data: {
             ${regularTickets > 0
               ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
                   <span>${regularTickets} Regular Tickets</span>
-                  <span>${formatPrice((totalAmount - (pifTickets * 15)) / regularTickets)} each</span>
+                  <span>${formatPrice(ticketPrice)} each</span>
                 </p>`
               : ''}
             ${pifTickets > 0
               ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
                   <span>${pifTickets} Pay It Forward Tickets</span>
-                  <span>£15.00 each</span>
+                  <span>£${settings.minimumTicketPrice.toFixed(2)} each</span>
                 </p>`
               : ''}
             <p style="margin: 8px 0; color: #6b7280;">Total: ${ticketQuantity} tickets</p>
@@ -161,7 +164,7 @@ export function generateTicketConfirmationEmail(data: {
             <h2 style="margin: 0 0 16px 0; color: #111827;">Total Cost</h2>
             <p style="margin: 8px 0; display: flex; justify-content: space-between;">
               <span>Tickets Subtotal</span>
-              <span>${formatPrice(totalAmount - (foodOrders.reduce((sum, order) => sum + (order.price * order.quantity), 0)))}</span>
+              <span>${formatPrice(regularTickets * ticketPrice + pifTickets * settings.minimumTicketPrice)}</span>
             </p>
             ${foodOrders.length > 0
               ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
