@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 interface ResetTicketDialogProps {
   ticket: {
@@ -18,16 +20,22 @@ interface ResetTicketDialogProps {
     status: string
   }
   purchaseId: string
+  maxTickets: number
 }
 
-export function ResetTicketDialog({ ticket, purchaseId }: ResetTicketDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+export function ResetTicketDialog({
+  ticket,
+  purchaseId,
+  maxTickets,
+}: ResetTicketDialogProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
   const handleReset = async () => {
-    setLoading(true)
+    setIsSubmitting(true)
     try {
       const response = await fetch(`/api/tickets/${ticket.id}/reset`, {
         method: 'POST',
@@ -35,44 +43,64 @@ export function ResetTicketDialog({ ticket, purchaseId }: ResetTicketDialogProps
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          quantity,
           purchaseId,
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to reset ticket')
+        throw new Error('Failed to reset tickets')
       }
 
       toast({
         title: 'Success',
-        description: 'Ticket reset successfully',
+        description: `Reset ${quantity} ticket${quantity > 1 ? 's' : ''}`,
       })
-      setOpen(false)
+      setIsOpen(false)
       router.refresh()
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to reset ticket',
+        description: 'Failed to reset tickets',
         variant: 'destructive',
       })
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Reset Ticket</Button>
+        <Button variant="outline" size="sm">
+          Reset
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reset Ticket</DialogTitle>
+          <DialogTitle>Reset Tickets</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <p>Are you sure you want to reset this ticket? This will make it available for reallocation.</p>
-          <Button onClick={handleReset} disabled={loading}>
-            {loading ? 'Resetting...' : 'Reset Ticket'}
+          <div className="space-y-2">
+            <Label htmlFor="quantity">Number of Tickets</Label>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              max={maxTickets}
+              value={quantity}
+              onChange={(e) => setQuantity(Math.min(Number(e.target.value), maxTickets))}
+            />
+            <p className="text-sm text-gray-500">
+              Maximum {maxTickets} ticket{maxTickets > 1 ? 's' : ''} available
+            </p>
+          </div>
+          <Button
+            onClick={handleReset}
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            {isSubmitting ? 'Resetting...' : 'Reset Tickets'}
           </Button>
         </div>
       </DialogContent>

@@ -20,12 +20,18 @@ interface AllocateTicketDialogProps {
     status: string
   }
   purchaseId: string
+  maxTickets: number
 }
 
-export function AllocateTicketDialog({ ticket, purchaseId }: AllocateTicketDialogProps) {
-  const [open, setOpen] = useState(false)
+export function AllocateTicketDialog({
+  ticket,
+  purchaseId,
+  maxTickets,
+}: AllocateTicketDialogProps) {
+  const [isOpen, setIsOpen] = useState(false)
   const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -39,7 +45,7 @@ export function AllocateTicketDialog({ ticket, purchaseId }: AllocateTicketDialo
       return
     }
 
-    setLoading(true)
+    setIsSubmitting(true)
     try {
       const response = await fetch(`/api/tickets/${ticket.id}/allocate`, {
         method: 'POST',
@@ -48,43 +54,46 @@ export function AllocateTicketDialog({ ticket, purchaseId }: AllocateTicketDialo
         },
         body: JSON.stringify({
           email,
+          quantity,
           purchaseId,
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to allocate ticket')
+        throw new Error('Failed to allocate tickets')
       }
 
       toast({
         title: 'Success',
-        description: 'Ticket allocated successfully',
+        description: `Allocated ${quantity} ticket${quantity > 1 ? 's' : ''} to ${email}`,
       })
-      setOpen(false)
+      setIsOpen(false)
       router.refresh()
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to allocate ticket',
+        description: 'Failed to allocate tickets',
         variant: 'destructive',
       })
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Allocate Ticket</Button>
+        <Button variant="outline" size="sm">
+          Allocate
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Allocate Pay It Forward Ticket</DialogTitle>
+          <DialogTitle>Allocate Tickets</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Recipient Email</Label>
+            <Label htmlFor="email">Email Address</Label>
             <Input
               id="email"
               type="email"
@@ -93,8 +102,26 @@ export function AllocateTicketDialog({ ticket, purchaseId }: AllocateTicketDialo
               placeholder="Enter recipient's email"
             />
           </div>
-          <Button onClick={handleAllocate} disabled={loading}>
-            {loading ? 'Allocating...' : 'Allocate Ticket'}
+          <div className="space-y-2">
+            <Label htmlFor="quantity">Number of Tickets</Label>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              max={maxTickets}
+              value={quantity}
+              onChange={(e) => setQuantity(Math.min(Number(e.target.value), maxTickets))}
+            />
+            <p className="text-sm text-gray-500">
+              Maximum {maxTickets} ticket{maxTickets > 1 ? 's' : ''} available
+            </p>
+          </div>
+          <Button
+            onClick={handleAllocate}
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            {isSubmitting ? 'Allocating...' : 'Allocate Tickets'}
           </Button>
         </div>
       </DialogContent>

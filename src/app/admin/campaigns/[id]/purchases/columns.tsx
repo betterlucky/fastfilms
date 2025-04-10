@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { AllocateTicketDialog } from '../tickets/allocate-ticket-dialog'
 import { ResetTicketDialog } from '../tickets/reset-ticket-dialog'
 import { ResendConfirmationButton } from '@/components/resend-confirmation-button'
+import Link from 'next/link'
 
 interface Ticket {
   id: string
@@ -59,14 +60,21 @@ export const columns: ColumnDef<Purchase>[] = [
     header: 'Tickets',
     cell: ({ row }) => {
       const tickets = row.getValue('tickets') as Ticket[]
+      const standardTickets = tickets.filter(t => t.status === 'CONFIRMED')
+      const pifTickets = tickets.filter(t => t.status === 'PAY_IT_FORWARD')
+      
       return (
-        <div>
-          {tickets.map((ticket, i) => (
-            <div key={i} className="text-sm">
-              {ticket.status === 'CONFIRMED' ? 'Standard' : 'Pay It Forward'} - £
-              {ticket.pricePaid.toFixed(2)}
+        <div className="space-y-1">
+          {standardTickets.length > 0 && (
+            <div className="text-sm">
+              {standardTickets.length} Standard Ticket{standardTickets.length > 1 ? 's' : ''} - £{standardTickets[0].pricePaid.toFixed(2)} each
             </div>
-          ))}
+          )}
+          {pifTickets.length > 0 && (
+            <div className="text-sm">
+              {pifTickets.length} Pay It Forward Ticket{pifTickets.length > 1 ? 's' : ''} - £{pifTickets[0].pricePaid.toFixed(2)} each
+            </div>
+          )}
         </div>
       )
     },
@@ -76,19 +84,16 @@ export const columns: ColumnDef<Purchase>[] = [
     header: 'Pre-orders',
     cell: ({ row }) => {
       const orders = row.getValue('orders') as Order[]
+      const totalItems = orders.reduce((sum, order) => sum + order.quantity, 0)
       return (
         <div>
-          {orders.map((order, i) => (
-            <div key={i} className="text-sm">
-              {order.menuItem.name} x{order.quantity} - £
-              {(order.menuItem.price * order.quantity).toFixed(2)}
-              {order.choices.map((choice, j) => (
-                <div key={j} className="ml-2 text-xs text-gray-500">
-                  {choice.option.name}: {choice.selectedChoice.name}
-                </div>
-              ))}
-            </div>
-          ))}
+          <div className="text-sm">{totalItems} item{totalItems !== 1 ? 's' : ''}</div>
+          <Link 
+            href={`/admin/campaigns/${row.original.id}/order-details`}
+            className="text-xs text-blue-600 hover:underline"
+          >
+            View Details
+          </Link>
         </div>
       )
     },
@@ -114,12 +119,14 @@ export const columns: ColumnDef<Purchase>[] = [
             <AllocateTicketDialog
               ticket={pifTickets[0]}
               purchaseId={purchase.id}
+              maxTickets={pifTickets.length}
             />
           )}
           {standardTickets.length > 0 && (
             <ResetTicketDialog
               ticket={standardTickets[0]}
               purchaseId={purchase.id}
+              maxTickets={standardTickets.length}
             />
           )}
           <ResendConfirmationButton

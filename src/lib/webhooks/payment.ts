@@ -157,35 +157,47 @@ export async function handlePaymentSuccess(
       }
     }
 
-    // Send confirmation email with retry
-    const emailData = {
-      movieTitle: tickets[0].campaign.movieTitle,
-      venueName: tickets[0].campaign.venue.name,
-      screeningDate: tickets[0].campaign.screeningDate,
-      ticketQuantity: tickets.length,
-      totalAmount: amount,
-      regularTickets: tickets.filter(t => t.status === TicketStatus.CONFIRMED).length,
-      pifTickets: tickets.filter(t => t.status === TicketStatus.PAY_IT_FORWARD).length,
-      foodOrders: tickets[0].purchase?.orders.map((order) => ({
-        name: order.menuItem.name,
-        quantity: order.quantity,
-        price: Number(order.menuItem.price),
-        options: order.choices.map((choice) => ({
-          name: choice.option.name,
-          choice: choice.selectedChoice.name,
-        })),
-      })) || [],
-    }
+    // Group tickets by purchase ID
+    const ticketsByPurchase = tickets.reduce((acc, ticket) => {
+      const purchaseId = ticket.purchaseId
+      if (!acc[purchaseId]) {
+        acc[purchaseId] = []
+      }
+      acc[purchaseId].push(ticket)
+      return acc
+    }, {} as Record<string, typeof tickets>)
 
-    const emailHtml = generateTicketConfirmationEmail(emailData)
-    const emailSent = await sendEmail({
-      to: tickets[0].user.email,
-      subject: `Your tickets for ${tickets[0].campaign.movieTitle}`,
-      html: emailHtml
-    })
+    // Send one email per purchase
+    for (const [purchaseId, purchaseTickets] of Object.entries(ticketsByPurchase)) {
+      const emailData = {
+        movieTitle: purchaseTickets[0].campaign.movieTitle,
+        venueName: purchaseTickets[0].campaign.venue.name,
+        screeningDate: purchaseTickets[0].campaign.screeningDate,
+        ticketQuantity: purchaseTickets.length,
+        totalAmount: amount,
+        regularTickets: purchaseTickets.filter(t => t.status === TicketStatus.CONFIRMED).length,
+        pifTickets: purchaseTickets.filter(t => t.status === TicketStatus.PAY_IT_FORWARD).length,
+        foodOrders: purchaseTickets[0].purchase?.orders.map((order) => ({
+          name: order.menuItem.name,
+          quantity: order.quantity,
+          price: Number(order.menuItem.price),
+          options: order.choices.map((choice) => ({
+            name: choice.option.name,
+            choice: choice.selectedChoice.name,
+          })),
+        })) || [],
+      }
 
-    if (!emailSent) {
-      console.error('Failed to send confirmation email after retries')
+      const emailHtml = generateTicketConfirmationEmail(emailData)
+      const emailSent = await sendEmail({
+        to: purchaseTickets[0].user.email,
+        subject: `Your tickets for ${purchaseTickets[0].campaign.movieTitle}`,
+        html: emailHtml
+      })
+
+      if (!emailSent) {
+        console.error(`Failed to send confirmation email for purchase ${purchaseId}`)
+      }
     }
 
     return {

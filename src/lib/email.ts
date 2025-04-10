@@ -80,6 +80,23 @@ export function generateTicketConfirmationEmail(data: {
     }).format(amount)
   }
 
+  // Format date and time in UTC to ensure consistency
+  const date = new Date(screeningDate)
+  const formattedDate = date.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/London'
+  })
+
+  const formattedTime = date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Europe/London'
+  })
+
   const foodOrdersHtml = foodOrders.length > 0
     ? `
       <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
@@ -117,23 +134,8 @@ export function generateTicketConfirmationEmail(data: {
           <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
             <h2 style="margin: 0 0 16px 0; color: #111827;">${movieTitle}</h2>
             <p style="margin: 8px 0;"><strong>Venue:</strong> ${venueName}</p>
-            <p style="margin: 8px 0;"><strong>Date:</strong> ${screeningDate.toLocaleDateString(
-              'en-GB',
-              {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              }
-            )}</p>
-            <p style="margin: 8px 0;"><strong>Time:</strong> ${screeningDate.toLocaleTimeString(
-              'en-GB',
-              {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-              }
-            )}</p>
+            <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
+            <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
           </div>
 
           <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
