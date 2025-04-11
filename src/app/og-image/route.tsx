@@ -3,14 +3,14 @@ import { getFeaturedCampaign } from '@/lib/campaigns'
 import { formatPrice } from '@/lib/utils'
 
 export const runtime = 'edge'
-export const alt = 'FastFilms Campaign'
-export const size = {
-  width: 1200,
-  height: 630,
-}
 
-export default async function Image() {
+export async function GET() {
   const campaign = await getFeaturedCampaign()
+  
+  const size = {
+    width: 1200,
+    height: 630,
+  }
   
   if (!campaign) {
     return new ImageResponse(
@@ -34,9 +34,7 @@ export default async function Image() {
           </div>
         </div>
       ),
-      {
-        ...size,
-      }
+      size
     )
   }
 
@@ -133,13 +131,13 @@ export default async function Image() {
               overflow: 'hidden',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             }}>
-              <img
-                src={`https://image.tmdb.org/t/p/w500${campaign.posterPath}`}
-                alt={campaign.movieTitle}
+              <div
                 style={{ 
                   width: '100%', 
                   height: '100%', 
-                  objectFit: 'cover',
+                  backgroundImage: `url(https://image.tmdb.org/t/p/w500${campaign.posterPath})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
                 }}
               />
             </div>
@@ -181,8 +179,6 @@ export default async function Image() {
         </div>
       </div>
     ),
-    {
-      ...size,
-    }
+    size
   )
 } 
