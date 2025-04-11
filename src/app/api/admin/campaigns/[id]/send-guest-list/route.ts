@@ -94,36 +94,12 @@ export async function POST(
       return new NextResponse('Venue contact email not set', { status: 400 })
     }
 
-    // Get all tickets for guest list
-    const tickets = await prisma.ticket.findMany({
-      where: {
-        campaignId: params.id,
-        status: {
-          in: ['CONFIRMED', 'PAY_IT_FORWARD']
-        },
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-    })
-
     // Get orders directly for preorders PDF
     const orders = await prisma.order.findMany({
       where: {
         purchase: {
-          tickets: {
-            some: {
-              campaignId: params.id,
-              status: {
-                in: ['CONFIRMED', 'PAY_IT_FORWARD']
-              }
-            }
-          }
+          campaignId: params.id,
+          status: 'CONFIRMED',
         }
       },
       include: {
@@ -169,7 +145,7 @@ export async function POST(
         ...campaign,
         venue: campaign.venue,
       },
-      tickets,
+      tickets: campaign.tickets,
     })
 
     const preordersPDF = await generatePreordersPDF({

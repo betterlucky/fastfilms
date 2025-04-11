@@ -15,7 +15,7 @@ export interface OrderWithMenuItem {
   id: string
   createdAt: Date
   updatedAt: Date
-  ticketId: string
+  purchaseId: string
   menuItemId: string
   quantity: number
   choices: OrderChoice[]
@@ -28,32 +28,6 @@ export interface OrderWithMenuItem {
     venueId: string
     createdAt: Date
     updatedAt: Date
-  }
-}
-
-export interface TicketWithOrders {
-  id: string
-  createdAt: Date
-  updatedAt: Date
-  status: string
-  userId: string
-  campaignId: string
-  orders: OrderWithMenuItem[]
-  user?: {
-    name: string | null
-    email: string
-  }
-  campaign: {
-    id: string
-    title: string
-    description: string
-    movieTitle: string
-    screeningDate: Date
-    venue: {
-      id: string
-      name: string
-      contactEmail: string | null
-    }
   }
 }
 

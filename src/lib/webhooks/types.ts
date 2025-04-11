@@ -15,7 +15,3 @@ export interface OrderWithMenuItem extends Omit<Order, 'choices'> {
   menuItem: MenuItem
   choices: OrderChoice[]
 }
-
-export interface TicketWithOrders extends Ticket {
-  orders: OrderWithMenuItem[]
-}

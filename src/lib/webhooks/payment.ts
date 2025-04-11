@@ -246,16 +246,7 @@ interface Campaign {
 interface Ticket {
   id: string
   type: TicketStatus
-  orders: Array<{
-    menuItem: {
-      name: string
-      price: number | Prisma.Decimal
-    }
-    choices: Array<{
-      optionId: string
-      selectedChoice: string
-    }>
-  }>
+  purchaseId: string
 }
 
 function generateConfirmationEmail(
