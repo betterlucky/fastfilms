@@ -284,33 +284,22 @@ export async function generatePreordersPDF(data: PreorderData) {
 
   // Process all orders and collect choices
   data.orders.forEach(order => {
-    // For combo items, handle base items separately
+    // For combo items, handle all items with proper quantities
     if (order.menuItem.category?.toLowerCase() === 'combo') {
-      // Find the base item choice (usually first option or marked as base)
-      const baseItemChoice = order.choices.find(choice => 
-        choice.option.order === 0 || // First option
-        choice.option.name.toLowerCase().includes('base') // Or marked as base
-      )
-      
-      if (baseItemChoice?.selectedChoice.name) {
-        const itemName = baseItemChoice.selectedChoice.name
-        choiceSummary[itemName] = (choiceSummary[itemName] || 0) + order.quantity
-      }
+      order.choices.forEach(choice => {
+        const choiceName = choice.selectedChoice.name
+        // Skip "No thanks" choices
+        if (choiceName.toLowerCase() === 'no thanks') {
+          return
+        }
+        // Add each choice with the order quantity
+        choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + order.quantity
+      })
+    } else {
+      // For non-combo items, just add the base item
+      const itemName = order.menuItem.name
+      choiceSummary[itemName] = (choiceSummary[itemName] || 0) + order.quantity
     }
-
-    // Process all other choices
-    order.choices.forEach(choice => {
-      const choiceName = choice.selectedChoice.name
-      // Skip "No thanks" choices and base items in combos
-      if (choiceName.toLowerCase() === 'no thanks' ||
-          (order.menuItem.category?.toLowerCase() === 'combo' &&
-           (choice.option.order === 0 || choice.option.name.toLowerCase().includes('base')))) {
-        return
-      }
-
-      // Add the choice to our summary
-      choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + 1
-    })
   })
 
   // Add Item Summary section
@@ -428,23 +417,15 @@ export async function generatePreordersPDF(data: PreorderData) {
         })
 
       sortedChoices.forEach(([optionName, choices]) => {
-        const choicesText = Object.entries(choices)
+        Object.entries(choices)
           .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
-          .map(([choice, count]) => {
-            // For base items in combos, use the full quantity
-            if (originalOrder.menuItem.category?.toLowerCase() === 'combo' &&
-                (optionName.toLowerCase().includes('base') || 
-                 originalOrder.choices.find(c => c.option.name === optionName)?.option.order === 0)) {
-              return `${details.quantity}x ${choice}`
-            }
-            return `${count}x ${choice}`
+          .forEach(([choice, count]) => {
+            // Always use the full order quantity for each choice in a combo
+            const displayQuantity = details.quantity
+            const choiceText = `${displayQuantity}x ${choice}`
+            doc.text(choiceText, MARGIN + 15, yPos)
+            yPos += 6
           })
-          .join(', ')
-        
-        if (choicesText) {
-          doc.text(choicesText, MARGIN + 15, yPos)
-          yPos += 6
-        }
       })
       yPos += 2
     })

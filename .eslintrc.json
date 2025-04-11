@@ -4,6 +4,12 @@
   "rules": {
     "tailwindcss/no-custom-classname": "off",
     "react/no-unescaped-entities": "off",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "no-restricted-imports": ["error", {
+      "paths": [{
+        "name": "src/config/settings",
+        "message": "Please use '@/lib/settings' instead of src/config/settings"
+      }]
+    }]
   }
 }
