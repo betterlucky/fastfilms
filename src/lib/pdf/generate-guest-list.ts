@@ -294,17 +294,19 @@ export async function generatePreordersPDF(data: PreorderData) {
         if (choiceName.toLowerCase() === 'no thanks') {
           return
         }
-        // For choices that are part of the base combo (like Crunchy Crisps), 
-        // multiply by order quantity
+        // For base combo items (like Crunchy Crisps), use order quantity
+        // For add-ons and drinks, count as individual items
         if (choice.option.name === 'Crunchy Crisps') {
-          choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + order.quantity
-        } else {
-          // For add-ons and drinks, only count once per selection
           choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + 1
+        } else {
+          // Only count each unique choice once
+          if (!choiceSummary[choiceName]) {
+            choiceSummary[choiceName] = 1
+          }
         }
       })
     } else {
-      // For non-combo items, add with order quantity
+      // For non-combo items (like Furious Hot Box), use order quantity
       const itemName = order.menuItem.name
       choiceSummary[itemName] = (choiceSummary[itemName] || 0) + order.quantity
     }

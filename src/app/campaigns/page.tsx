@@ -53,9 +53,16 @@ export default async function CampaignsPage() {
             <Link key={campaign.id} href={`/campaigns/${campaign.id}`}>
               <Card className="group transition-colors hover:border-gray-400">
                 <CardHeader>
-                  <CardTitle className="group-hover:text-gray-600">
-                    {campaign.title}
-                  </CardTitle>
+                  <div className="relative">
+                    {campaign.isTest && (
+                      <div className="absolute -right-12 top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
+                        TEST CAMPAIGN
+                      </div>
+                    )}
+                    <CardTitle className="group-hover:text-gray-600">
+                      {campaign.title}
+                    </CardTitle>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
