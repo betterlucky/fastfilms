@@ -16,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { Campaign, Venue, Charity, MenuItem, Screen } from '@prisma/client'
-import { Loader2 } from 'lucide-react'
+import { FaSpinner } from 'react-icons/fa'
 import {
   Form,
   FormControl,
@@ -377,11 +377,11 @@ export function CampaignEditForm({
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
-                Saving...
+                <FaSpinner className="mr-2 size-4 animate-spin" />
+                Updating...
               </>
             ) : (
-              'Save Changes'
+              'Update Campaign'
             )}
           </Button>
         </div>

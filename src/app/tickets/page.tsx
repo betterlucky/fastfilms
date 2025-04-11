@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { TicketIcon } from 'lucide-react'
+import { FaTicketAlt } from 'react-icons/fa'
 import { ResendConfirmationButton } from '@/components/resend-confirmation-button'
 
 interface Ticket {
@@ -133,7 +133,7 @@ export default function TicketsPage() {
       <div className="bg-white py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <TicketIcon className="mx-auto size-12 text-gray-400" />
+            <FaTicketAlt className="mx-auto size-12 text-gray-400" />
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               No tickets yet
             </h2>

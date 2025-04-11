@@ -16,10 +16,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { AlertCircle } from 'lucide-react'
+import { FaExclamationCircle, FaTrash } from 'react-icons/fa'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { TrashIcon } from 'lucide-react'
 
 interface MenuItem {
   id: string
@@ -710,7 +709,7 @@ export default function BookingForm({
                                     (v) => !v.isValid
                                   ) && (
                                     <div className="mt-1 flex items-center gap-2 text-xs text-red-500">
-                                      <AlertCircle className="size-4" />
+                                      <FaExclamationCircle className="size-4" />
                                       <span>
                                         Please complete all required selections
                                         for each item
@@ -763,7 +762,14 @@ export default function BookingForm({
 
       {error && (
         <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FaExclamationCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">{error}</h3>
+            </div>
+          </div>
         </div>
       )}
 

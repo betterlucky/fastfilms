@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { ThumbsUp, ThumbsDown, Edit2, Trash2, Reply, X } from 'lucide-react'
+import { FaThumbsUp, FaThumbsDown, FaEdit, FaTrash, FaReply, FaTimes } from 'react-icons/fa'
 import { toast } from 'sonner'
 
 interface Comment {
@@ -248,128 +248,129 @@ export default function CommentsSection({ campaignId, initialComments }: Comment
               <Textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="min-h-[80px]"
+                className="min-h-[100px]"
               />
               <div className="flex justify-end gap-2">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => {
                     setEditingComment(null)
                     setEditContent('')
                   }}
                 >
+                  <FaTimes className="mr-2" />
                   Cancel
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => handleEdit(comment.id)}
-                  disabled={isSubmitting || !editContent.trim()}
+                  disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Saving...' : 'Save'}
+                  <FaEdit className="mr-2" />
+                  Save
                 </Button>
               </div>
             </div>
           ) : (
-            <p className="text-sm">{processMentions(comment.content)}</p>
-          )}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`p-1 h-6 ${comment.userReaction === 'like' ? 'text-blue-500' : ''}`}
-                onClick={() => handleReaction(comment.id, 'like')}
-              >
-                <ThumbsUp className="h-4 w-4" />
-                <span className="ml-1">{comment.likes}</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`p-1 h-6 ${comment.userReaction === 'dislike' ? 'text-red-500' : ''}`}
-                onClick={() => handleReaction(comment.id, 'dislike')}
-              >
-                <ThumbsDown className="h-4 w-4" />
-                <span className="ml-1">{comment.dislikes}</span>
-              </Button>
-            </div>
-            {session?.user && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                  className="text-sm text-gray-500 hover:text-gray-900"
+            <div className="space-y-2">
+              <p className="text-gray-700">{processMentions(comment.content)}</p>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => handleReaction(comment.id, 'like')}
+                  className={`flex items-center gap-1 text-sm ${
+                    comment.userReaction === 'like' ? 'text-blue-500' : 'text-gray-500'
+                  }`}
                 >
-                  <Reply className="h-4 w-4 mr-1" />
-                  Reply
-                </Button>
-                {session.user.id === comment.user.id && (
+                  <FaThumbsUp className="size-4" />
+                  <span>{comment.likes}</span>
+                </button>
+                <button
+                  onClick={() => handleReaction(comment.id, 'dislike')}
+                  className={`flex items-center gap-1 text-sm ${
+                    comment.userReaction === 'dislike' ? 'text-red-500' : 'text-gray-500'
+                  }`}
+                >
+                  <FaThumbsDown className="size-4" />
+                  <span>{comment.dislikes}</span>
+                </button>
+                {session?.user && (
                   <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <button
                       onClick={() => {
-                        setEditingComment(comment.id)
-                        setEditContent(comment.content)
+                        setReplyingTo(comment.id)
+                        setReplyContent('')
                       }}
-                      className="text-sm text-gray-500 hover:text-gray-900"
+                      className="flex items-center gap-1 text-sm text-gray-500"
                     >
-                      <Edit2 className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setCommentToDelete(comment.id)
-                        setDeleteDialogOpen(true)
-                      }}
-                      className="text-sm text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
+                      <FaReply className="size-4" />
+                      Reply
+                    </button>
+                    {comment.user.id === session.user.id && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingComment(comment.id)
+                            setEditContent(comment.content)
+                          }}
+                          className="flex items-center gap-1 text-sm text-gray-500"
+                        >
+                          <FaEdit className="size-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCommentToDelete(comment.id)
+                            setDeleteDialogOpen(true)
+                          }}
+                          className="flex items-center gap-1 text-sm text-gray-500"
+                        >
+                          <FaTrash className="size-4" />
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
-              </div>
-            )}
-          </div>
-          {replyingTo === comment.id && (
-            <div className="mt-2 space-y-2">
-              <Textarea
-                placeholder="Write a reply..."
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                className="min-h-[80px]"
-              />
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setReplyingTo(null)
-                    setReplyContent('')
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleReply(comment.id)}
-                  disabled={isSubmitting || !replyContent.trim()}
-                >
-                  {isSubmitting ? 'Posting...' : 'Post Reply'}
-                </Button>
               </div>
             </div>
           )}
         </div>
       </div>
+      {replyingTo === comment.id && (
+        <div className="ml-8 space-y-2">
+          <Textarea
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+            placeholder="Write your reply..."
+            className="min-h-[100px]"
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setReplyingTo(null)
+                setReplyContent('')
+              }}
+            >
+              <FaTimes className="mr-2" />
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => handleReply(comment.id)}
+              disabled={isSubmitting}
+            >
+              <FaReply className="mr-2" />
+              Reply
+            </Button>
+          </div>
+        </div>
+      )}
       {comment.replies.length > 0 && (
-        <div className="ml-12 space-y-4">
-          {comment.replies.map(renderComment)}
+        <div className="ml-8 space-y-4">
+          {comment.replies.map(reply => renderComment(reply))}
         </div>
       )}
     </div>
