@@ -33,7 +33,7 @@ export default async function ProfilePage() {
           <p className="text-gray-500">Manage your account settings and view your activity</p>
         </div>
         
-        <ProfileTabs user={session.user} />
+        <ProfileTabs user={user} />
       </div>
     </div>
   )

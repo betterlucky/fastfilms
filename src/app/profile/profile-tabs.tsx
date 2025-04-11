@@ -51,6 +51,7 @@ interface ProfileTabsProps {
 
 export default function ProfileTabs({ user }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState('profile')
+  const [selectedColor, setSelectedColor] = useState(user.avatarColor || '')
   const { update } = useSession()
   const router = useRouter()
 
@@ -73,6 +74,16 @@ export default function ProfileTabs({ user }: ProfileTabsProps) {
       router.refresh()
     } catch (error) {
       console.error('Error updating profile:', error)
+    }
+  }
+
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color)
+    const form = document.querySelector('form')
+    const hiddenInput = document.querySelector('input[name="avatarColor"]') as HTMLInputElement
+    if (form && hiddenInput) {
+      hiddenInput.value = color
+      form.requestSubmit()
     }
   }
 
@@ -122,25 +133,16 @@ export default function ProfileTabs({ user }: ProfileTabsProps) {
                     <button
                       key={color}
                       type="button"
-                      onClick={() => {
-                        const form = document.querySelector('form')
-                        if (form) {
-                          const input = form.querySelector('input[name="avatarColor"]') as HTMLInputElement
-                          if (input) {
-                            input.value = color
-                            form.requestSubmit()
-                          }
-                        }
-                      }}
+                      onClick={() => handleColorSelect(color)}
                       className={cn(
                         'size-8 rounded-full transition-transform hover:scale-110',
                         color,
-                        user.avatarColor === color && 'ring-2 ring-offset-2 ring-gray-900'
+                        selectedColor === color && 'ring-2 ring-offset-2 ring-gray-900'
                       )}
                     />
                   ))}
                 </div>
-                <input type="hidden" name="avatarColor" defaultValue={user.avatarColor || ''} />
+                <input type="hidden" name="avatarColor" defaultValue={selectedColor} />
               </div>
 
               <Button type="submit">Update Profile</Button>

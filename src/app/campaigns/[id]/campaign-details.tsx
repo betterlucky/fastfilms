@@ -27,15 +27,11 @@ interface Comment {
   user: {
     id: string
     name: string | null
+    email: string | null
     image: string | null
+    avatarColor?: string | null
   }
-  replies: (Comment & {
-    user: {
-      id: string
-      name: string | null
-      image: string | null
-    }
-  })[]
+  replies: Comment[]
   likes: number
   dislikes: number
   userReaction?: 'like' | 'dislike'

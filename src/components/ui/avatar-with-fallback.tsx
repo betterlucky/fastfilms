@@ -67,9 +67,9 @@ export function AvatarWithFallback({
   const color = getColor()
 
   return (
-    <Avatar className={cn('h-20 w-20', className)}>
+    <Avatar className={cn('h-24 w-24', className)}>
       {src && <AvatarImage src={src} alt={name || 'User avatar'} />}
-      <AvatarFallback className={cn(color, 'text-white font-semibold text-2xl')}>
+      <AvatarFallback className={cn(color, 'text-white font-semibold text-3xl')}>
         {initials.toUpperCase()}
       </AvatarFallback>
     </Avatar>
