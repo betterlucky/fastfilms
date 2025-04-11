@@ -102,8 +102,10 @@ export async function POST(request: NextRequest) {
       return total + Number(menuItem?.price || 0) * selection.quantity
     }, 0)
 
-    const ticketsTotal = (quantity + payItForwardTickets) * ticketPrice
-    const totalAmount = ticketsTotal + foodOrdersTotal
+    const regularTicketsTotal = quantity * ticketPrice
+    const pifTicketsTotal = payItForwardTickets * settings.minimumTicketPrice
+    const ticketsTotal = regularTicketsTotal + pifTicketsTotal
+    const totalAmount = ticketsTotal + foodOrdersTotal + settings.transactionFee
 
     // Validate the calculated total
     validateTotalAmount(ticketsTotal, foodOrdersTotal, totalAmount, totalAmount)
@@ -198,6 +200,7 @@ export async function POST(request: NextRequest) {
           options: order.choices.map((choice) => ({
             name: choice.option.name,
             choice: choice.selectedChoice.name,
+            priceAdjustment: Number(choice.selectedChoice.priceAdjustment || 0)
           })),
         })),
       }

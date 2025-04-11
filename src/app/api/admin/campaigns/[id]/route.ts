@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 
 export async function PUT(
   request: Request,
@@ -143,6 +144,11 @@ export async function DELETE(
         where: { id: params.id },
       })
     })
+
+    // Revalidate both the campaigns list and the specific campaign page
+    revalidatePath('/campaigns')
+    revalidatePath(`/campaigns/${params.id}`)
+    revalidatePath('/') // Revalidate homepage for campaign hero
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {

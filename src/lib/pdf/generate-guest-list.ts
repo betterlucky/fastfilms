@@ -30,6 +30,7 @@ interface PreorderData {
     user: Pick<User, 'name' | 'email'>
     menuItem: {
       name: string
+      price: number
     }
     choices: {
       option: {
@@ -37,15 +38,23 @@ interface PreorderData {
       }
       selectedChoice: {
         name: string
+        priceAdjustment?: number
       }
     }[]
   })[]
 }
 
 // Constants for layout
-const PAGE_WIDTH = 210 // A4 width in mm
-const MARGIN = 20
+const PAGE_WIDTH = 297 // A4 landscape width in mm
+const PAGE_HEIGHT = 210 // A4 landscape height in mm
+const MARGIN = 15
 const CONTENT_WIDTH = PAGE_WIDTH - 2 * MARGIN
+const COLUMN_WIDTHS = {
+  NAME: 80,
+  EMAIL: 100,
+  PARTY_SIZE: 40,
+  PREORDERS: 40
+}
 
 // Helper function to format date in UK format
 function formatDate(date: Date | string): string {
@@ -111,36 +120,36 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
       const doc = new jsPDF({
-        orientation: 'portrait',
+        orientation: 'landscape',
         unit: 'mm',
         format: 'a4',
       })
 
       // Add header
       drawHeader(doc, data.campaign.title, 'Guest List')
-      let yPos = 50 // Start below header
+      let yPos = 40 // Start below header
 
       // Campaign Details in a box
       doc.setFillColor(250, 250, 250)
-      doc.roundedRect(MARGIN, yPos, CONTENT_WIDTH, 35, 3, 3, 'F')
+      doc.roundedRect(MARGIN, yPos, CONTENT_WIDTH, 25, 3, 3, 'F')
       doc.setFontSize(12)
       yPos += 8
+      
+      // Two column layout for campaign details
       doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
-      yPos += 8
       doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
         year: 'numeric',
-      })}`, MARGIN + 5, yPos)
-      yPos += 10
+      })}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
+      yPos += 8
       doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
       })}`, MARGIN + 5, yPos)
-      yPos += 8
-      doc.text(`Total Guests: ${data.tickets.length}`, MARGIN + 5, yPos)
+      doc.text(`Total Guests: ${data.tickets.length}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
       yPos += 15
 
       // Group tickets by purchase
@@ -150,7 +159,7 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
           acc[purchaseId] = {
             user: ticket.user,
             tickets: [],
-            orders: ticket.purchase?.orders || []
+            hasPreorders: ticket.purchase?.orders.length > 0
           }
         }
         acc[purchaseId].tickets.push(ticket)
@@ -158,10 +167,7 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       }, {} as Record<string, {
         user: Pick<User, 'name' | 'email'>
         tickets: Ticket[]
-        orders: {
-          id: string
-          quantity: number
-        }[]
+        hasPreorders: boolean
       }>)
 
       // Sort groups by user name
@@ -169,48 +175,52 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
         (a.user.name || '').localeCompare(b.user.name || '')
       )
 
-      // Column headers
+      // Column headers with better spacing
       doc.setFillColor(230, 230, 230)
       doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
       doc.setFontSize(11)
+      doc.setFont(undefined, 'bold')
       doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
-      doc.text('Email', MARGIN + 80, yPos + 5.5)
-      doc.text('Party Size', MARGIN + 150, yPos + 5.5)
-      doc.text('Preorders', MARGIN + 180, yPos + 5.5)
+      doc.text('Email', MARGIN + COLUMN_WIDTHS.NAME + 10, yPos + 5.5)
+      doc.text('Party Size', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos + 5.5)
+      doc.text('Preorders', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos + 5.5)
+      doc.setFont(undefined, 'normal')
       yPos += 12
 
-      // Add guest groups
+      // Add guest groups with optimized layout
       doc.setFontSize(10)
       sortedGroups.forEach((group, index) => {
+        // Check if we need a new page
+        if (yPos > PAGE_HEIGHT - 20) {
+          doc.addPage()
+          drawHeader(doc, data.campaign.title, 'Guest List')
+          yPos = 40
+
+          // Repeat column headers
+          doc.setFillColor(230, 230, 230)
+          doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
+          doc.setFontSize(11)
+          doc.setFont(undefined, 'bold')
+          doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
+          doc.text('Email', MARGIN + COLUMN_WIDTHS.NAME + 10, yPos + 5.5)
+          doc.text('Party Size', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos + 5.5)
+          doc.text('Preorders', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos + 5.5)
+          doc.setFont(undefined, 'normal')
+          yPos += 12
+          doc.setFontSize(10)
+        }
+
         // Add zebra striping
         if (index % 2 === 0) {
           doc.setFillColor(250, 250, 250)
           doc.rect(MARGIN, yPos - 4, CONTENT_WIDTH, 8, 'F')
         }
 
-        // Check if we need a new page
-        if (yPos > 270) {
-          doc.addPage()
-          // Repeat header on new page
-          drawHeader(doc, data.campaign.title, 'Guest List')
-          yPos = 50
-
-          // Repeat column headers
-          doc.setFillColor(230, 230, 230)
-          doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
-          doc.setFontSize(11)
-          doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
-          doc.text('Email', MARGIN + 80, yPos + 5.5)
-          doc.text('Party Size', MARGIN + 150, yPos + 5.5)
-          doc.text('Preorders', MARGIN + 180, yPos + 5.5)
-          yPos += 12
-          doc.setFontSize(10)
-        }
-
+        // Main guest info
         doc.text(group.user.name || 'Guest', MARGIN + 5, yPos)
-        doc.text(group.user.email, MARGIN + 80, yPos)
-        doc.text(group.tickets.length.toString(), MARGIN + 150, yPos)
-        doc.text(group.orders.length > 0 ? 'Yes' : 'No', MARGIN + 180, yPos)
+        doc.text(group.user.email, MARGIN + COLUMN_WIDTHS.NAME + 10, yPos)
+        doc.text(group.tickets.length.toString(), MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos)
+        doc.text(group.hasPreorders ? 'Yes' : 'No', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos)
         yPos += 8
       })
 
@@ -230,60 +240,153 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
       const doc = new jsPDF({
-        orientation: 'portrait',
+        orientation: 'landscape',
         unit: 'mm',
         format: 'a4',
       })
 
       // Add header
       drawHeader(doc, data.campaign.title, 'Preorder Summary')
-      let yPos = 50
+      let yPos = 40
 
       // Campaign Details in a box
       doc.setFillColor(250, 250, 250)
-      doc.roundedRect(MARGIN, yPos, CONTENT_WIDTH, 30, 3, 3, 'F')
+      doc.roundedRect(MARGIN, yPos, CONTENT_WIDTH, 25, 3, 3, 'F')
       doc.setFontSize(12)
       yPos += 8
+      
+      // Two column layout for campaign details
       doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
-      yPos += 8
       doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
         year: 'numeric',
-      })}`, MARGIN + 5, yPos)
-      yPos += 10
+      })}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
+      yPos += 8
       doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
       })}`, MARGIN + 5, yPos)
+      doc.text(`Total Orders: ${data.orders.length}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
       yPos += 15
 
-      // Group orders by menu item and choices
-      const orderSummary = new Map<string, number>()
-      data.orders.forEach((order) => {
-        const key = `${order.menuItem.name}${order.choices.length > 0 ? ' - ' + order.choices.map(c => `${c.option.name}: ${c.selectedChoice.name}`).join(', ') : ''}`
-        orderSummary.set(key, (orderSummary.get(key) || 0) + order.quantity)
+      // Create item summary with consolidated choices
+      interface ItemSummary {
+        quantity: number
+        choices: Map<string, Map<string, number>>
+      }
+      
+      const itemSummary = new Map<string, ItemSummary>()
+
+      // Helper function to add or update item summary
+      function addToSummary(itemName: string, quantity: number, choices: Array<{
+        option: { name: string },
+        selectedChoice: { name: string }
+      }>) {
+        const existing = itemSummary.get(itemName) || {
+          quantity: 0,
+          choices: new Map()
+        }
+
+        existing.quantity += quantity
+
+        // Track choices
+        choices.forEach(choice => {
+          const optionName = choice.option.name
+          const choiceName = choice.selectedChoice.name
+
+          if (!existing.choices.has(optionName)) {
+            existing.choices.set(optionName, new Map())
+          }
+
+          const choiceCounts = existing.choices.get(optionName)!
+          choiceCounts.set(choiceName, (choiceCounts.get(choiceName) || 0) + quantity)
+        })
+
+        itemSummary.set(itemName, existing)
+      }
+
+      // Process orders and consolidate items
+      data.orders.forEach(order => {
+        // Check if this is a combo item by looking for "Combo" in the name
+        const isCombo = order.menuItem.name.toLowerCase().includes('combo')
+        
+        if (!isCombo) {
+          // For non-combo items, just add them directly
+          addToSummary(order.menuItem.name, order.quantity, order.choices)
+        } else {
+          // For combo items, we need to process each choice as a separate item
+          // First, add the main combo item
+          addToSummary(order.menuItem.name, order.quantity, [])
+          
+          // Then process each component of the combo
+          order.choices.forEach(choice => {
+            // Skip choices that are "No thanks" or similar
+            if (choice.selectedChoice.name.toLowerCase() === 'no thanks') {
+              return
+            }
+            
+            // For drinks and similar items that might appear both in combos and standalone
+            if (choice.option.name.toLowerCase().includes('drink')) {
+              addToSummary(choice.selectedChoice.name, order.quantity, [])
+            }
+          })
+        }
       })
 
-      // Order Summary section
+      // Add Item Summary section
       doc.setFillColor(230, 230, 230)
       doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
       doc.setFontSize(14)
-      doc.text('Order Summary', MARGIN + 5, yPos + 5.5)
+      doc.setFont(undefined, 'bold')
+      doc.text('Item Summary', MARGIN + 5, yPos + 5.5)
+      doc.setFont(undefined, 'normal')
       yPos += 12
 
-      // Display summary
+      // Display consolidated item summary
       doc.setFontSize(11)
-      orderSummary.forEach((quantity, item) => {
-        doc.text(`${item}`, MARGIN + 5, yPos)
-        doc.text(`${quantity}`, MARGIN + CONTENT_WIDTH - 15, yPos, {
-          align: 'right',
+      
+      // First display main items (non-choices)
+      Array.from(itemSummary.entries())
+        .sort(([aName], [bName]) => aName.localeCompare(bName))
+        .forEach(([itemName, summary]) => {
+          // Check if we need a new page
+          if (yPos > PAGE_HEIGHT - 40) {
+            doc.addPage()
+            drawHeader(doc, data.campaign.title, 'Preorder Summary')
+            yPos = 40
+          }
+
+          // Main item line
+          doc.setFont(undefined, 'bold')
+          doc.text(`${summary.quantity}x ${itemName}`, MARGIN + 5, yPos)
+          doc.setFont(undefined, 'normal')
+          yPos += 6
+
+          // Display choices if any
+          summary.choices.forEach((choiceCounts, optionName) => {
+            // Skip empty or "No thanks" choices
+            const validChoices = Array.from(choiceCounts.entries())
+              .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
+            
+            if (validChoices.length > 0) {
+              const choicesText = validChoices
+                .map(([choice, count]) => `${count}x ${choice}`)
+                .join(', ')
+              doc.text(`${optionName}: ${choicesText}`, MARGIN + 15, yPos)
+              yPos += 6
+            }
+          })
+          yPos += 2
         })
-        yPos += 7
-      })
-      yPos += 15
+
+      // Add Orders by Party section
+      yPos += 10
+      doc.addPage()
+      drawHeader(doc, data.campaign.title, 'Order Details')
+      yPos = 40
 
       // Group orders by user
       const userOrders = new Map<string, typeof data.orders>()
@@ -295,54 +398,52 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
         userOrders.get(key)!.push(order)
       })
 
-      // Individual Orders section
-      doc.setFillColor(230, 230, 230)
-      doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
-      doc.setFontSize(14)
-      doc.text('Orders by Party', MARGIN + 5, yPos + 5.5)
-      yPos += 12
-
-      // Add orders by user
+      // Add orders by user with optimized layout
       doc.setFontSize(11)
       userOrders.forEach((orders, email) => {
         // Check if we need a new page
-        if (yPos > 250) {
+        if (yPos > PAGE_HEIGHT - 40) {
           doc.addPage()
           drawHeader(doc, data.campaign.title, 'Preorder Summary')
-          yPos = 50
+          yPos = 40
         }
 
-        // User box with light background
-        const user = orders[0].user
-        const boxHeight = 12 + orders.length * 12
-        doc.setFillColor(250, 250, 250)
-        doc.roundedRect(MARGIN, yPos - 4, CONTENT_WIDTH, boxHeight, 2, 2, 'F')
-
         // User details
-        doc.setFontSize(11)
+        const user = orders[0].user
+        doc.setFont(undefined, 'bold')
         doc.text(`${user.name || 'Guest'}`, MARGIN + 5, yPos)
-        doc.text(email, MARGIN + 80, yPos)
+        doc.text(email, MARGIN + 60, yPos)
+        doc.setFont(undefined, 'normal')
         yPos += 8
 
-        // Orders
+        // Orders in a server-friendly format
         doc.setFontSize(10)
+        let userTotal = 0
         orders.forEach((order) => {
-          doc.text(`${order.quantity}x ${order.menuItem.name}`, MARGIN + 10, yPos)
+          const priceAdjustments = order.choices.reduce((sum, choice) => 
+            sum + (Number(choice.selectedChoice.priceAdjustment) || 0), 0)
+          const itemTotal = (order.menuItem.price * order.quantity) + (priceAdjustments * order.quantity)
+          userTotal += itemTotal
+
+          // Main item line
+          doc.text(`${order.quantity}x ${order.menuItem.name}:`, MARGIN + 10, yPos)
           yPos += 6
-          if (order.choices.length > 0) {
-            order.choices.forEach((choice) => {
-              doc.text(
-                `${choice.option.name}: ${choice.selectedChoice.name}`,
-                MARGIN + 15,
-                yPos
-              )
-              yPos += 6
-            })
-          }
+
+          // Choices in a clear format
+          order.choices.forEach((choice) => {
+            doc.text(`  ${choice.option.name}: ${choice.selectedChoice.name}`, MARGIN + 15, yPos)
+            yPos += 6
+          })
           yPos += 2
         })
 
-        yPos += 4 // Space between user groups
+        // User total
+        doc.setFontSize(11)
+        doc.setFont(undefined, 'bold')
+        doc.text('Total:', MARGIN + 10, yPos)
+        doc.text(`£${(userTotal / 100).toFixed(2)}`, MARGIN + CONTENT_WIDTH - 30, yPos, { align: 'right' })
+        doc.setFont(undefined, 'normal')
+        yPos += 10
       })
 
       // Add page numbers

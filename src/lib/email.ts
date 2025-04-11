@@ -61,6 +61,7 @@ export function generateTicketConfirmationEmail(data: {
     options?: Array<{
       name: string
       choice: string
+      priceAdjustment?: number
     }>
   }>
 }) {
@@ -83,109 +84,118 @@ export function generateTicketConfirmationEmail(data: {
     }).format(amount)
   }
 
-  // Format date and time in UTC to ensure consistency
+  // Calculate subtotals
+  const regularTicketsSubtotal = regularTickets * ticketPrice
+  const pifTicketsSubtotal = pifTickets * settings.minimumTicketPrice
+  const ticketsSubtotal = regularTicketsSubtotal + pifTicketsSubtotal
+  const foodSubtotal = foodOrders.reduce((sum, order) => {
+    const itemTotal = order.price * order.quantity
+    const optionsTotal = (order.options || []).reduce((optSum, option) => 
+      optSum + (Number(option.priceAdjustment) || 0), 0)
+    return sum + itemTotal + optionsTotal
+  }, 0)
+  const transactionFee = settings.transactionFee
+  const total = ticketsSubtotal + foodSubtotal + transactionFee
+
+  // Format date and time
   const date = new Date(screeningDate)
   const formattedDate = date.toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-    timeZone: 'Europe/London'
   })
-
   const formattedTime = date.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-    timeZone: 'Europe/London'
   })
-
-  const foodOrdersHtml = foodOrders.length > 0
-    ? `
-      <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
-        <h2 style="margin: 0 0 16px 0; color: #111827;">Your Pre-orders</h2>
-        ${foodOrders.map(order => `
-          <div style="margin-bottom: 12px;">
-            <p style="margin: 0; display: flex; justify-content: space-between;">
-              <span>${order.quantity}x ${order.name}</span>
-              <span>${formatPrice(order.price * order.quantity)}</span>
-            </p>
-            ${order.options?.length
-              ? `<p style="margin: 4px 0 0 20px; color: #6b7280; font-size: 14px;">
-                  ${order.options.map(opt => `${opt.name}: ${opt.choice}`).join(', ')}
-                </p>`
-              : ''}
-          </div>
-        `).join('')}
-      </div>
-    `
-    : ''
 
   return `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
-        <title>Ticket Confirmation</title>
+        <title>Ticket Confirmation - ${movieTitle}</title>
       </head>
-      <body style="font-family: sans-serif; line-height: 1.5; color: #1f2937;">
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #4f46e5; margin-bottom: 24px;">Your Tickets are Confirmed!</h1>
+          <h1 style="color: #4f46e5;">Your Tickets are Confirmed!</h1>
           
-          <p>Thank you for your purchase. Your tickets for the following screening have been confirmed:</p>
-          
-          <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
-            <h2 style="margin: 0 0 16px 0; color: #111827;">${movieTitle}</h2>
-            <p style="margin: 8px 0;"><strong>Venue:</strong> ${venueName}</p>
-            <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
-            <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
+          <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="margin: 0 0 10px 0;">${movieTitle}</h2>
+            <p style="margin: 5px 0;">${formattedDate} at ${formattedTime}</p>
+            <p style="margin: 5px 0;">${venueName}</p>
           </div>
 
-          <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
-            <h2 style="margin: 0 0 16px 0; color: #111827;">Ticket Summary</h2>
-            ${regularTickets > 0
-              ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
-                  <span>${regularTickets} Regular Tickets</span>
-                  <span>${formatPrice(ticketPrice)} each</span>
-                </p>`
-              : ''}
-            ${pifTickets > 0
-              ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
-                  <span>${pifTickets} Pay It Forward Tickets</span>
-                  <span>£${settings.minimumTicketPrice.toFixed(2)} each</span>
-                </p>`
-              : ''}
-            <p style="margin: 8px 0; color: #6b7280;">Total: ${ticketQuantity} tickets</p>
-          </div>
-          
-          ${foodOrdersHtml}
-
-          <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
-            <h2 style="margin: 0 0 16px 0; color: #111827;">Total Cost</h2>
-            <p style="margin: 8px 0; display: flex; justify-content: space-between;">
-              <span>Tickets Subtotal</span>
-              <span>${formatPrice(regularTickets * ticketPrice + pifTickets * settings.minimumTicketPrice)}</span>
-            </p>
-            ${foodOrders.length > 0
-              ? `<p style="margin: 8px 0; display: flex; justify-content: space-between;">
-                  <span>Pre-orders Subtotal</span>
-                  <span>${formatPrice(foodOrders.reduce((sum, order) => sum + (order.price * order.quantity), 0))}</span>
-                </p>`
-              : ''}
-            <div style="margin: 12px 0; border-top: 1px solid #e5e7eb;"></div>
-            <p style="margin: 8px 0; display: flex; justify-content: space-between; font-weight: 600;">
-              <span>Total Paid</span>
-              <span>${formatPrice(totalAmount)}</span>
+          <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin: 0 0 10px 0;">Ticket Summary</h3>
+            ${regularTickets > 0 ? `
+              <p style="margin: 5px 0;">
+                ${regularTickets} Regular Tickets at ${formatPrice(ticketPrice)} each
+                (${formatPrice(regularTicketsSubtotal)})
+              </p>
+            ` : ''}
+            ${pifTickets > 0 ? `
+              <p style="margin: 5px 0;">
+                ${pifTickets} Pay It Forward Tickets at ${formatPrice(settings.minimumTicketPrice)} each
+                (${formatPrice(pifTicketsSubtotal)})
+              </p>
+            ` : ''}
+            <p style="margin: 5px 0; font-size: 0.9em; color: #666;">
+              Total: ${ticketQuantity} tickets
             </p>
           </div>
 
-          <p style="margin-top: 24px;">Please arrive at least 15 minutes before the screening time. You'll need to show this email as proof of purchase.</p>
-          
-          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-            <p style="color: #6b7280; font-size: 14px;">
-              If you have any questions about your booking, please contact us at support@fastfilms.example.com
-            </p>
+          ${foodOrders.length > 0 ? `
+            <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0;">Pre-ordered Items</h3>
+              <ul style="margin: 0; padding-left: 20px;">
+                ${foodOrders.map(order => `
+                  <li style="margin: 5px 0;">
+                    ${order.quantity}x ${order.name} at ${formatPrice(order.price)} each
+                    (${formatPrice(order.price * order.quantity)})
+                    ${order.options?.length ? `
+                      <ul style="margin: 5px 0; padding-left: 20px;">
+                        ${order.options.map(option => `
+                          <li style="margin: 2px 0;">
+                            ${option.name}: ${option.choice}
+                            ${option.priceAdjustment ? ` (+${formatPrice(option.priceAdjustment)})` : ''}
+                          </li>
+                        `).join('')}
+                      </ul>
+                    ` : ''}
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          ` : ''}
+
+          <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin: 0 0 10px 0;">Total Cost</h3>
+            <div style="margin: 5px 0;">
+              <span style="display: inline-block; width: 200px;">Tickets Subtotal:</span>
+              <span>${formatPrice(ticketsSubtotal)}</span>
+            </div>
+            ${foodOrders.length > 0 ? `
+              <div style="margin: 5px 0;">
+                <span style="display: inline-block; width: 200px;">Food & Drinks Total:</span>
+                <span>${formatPrice(foodSubtotal)}</span>
+              </div>
+            ` : ''}
+            <div style="margin: 5px 0;">
+              <span style="display: inline-block; width: 200px;">Transaction Fee:</span>
+              <span>${formatPrice(transactionFee)}</span>
+            </div>
+            <div style="margin: 10px 0; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+              <span style="display: inline-block; width: 200px; font-weight: bold;">Total:</span>
+              <span style="font-weight: bold;">${formatPrice(total)}</span>
+            </div>
           </div>
+
+          <p style="margin: 20px 0; font-size: 0.9em; color: #666;">
+            Please arrive at least 15 minutes before the screening time. You'll need to show this email as proof of purchase.
+          </p>
         </div>
       </body>
     </html>

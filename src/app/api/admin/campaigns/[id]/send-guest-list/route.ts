@@ -59,6 +59,7 @@ export async function POST(
                     menuItem: {
                       select: {
                         name: true,
+                        price: true
                       },
                     },
                     choices: {
@@ -71,6 +72,7 @@ export async function POST(
                         selectedChoice: {
                           select: {
                             name: true,
+                            priceAdjustment: true
                           },
                         },
                       },
@@ -103,15 +105,40 @@ export async function POST(
     }))
 
     // Transform orders for preorder PDF
-    const allOrders = campaign.tickets.flatMap(
-      (ticket) =>
-        ticket.purchase?.orders.map((order) => ({
-          ...order,
-          user: ticket.user,
-          menuItem: order.menuItem,
-          choices: order.choices,
-        })) || []
-    )
+    const allOrders = Array.from(
+      new Set(
+        campaign.tickets.map(ticket => ticket.purchase?.id)
+      )
+    ).flatMap(purchaseId => {
+      const ticket = campaign.tickets.find(t => t.purchase?.id === purchaseId)
+      if (!ticket || !ticket.purchase) return []
+      
+      return ticket.purchase.orders.map(order => ({
+        id: order.id,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        purchaseId: order.purchaseId,
+        menuItemId: order.menuItemId,
+        quantity: order.quantity,
+        user: {
+          name: ticket.user.name,
+          email: ticket.user.email
+        },
+        menuItem: {
+          name: order.menuItem.name,
+          price: Number(order.menuItem.price)
+        },
+        choices: order.choices.map(choice => ({
+          option: {
+            name: choice.option.name
+          },
+          selectedChoice: {
+            name: choice.selectedChoice.name,
+            priceAdjustment: Number(choice.selectedChoice.priceAdjustment)
+          }
+        }))
+      }))
+    })
 
     // Generate PDFs
     const guestListPDF = await generateGuestListPDF({

@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { TicketStatus, PurchaseStatus } from '@prisma/client'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
@@ -108,6 +109,9 @@ export async function POST(request: Request) {
           where: { id: campaignId }
         })
       })
+
+      // Revalidate the campaigns list after cleanup
+      revalidatePath('/campaigns')
 
       return NextResponse.json({
         message: 'Campaign deleted successfully',
@@ -236,6 +240,10 @@ export async function POST(request: Request) {
         }
       })
     })
+
+    // Revalidate the campaigns list after cleanup
+    revalidatePath('/campaigns')
+    revalidatePath('/') // Revalidate homepage for campaign hero
 
     return NextResponse.json({
       message: `Successfully deleted ${testCampaigns.length} test campaigns and their associated data`,

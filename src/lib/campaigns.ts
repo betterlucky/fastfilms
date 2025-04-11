@@ -192,16 +192,7 @@ export async function getCampaigns(includeFeatured: boolean = false) {
     },
   })
 
-  // Filter out duplicates by title and screeningDate
-  const uniqueCampaigns = campaigns.reduce((acc, current) => {
-    const key = `${current.title}-${current.screeningDate.toISOString()}`
-    if (!acc.has(key)) {
-      acc.set(key, current)
-    }
-    return acc
-  }, new Map())
-
-  return Array.from(uniqueCampaigns.values()).map((campaign) => ({
+  return campaigns.map((campaign) => ({
     ...campaign,
     fundingTarget: Number(campaign.fundingTarget),
     currentFunding: Number(campaign.currentFunding),
