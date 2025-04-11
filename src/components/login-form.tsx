@@ -5,12 +5,15 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EyeIcon, EyeOffIcon } from 'lucide-react'
 
 export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const callbackUrl = searchParams.get('callbackUrl') || '/campaigns'
   const justRegistered = searchParams.get('registered')
   const verified = searchParams.get('verified')
@@ -25,7 +28,9 @@ export default function LoginForm() {
       const response = await signIn('credentials', {
         email: formData.get('email'),
         password: formData.get('password'),
+        remember: rememberMe,
         redirect: false,
+        callbackUrl,
       })
 
       if (!response?.ok) {
@@ -41,7 +46,6 @@ export default function LoginForm() {
         return
       }
 
-      // Simple navigation after successful login
       window.location.href = callbackUrl
     } catch (err) {
       console.error('Login error:', err)
@@ -117,15 +121,52 @@ export default function LoginForm() {
             >
               Password
             </label>
-            <div className="mt-2">
+            <div className="mt-2 relative">
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 required
-                className="block w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                className="block w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm pr-10"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                Remember me
+              </label>
+            </div>
+            <div className="text-sm">
+              <Button
+                variant="link"
+                className="font-semibold text-indigo-600 hover:text-indigo-500"
+                onClick={() => router.push('/forgot-password')}
+              >
+                Forgot password?
+              </Button>
             </div>
           </div>
 
@@ -137,16 +178,6 @@ export default function LoginForm() {
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
-          </div>
-
-          <div className="text-center text-sm">
-            <Button
-              variant="link"
-              className="font-semibold text-indigo-600 hover:text-indigo-500"
-              onClick={() => router.push('/forgot-password')}
-            >
-              Forgot password?
-            </Button>
           </div>
         </form>
 

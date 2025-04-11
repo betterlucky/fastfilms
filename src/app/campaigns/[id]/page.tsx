@@ -12,52 +12,76 @@ export default async function CampaignPage({
   const session = await getServerSession(authOptions)
   const isAdmin = session?.user?.role === 'ADMIN'
 
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      movieTitle: true,
-      screeningDate: true,
-      ticketCap: true,
-      currentTickets: true,
-      customBlurb: true,
-      posterPath: true,
-      deadlineDate: true,
-      screenId: true,
-      screen: {
-        select: {
-          id: true,
-          name: true,
-          capacity: true,
-        },
-      },
-      venue: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      charityId: true,
-      menuItems: {
-        select: {
-          menuItem: {
-            select: {
-              id: true,
-              name: true,
-              description: true,
-              price: true,
-              category: true,
+  const transformComment = (comment: any) => ({
+    ...comment,
+    likes: comment.reactions.filter(r => r.reaction === 'like').length,
+    dislikes: comment.reactions.filter(r => r.reaction === 'dislike').length,
+    replies: comment.replies.map(transformComment),
+  })
+
+  const [campaign, rawComments] = await Promise.all([
+    prisma.campaign.findUnique({
+      where: { id },
+      include: {
+        venue: true,
+        charity: true,
+        screen: true,
+        menuItems: {
+          include: {
+            menuItem: {
+              include: {
+                options: {
+                  include: {
+                    choices: true,
+                  },
+                },
+              },
             },
           },
         },
       },
-      isTest: true,
-      currentFunding: true,
-      fundingTarget: true,
-    },
-  })
+    }),
+    prisma.comment.findMany({
+      where: { campaignId: id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+            replies: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        reactions: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
+  ])
+
+  const comments = rawComments.map(transformComment)
 
   if (!campaign) {
     notFound()
@@ -107,6 +131,7 @@ export default async function CampaignPage({
       availableScreens={availableScreens}
       charities={charities}
       venueMenuItems={venueMenuItemsWithNumberPrices}
+      initialComments={comments}
     />
   )
 }

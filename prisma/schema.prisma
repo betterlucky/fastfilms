@@ -45,6 +45,7 @@ model User {
   updatedAt       DateTime         @updatedAt
   accounts        Account[]
   comments        Comment[]
+  commentReactions CommentReaction[]
   Contribution    Contribution[]
   purchases       Purchase[]
   purchaseResends PurchaseResend[]
@@ -267,17 +268,30 @@ model OrderChoice {
 }
 
 model Comment {
-  id         String    @id @default(cuid())
-  content    String
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
   campaignId String
-  userId     String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  parentId   String?
-  campaign   Campaign  @relation(fields: [campaignId], references: [id])
-  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies    Comment[] @relation("CommentReplies")
-  user       User      @relation(fields: [userId], references: [id])
+  campaign  Campaign @relation(fields: [campaignId], references: [id])
+  parentId  String?
+  parent    Comment? @relation("Replies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("Replies")
+  reactions CommentReaction[]
+}
+
+model CommentReaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  reaction  String   // 'like' or 'dislike'
+  createdAt DateTime @default(now())
+
+  @@unique([userId, commentId])
 }
 
 model CampaignMenuItem {

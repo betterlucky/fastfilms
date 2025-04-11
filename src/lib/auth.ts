@@ -47,6 +47,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
+        remember: { label: 'Remember Me', type: 'boolean' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -105,6 +106,8 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
+    // 30 days if remember me is checked, 24 hours if not
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
 }

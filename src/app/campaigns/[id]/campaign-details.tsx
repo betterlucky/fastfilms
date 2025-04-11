@@ -8,6 +8,28 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { CalendarIcon, Clock, Users, Ticket } from 'lucide-react'
 import { getCampaignProgress, getProgressBarClasses } from '@/lib/campaign-utils'
+import CommentsSection from '@/components/CommentsSection'
+
+interface Comment {
+  id: string
+  content: string
+  createdAt: Date
+  user: {
+    id: string
+    name: string | null
+    image: string | null
+  }
+  replies: (Comment & {
+    user: {
+      id: string
+      name: string | null
+      image: string | null
+    }
+  })[]
+  likes: number
+  dislikes: number
+  userReaction?: 'like' | 'dislike'
+}
 
 interface CampaignDetailsProps {
   campaign: {
@@ -60,6 +82,7 @@ interface CampaignDetailsProps {
     price: number
     category: string
   }[]
+  initialComments: Comment[]
 }
 
 export default function CampaignDetails({
@@ -68,6 +91,7 @@ export default function CampaignDetails({
   availableScreens,
   charities,
   venueMenuItems,
+  initialComments,
 }: CampaignDetailsProps) {
   const screeningDate = new Date(campaign.screeningDate)
   // Adjust for UK timezone (add one hour to match campaign listing)
@@ -269,6 +293,16 @@ export default function CampaignDetails({
                   </dl>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Comments Section */}
+          <Card>
+            <CardContent className="p-6">
+              <CommentsSection
+                campaignId={campaign.id}
+                initialComments={initialComments}
+              />
             </CardContent>
           </Card>
         </div>

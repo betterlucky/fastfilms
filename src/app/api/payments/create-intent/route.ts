@@ -93,13 +93,42 @@ export async function POST(request: NextRequest) {
           in: validMenuSelections.map((selection) => selection.menuItemId),
         },
       },
+      include: {
+        options: {
+          include: {
+            choices: true
+          }
+        }
+      }
     })
 
-    const foodOrdersTotal = validMenuSelections.reduce((total, selection) => {
+    const foodOrdersTotal: number = validMenuSelections.reduce((total: number, selection) => {
       const menuItem = menuItems.find(
         (item) => item.id === selection.menuItemId
       )
-      return total + Number(menuItem?.price || 0) * selection.quantity
+      if (!menuItem) return total
+
+      // Calculate total for each quantity separately
+      const itemTotal = Array.from({ length: selection.quantity })
+        .reduce<number>((quantityTotal, _, index) => {
+          const basePrice = Number(menuItem.price)
+
+          // Calculate price adjustments from choices for this specific quantity
+          const choicesTotal = Object.entries(menuSelections[selection.menuItemId].options).reduce((choicesSum: number, [optionId, choiceArrays]) => {
+            const option = menuItem.options.find(opt => opt.id === optionId)
+            if (!option) return choicesSum
+
+            const choiceId = choiceArrays[index]?.[0] || choiceArrays[0][0]
+            const choice = option.choices.find(c => c.id === choiceId)
+            if (!choice) return choicesSum
+
+            return choicesSum + Number(choice.priceAdjustment)
+          }, 0)
+
+          return quantityTotal + basePrice + choicesTotal
+        }, 0)
+
+      return total + itemTotal
     }, 0)
 
     const regularTicketsTotal = quantity * ticketPrice
@@ -137,18 +166,19 @@ export async function POST(request: NextRequest) {
             orders:
               validMenuSelections.length > 0
                 ? {
-                    create: validMenuSelections.map((selection) => ({
-                      menuItemId: selection.menuItemId,
-                      quantity: selection.quantity,
-                      choices: {
-                        create: Object.entries(menuSelections[selection.menuItemId].options).flatMap(([optionId, choiceArrays]) =>
-                          choiceArrays.map(choices => ({
+                    create: validMenuSelections.flatMap((selection) => {
+                      // Create separate orders for each quantity to handle different choices
+                      return Array.from({ length: selection.quantity }).map((_, index) => ({
+                        menuItemId: selection.menuItemId,
+                        quantity: 1, // Each order has quantity 1 since we're creating multiple orders
+                        choices: {
+                          create: Object.entries(menuSelections[selection.menuItemId].options).map(([optionId, choiceArrays]) => ({
                             optionId,
-                            selectedChoiceId: choices[0], // Take the first choice for each option
+                            selectedChoiceId: choiceArrays[index]?.[0] || choiceArrays[0][0], // Use index-specific choice if available, fallback to first choice
                           }))
-                        ),
-                      },
-                    })),
+                        },
+                      }))
+                    }),
                   }
                 : undefined,
           },
@@ -258,18 +288,19 @@ export async function POST(request: NextRequest) {
         orders:
           validMenuSelections.length > 0
             ? {
-                create: validMenuSelections.map((selection) => ({
-                  menuItemId: selection.menuItemId,
-                  quantity: selection.quantity,
-                  choices: {
-                    create: Object.entries(menuSelections[selection.menuItemId].options).flatMap(([optionId, choiceArrays]) =>
-                      choiceArrays.map(choices => ({
+                create: validMenuSelections.flatMap((selection) => {
+                  // Create separate orders for each quantity to handle different choices
+                  return Array.from({ length: selection.quantity }).map((_, index) => ({
+                    menuItemId: selection.menuItemId,
+                    quantity: 1, // Each order has quantity 1 since we're creating multiple orders
+                    choices: {
+                      create: Object.entries(menuSelections[selection.menuItemId].options).map(([optionId, choiceArrays]) => ({
                         optionId,
-                        selectedChoiceId: choices[0], // Take the first choice for each option
+                        selectedChoiceId: choiceArrays[index]?.[0] || choiceArrays[0][0], // Use index-specific choice if available, fallback to first choice
                       }))
-                    ),
-                  },
-                })),
+                    },
+                  }))
+                }),
               }
             : undefined,
       },

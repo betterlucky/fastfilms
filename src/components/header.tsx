@@ -83,6 +83,13 @@ export function Header() {
               <div className="size-8 animate-pulse rounded-full bg-gray-200" />
             ) : session ? (
               <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/profile')}
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Profile
+                </Button>
                 <span className="text-sm text-gray-600">
                   {session.user?.email}
                 </span>

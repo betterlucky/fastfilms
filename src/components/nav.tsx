@@ -62,16 +62,29 @@ export function Nav() {
               </Button>
 
               {status === 'authenticated' && (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    router.push('/tickets')
-                    setIsOpen(false)
-                  }}
-                  className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                >
-                  My Tickets
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      router.push('/tickets')
+                      setIsOpen(false)
+                    }}
+                    className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    My Tickets
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      router.push('/profile')
+                      setIsOpen(false)
+                    }}
+                    className="flex w-full items-center rounded-md p-3 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    Profile
+                  </Button>
+                </>
               )}
 
               {isAdmin && (
@@ -134,13 +147,23 @@ export function Nav() {
                 Campaigns
               </Button>
               {status === 'authenticated' && (
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push('/tickets')}
-                  className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                >
-                  My Tickets
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push('/tickets')}
+                    className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    My Tickets
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push('/profile')}
+                    className="text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    Profile
+                  </Button>
+                </>
               )}
               {isAdmin && (
                 <Button
