@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -65,12 +65,12 @@ export default function UserComments() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest')
   const { toast } = useToast()
 
-  const fetchComments = async (pageNum: number) => {
+  const fetchComments = useCallback(async (pageNum: number) => {
     try {
       const response = await fetch(`/api/user/comments?page=${pageNum}&sort=${sortOrder}`)
       if (!response.ok) throw new Error('Failed to fetch comments')
       const data = await response.json()
-      setComments(pageNum === 1 ? data.comments : [...comments, ...data.comments])
+      setComments(prevComments => pageNum === 1 ? data.comments : [...prevComments, ...data.comments])
       setPagination(data.pagination)
     } catch (err) {
       setError('Failed to load comments')
@@ -78,16 +78,16 @@ export default function UserComments() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [sortOrder])
 
   useEffect(() => {
     setPage(1)
     fetchComments(1)
-  }, [sortOrder])
+  }, [sortOrder, fetchComments])
 
   useEffect(() => {
     fetchComments(page)
-  }, [page])
+  }, [page, fetchComments])
 
   const handleEdit = (comment: UserComment) => {
     setEditingCommentId(comment.id)
