@@ -282,33 +282,29 @@ export async function generatePreordersPDF(data: PreorderData) {
   yPos += 15
 
   // Create summary of all choices
-  interface ChoiceSummary {
-    [choiceName: string]: number
-  }
-  
-  const choiceSummary: ChoiceSummary = {}
+  const choiceSummary: Record<string, number> = {}
 
   // Process all orders and collect choices
   data.orders.forEach(order => {
     if (order.menuItem.category?.toLowerCase() === 'combo') {
-      // For combo items, add each component separately
-      const baseItem = `${order.menuItem.name}`
-      choiceSummary[baseItem] = (choiceSummary[baseItem] || 0) + order.quantity
-
-      // Group choices by option type to avoid duplicates
-      const choicesByOption: Record<string, string> = {}
+      // For combo items, process each choice individually
       order.choices.forEach(choice => {
-        if (choice.selectedChoice.name.toLowerCase() !== 'no thanks') {
-          choicesByOption[choice.option.name] = choice.selectedChoice.name
+        const choiceName = choice.selectedChoice.name
+        // Skip "No thanks" choices
+        if (choiceName.toLowerCase() === 'no thanks') {
+          return
+        }
+        // For choices that are part of the base combo (like Crunchy Crisps), 
+        // multiply by order quantity
+        if (choice.option.name === 'Crunchy Crisps') {
+          choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + order.quantity
+        } else {
+          // For add-ons and drinks, only count once per selection
+          choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + 1
         }
       })
-
-      // Add each unique choice
-      Object.values(choicesByOption).forEach(choiceName => {
-        choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + order.quantity
-      })
     } else {
-      // For non-combo items, just add the base item
+      // For non-combo items, add with order quantity
       const itemName = order.menuItem.name
       choiceSummary[itemName] = (choiceSummary[itemName] || 0) + order.quantity
     }
@@ -434,8 +430,10 @@ export async function generatePreordersPDF(data: PreorderData) {
         Object.entries(choices)
           .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
           .forEach(([choice, count]) => {
-            // Always use the full order quantity for each choice in a combo
-            const displayQuantity = details.quantity
+            // For base combo items (Crunchy Crisps), use full quantity
+            // For add-ons and drinks, use individual quantities
+            const displayQuantity = optionName === 'Crunchy Crisps' ? 
+              details.quantity : 1
             const choiceText = `${displayQuantity}x ${choice}`
             doc.text(choiceText, MARGIN + 15, yPos)
             yPos += 6
