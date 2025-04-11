@@ -99,6 +99,8 @@ export function generateTicketConfirmationEmail(data: {
 
   // Format date and time
   const date = new Date(screeningDate)
+  // Adjust for UK timezone (add one hour to match campaign listing)
+  date.setHours(date.getHours() + 1)
   const formattedDate = date.toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',

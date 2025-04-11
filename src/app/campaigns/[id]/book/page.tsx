@@ -40,24 +40,21 @@ export default async function BookPage({ params }: { params: { id: string } }) {
     redirect(`/login?callbackUrl=/campaigns/${params.id}/book`)
   }
 
-  const formattedDate = new Date(campaign.screeningDate).toLocaleDateString(
-    'en-GB',
-    {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }
-  )
+  const screeningDate = new Date(campaign.screeningDate)
+  // Adjust for UK timezone (add one hour to match campaign listing)
+  screeningDate.setHours(screeningDate.getHours() + 1)
+  const formattedDate = screeningDate.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 
-  const formattedTime = new Date(campaign.screeningDate).toLocaleTimeString(
-    'en-GB',
-    {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }
-  )
+  const formattedTime = screeningDate.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
 
   // Transform menu items to match the expected format
   const formattedMenuItems = campaign.menuItems.map(({ menuItem }) => ({

@@ -167,6 +167,8 @@ export default function TicketsPage() {
         <div className="mt-16 space-y-8">
           {Object.entries(groupedTickets).map(([key, ticket]) => {
             const screeningDate = new Date(ticket.screeningDate)
+            // Adjust for UK timezone (add one hour to match campaign listing)
+            screeningDate.setHours(screeningDate.getHours() + 1)
             const formattedDate = screeningDate.toLocaleDateString('en-GB', {
               weekday: 'long',
               day: 'numeric',

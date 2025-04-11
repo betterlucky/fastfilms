@@ -69,15 +69,20 @@ export default function CampaignDetails({
   charities,
   venueMenuItems,
 }: CampaignDetailsProps) {
-  const formattedDate = new Date(campaign.screeningDate).toLocaleDateString(
-    'en-GB',
-    {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }
-  )
+  const screeningDate = new Date(campaign.screeningDate)
+  // Adjust for UK timezone (add one hour to match campaign listing)
+  screeningDate.setHours(screeningDate.getHours() + 1)
+  const formattedDate = screeningDate.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+  const formattedTime = screeningDate.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
 
   const formattedDeadlineDate = new Date(
     campaign.deadlineDate
@@ -174,13 +179,7 @@ export default function CampaignDetails({
                           <CalendarIcon className="mr-2 size-4" />
                           <span>
                             Screening:{' '}
-                            {new Date(
-                              campaign.screeningDate
-                            ).toLocaleDateString('en-GB', {
-                              weekday: 'long',
-                              day: 'numeric',
-                              month: 'long',
-                            })}
+                            {formattedDate} at {formattedTime}
                           </span>
                         </div>
                         <div className="flex items-center text-gray-500">
@@ -247,11 +246,7 @@ export default function CampaignDetails({
                     <div>
                       <dt className="text-gray-500">Screening Date</dt>
                       <dd>
-                        {formattedDate} at {new Date(campaign.screeningDate).toLocaleTimeString('en-GB', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false
-                        })}
+                        {formattedDate} at {formattedTime}
                       </dd>
                     </div>
                     <div>

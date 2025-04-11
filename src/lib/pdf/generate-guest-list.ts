@@ -135,14 +135,17 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       
       // Two column layout for campaign details
       doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
-      doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
+      const screeningDate = new Date(data.campaign.screeningDate)
+      // Adjust for UK timezone (add one hour to match campaign listing)
+      screeningDate.setHours(screeningDate.getHours() + 1)
+      doc.text(`Date: ${screeningDate.toLocaleDateString('en-GB', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
         year: 'numeric',
       })}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
       yPos += 8
-      doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
+      doc.text(`Time: ${screeningDate.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
@@ -257,14 +260,17 @@ export async function generatePreordersPDF(data: PreorderData) {
   
   // Two column layout for campaign details
   doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
-  doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
+  const screeningDate = new Date(data.campaign.screeningDate)
+  // Adjust for UK timezone (add one hour to match campaign listing)
+  screeningDate.setHours(screeningDate.getHours() + 1)
+  doc.text(`Date: ${screeningDate.toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   })}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
   yPos += 8
-  doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
+  doc.text(`Time: ${screeningDate.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
@@ -284,15 +290,21 @@ export async function generatePreordersPDF(data: PreorderData) {
 
   // Process all orders and collect choices
   data.orders.forEach(order => {
-    // For combo items, handle all items with proper quantities
     if (order.menuItem.category?.toLowerCase() === 'combo') {
+      // For combo items, add each component separately
+      const baseItem = `${order.menuItem.name}`
+      choiceSummary[baseItem] = (choiceSummary[baseItem] || 0) + order.quantity
+
+      // Group choices by option type to avoid duplicates
+      const choicesByOption: Record<string, string> = {}
       order.choices.forEach(choice => {
-        const choiceName = choice.selectedChoice.name
-        // Skip "No thanks" choices
-        if (choiceName.toLowerCase() === 'no thanks') {
-          return
+        if (choice.selectedChoice.name.toLowerCase() !== 'no thanks') {
+          choicesByOption[choice.option.name] = choice.selectedChoice.name
         }
-        // Add each choice with the order quantity
+      })
+
+      // Add each unique choice
+      Object.values(choicesByOption).forEach(choiceName => {
         choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + order.quantity
       })
     } else {
@@ -374,18 +386,20 @@ export async function generatePreordersPDF(data: PreorderData) {
       acc[key].quantity += order.quantity
 
       // Process choices
-      order.choices.forEach(choice => {
-        const optionName = choice.option.name
-        const choiceName = choice.selectedChoice.name
-        
-        if (!acc[key].choices[optionName]) {
-          acc[key].choices[optionName] = {}
-        }
-        if (!acc[key].choices[optionName][choiceName]) {
-          acc[key].choices[optionName][choiceName] = 0
-        }
-        acc[key].choices[optionName][choiceName] += 1
-      })
+      if (order.menuItem.category?.toLowerCase() === 'combo') {
+        // Group choices by option type to avoid duplicates
+        order.choices.forEach(choice => {
+          const optionName = choice.option.name
+          const choiceName = choice.selectedChoice.name
+          
+          if (choiceName.toLowerCase() !== 'no thanks') {
+            if (!acc[key].choices[optionName]) {
+              acc[key].choices[optionName] = {}
+            }
+            acc[key].choices[optionName][choiceName] = order.quantity
+          }
+        })
+      }
       
       return acc
     }, {} as Record<string, {
