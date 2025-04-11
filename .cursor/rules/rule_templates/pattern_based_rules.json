@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "rule_templates": {
+    "error_patterns": {
+      "common_errors": {
+        "pattern": "error_message",
+        "solution": "fix_implementation",
+        "prevention": "rule_definition"
+      }
+    },
+    "code_patterns": {
+      "repeated_patterns": {
+        "detection": "regex_pattern",
+        "suggestion": "best_practice",
+        "auto_fix": "transformation_rule"
+      }
+    },
+    "performance_patterns": {
+      "bottlenecks": {
+        "detection": "performance_metrics",
+        "optimization": "improvement_suggestion",
+        "rule": "enforcement_guidelines"
+      }
+    }
+  }
+} 

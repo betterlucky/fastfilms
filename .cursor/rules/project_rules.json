@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "rules": {
+    "code_style": {
+      "indentation": 2,
+      "max_line_length": 100,
+      "preferred_quote": "double"
+    },
+    "naming_conventions": {
+      "components": "PascalCase",
+      "functions": "camelCase",
+      "variables": "camelCase",
+      "constants": "UPPER_SNAKE_CASE"
+    },
+    "file_organization": {
+      "component_structure": [
+        "imports",
+        "types",
+        "constants",
+        "hooks",
+        "component"
+      ],
+      "preferred_file_extensions": {
+        "react_components": ".tsx",
+        "types": ".ts",
+        "styles": ".module.css"
+      }
+    },
+    "documentation": {
+      "require_component_docs": true,
+      "require_function_docs": true,
+      "require_type_docs": true
+    },
+    "testing": {
+      "require_tests_for": [
+        "components",
+        "hooks",
+        "utilities"
+      ],
+      "test_file_naming": "{filename}.test.tsx"
+    }
+  }
+} 

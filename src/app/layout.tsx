@@ -43,14 +43,28 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://fastfilms.co.uk'),
+  metadataBase: new URL('https://fastfilms.vercel.app'),
   openGraph: {
     title: 'FastFilms - Community Cinema Crowdfunding',
     description: 'Support and attend community film screenings across Cornwall',
-    url: 'https://fastfilms.co.uk',
+    url: 'https://fastfilms.vercel.app',
     siteName: 'FastFilms',
     locale: 'en_GB',
     type: 'website',
+    images: [
+      {
+        url: 'https://fastfilms.vercel.app/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Fw500%2FgqY0ITBgT7A82poL9jv851qdnIb.jpg&w=3840&q=75',
+        width: 1200,
+        height: 630,
+        alt: 'FastFilms Community Cinema',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FastFilms - Community Cinema Crowdfunding',
+    description: 'Support and attend community film screenings across Cornwall',
+    images: ['https://fastfilms.vercel.app/_next/image?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Fw500%2FgqY0ITBgT7A82poL9jv851qdnIb.jpg&w=3840&q=75'],
   },
 }
 

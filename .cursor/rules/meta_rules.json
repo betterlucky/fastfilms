@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "meta_rules": {
+    "rule_awareness": {
+      "name": "system_rule_awareness",
+      "description": "Ensure the AI assistant is aware of and can use the rule generation system",
+      "triggers": [
+        "when_noticing_code_patterns",
+        "when_fixing_issues",
+        "when_suggesting_improvements"
+      ],
+      "actions": [
+        "capture_issue_pattern",
+        "generate_new_rule",
+        "apply_existing_rules"
+      ],
+      "implementation": {
+        "capture_issue": {
+          "code_template": "capturer.captureIssue(code, context, problem, solution)",
+          "required_fields": [
+            "code_snippet",
+            "context_description",
+            "problem_statement",
+            "solution_guidance"
+          ]
+        },
+        "rule_generation": {
+          "confidence_threshold": 0.7,
+          "frequency_threshold": 2,
+          "auto_fix_criteria": [
+            "has_clear_solution",
+            "is_pattern_based",
+            "has_consistent_fix"
+          ]
+        },
+        "rule_application": {
+          "check_existing_rules": true,
+          "suggest_auto_fixes": true,
+          "provide_manual_guidance": true
+        }
+      },
+      "communication": {
+        "when_capturing": "I notice a pattern that might benefit from a rule. Let me capture this for future reference.",
+        "when_generating": "I've seen this pattern multiple times. I'll generate a new rule to help prevent this issue.",
+        "when_applying": "I notice this matches one of our existing rules. Let me help you fix this according to our best practices."
+      }
+    }
+  }
+} 
