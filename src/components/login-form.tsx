@@ -5,14 +5,18 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
 export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const callbackUrl = searchParams.get('callbackUrl') || '/campaigns'
   const justRegistered = searchParams.get('registered')
@@ -24,29 +28,25 @@ export default function LoginForm() {
     setIsLoading(true)
 
     try {
-      const formData = new FormData(event.currentTarget)
-      const response = await signIn('credentials', {
-        email: formData.get('email'),
-        password: formData.get('password'),
+      const result = await signIn('credentials', {
+        email,
+        password,
         remember: rememberMe,
         redirect: false,
         callbackUrl,
       })
 
-      if (!response?.ok) {
-        if (response?.error === 'Please verify your email before logging in') {
+      if (result?.error) {
+        if (result.error === 'Please verify your email before logging in') {
           setError(
             'Please check your email for a verification link before logging in.'
           )
-        } else if (response?.error === 'Invalid credentials') {
-          setError('Invalid email or password')
         } else {
-          setError(response?.error || 'Something went wrong. Please try again.')
+          setError('Invalid email or password')
         }
-        return
+      } else {
+        window.location.href = callbackUrl
       }
-
-      window.location.href = callbackUrl
     } catch (err) {
       console.error('Login error:', err)
       setError('Something went wrong. Please try again.')
@@ -109,6 +109,8 @@ export default function LoginForm() {
                 type="email"
                 autoComplete="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="block w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
@@ -121,25 +123,24 @@ export default function LoginForm() {
             >
               Password
             </label>
-            <div className="mt-2 relative">
-              <input
+            <div className="relative">
+              <Input
                 id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
-                className="block w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
                 {showPassword ? (
-                  <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                  <FaEyeSlash className="size-4" />
                 ) : (
-                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                  <FaEye className="size-4" />
                 )}
               </button>
             </div>

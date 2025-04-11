@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { PlusIcon, BuildingIcon } from 'lucide-react'
+import { FaPlus, FaBuilding } from 'react-icons/fa'
 import {
   Card,
   CardContent,
@@ -28,7 +28,7 @@ export default async function CharitiesPage() {
         <h1 className="text-3xl font-bold">Charities</h1>
         <Button asChild>
           <Link href="/admin/charities/new">
-            <PlusIcon className="mr-2 size-4" />
+            <FaPlus className="mr-2 size-4" />
             New Charity
           </Link>
         </Button>
@@ -47,7 +47,7 @@ export default async function CharitiesPage() {
                 />
               ) : (
                 <div className="flex h-full items-center justify-center bg-gray-100">
-                  <BuildingIcon className="size-12 text-gray-400" />
+                  <FaBuilding className="size-12 text-gray-400" />
                 </div>
               )}
             </div>
@@ -56,9 +56,9 @@ export default async function CharitiesPage() {
               <CardDescription>{charity.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground flex items-center space-x-2 text-sm">
-                <BuildingIcon className="size-4" />
-                <span>Charity</span>
+              <div className="flex items-center gap-2">
+                <FaBuilding className="size-4 text-gray-500" />
+                <span className="text-sm text-gray-500">{charity.name}</span>
               </div>
             </CardContent>
             <CardFooter>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { MailIcon } from 'lucide-react'
+import { FaEnvelope } from 'react-icons/fa'
 
 interface ResendConfirmationButtonProps {
   ticketIds: string[]
@@ -60,7 +60,7 @@ export function ResendConfirmationButton({
       disabled={isLoading}
       className={className}
     >
-      <MailIcon className="mr-2 size-4" />
+      <FaEnvelope className="mr-2 size-4" />
       {isLoading ? 'Sending...' : 'Resend Confirmation'}
     </Button>
   )

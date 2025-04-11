@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Menu, X } from 'lucide-react'
+import { FaBars, FaTimes } from 'react-icons/fa'
 import { useSession, signOut } from 'next-auth/react'
 
 export function Nav() {
@@ -37,10 +37,15 @@ export function Nav() {
           </Button>
           <Button
             variant="ghost"
+            size="icon"
+            className="md:hidden"
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2"
           >
-            {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            {isOpen ? (
+              <FaTimes className="size-6" />
+            ) : (
+              <FaBars className="size-6" />
+            )}
           </Button>
         </div>
       </div>

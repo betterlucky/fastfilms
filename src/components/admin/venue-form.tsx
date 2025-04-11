@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { X } from 'lucide-react'
+import { FaTimes } from 'react-icons/fa'
 
 const venueSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -220,13 +220,14 @@ export function VenueForm({ initialData, venueId }: VenueFormProps) {
                           className="flex items-center gap-1 rounded bg-gray-100 px-2 py-1"
                         >
                           <span className="text-sm">{email}</span>
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleRemoveEmail(email)}
-                            className="text-gray-500 hover:text-gray-700"
+                            className="text-red-500 hover:text-red-700"
                           >
-                            <X className="size-4" />
-                          </button>
+                            <FaTimes className="size-4" />
+                          </Button>
                         </div>
                       ))}
                     </div>

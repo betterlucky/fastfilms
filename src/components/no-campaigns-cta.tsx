@@ -10,10 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import Link from 'next/link'
-import { Film, Users, Ticket } from 'lucide-react'
+import { FaFilm, FaUsers, FaTicketAlt, FaCalendarAlt, FaPlus } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
-import { CalendarIcon, UsersIcon, FilmIcon } from 'lucide-react'
-import { PlusIcon } from 'lucide-react'
 
 export function NoCampaignsCTA() {
   const router = useRouter()
@@ -145,7 +143,7 @@ export function NoCampaignsCTA() {
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="flex items-center gap-x-3">
               <div className="flex items-center justify-center rounded-lg bg-white/10 p-2 ring-1 ring-white/20">
-                <CalendarIcon className="size-6 text-white" />
+                <FaCalendarAlt className="size-6 text-white" />
               </div>
               <h3 className="text-sm font-semibold leading-6 text-white">
                 Schedule screenings
@@ -158,7 +156,7 @@ export function NoCampaignsCTA() {
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="flex items-center gap-x-3">
               <div className="flex items-center justify-center rounded-lg bg-white/10 p-2 ring-1 ring-white/20">
-                <UsersIcon className="size-6 text-white" />
+                <FaUsers className="size-6 text-white" />
               </div>
               <h3 className="text-sm font-semibold leading-6 text-white">
                 Invite friends
@@ -171,7 +169,7 @@ export function NoCampaignsCTA() {
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="flex items-center gap-x-3">
               <div className="flex items-center justify-center rounded-lg bg-white/10 p-2 ring-1 ring-white/20">
-                <FilmIcon className="size-6 text-white" />
+                <FaFilm className="size-6 text-white" />
               </div>
               <h3 className="text-sm font-semibold leading-6 text-white">
                 Watch together
@@ -186,11 +184,49 @@ export function NoCampaignsCTA() {
       </div>
 
       <div className="text-center">
-        <FilmIcon className="mx-auto size-12 text-gray-400" />
+        <FaFilm className="mx-auto size-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-semibold text-gray-900">
           No campaigns
         </h3>
 
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="flex flex-col items-center space-y-2 rounded-lg border p-4">
+          <FaFilm className="size-8 text-blue-500" />
+          <h3 className="text-lg font-semibold">Browse Movies</h3>
+          <p className="text-center text-sm text-gray-500">
+            Discover upcoming screenings and find your next favorite film
+          </p>
+        </div>
+        <div className="flex flex-col items-center space-y-2 rounded-lg border p-4">
+          <FaUsers className="size-8 text-blue-500" />
+          <h3 className="text-lg font-semibold">Join the Community</h3>
+          <p className="text-center text-sm text-gray-500">
+            Connect with other film enthusiasts and share your passion
+          </p>
+        </div>
+        <div className="flex flex-col items-center space-y-2 rounded-lg border p-4">
+          <FaTicketAlt className="size-8 text-blue-500" />
+          <h3 className="text-lg font-semibold">Get Tickets</h3>
+          <p className="text-center text-sm text-gray-500">
+            Secure your spot at exclusive screenings and events
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-8 flex flex-col items-center space-y-4">
+        <FaCalendarAlt className="size-12 text-blue-500" />
+        <h2 className="text-2xl font-bold">Ready to Get Started?</h2>
+        <p className="text-center text-gray-500">
+          Join us for an unforgettable cinematic experience
+        </p>
+        <Button asChild>
+          <Link href="/campaigns">
+            <FaPlus className="mr-2 size-4" />
+            Browse Campaigns
+          </Link>
+        </Button>
       </div>
     </div>
   )

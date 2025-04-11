@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { CalendarIcon, Clock, Users } from 'lucide-react'
+import { FaCalendarAlt, FaClock, FaUsers } from 'react-icons/fa'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { getCampaigns } from '@/lib/campaigns'
 import { Progress } from '@/components/ui/progress'
@@ -66,8 +66,8 @@ export default async function CampaignsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <CalendarIcon className="mr-2 size-4" />
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaCalendarAlt className="size-4" />
                       <span>
                         Screening:{' '}
                         {new Date(campaign.screeningDate).toLocaleDateString(
@@ -80,8 +80,8 @@ export default async function CampaignsPage() {
                         )}
                       </span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Clock className="mr-2 size-4" />
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaClock className="size-4" />
                       <span>
                         Deadline:{' '}
                         {new Date(campaign.deadlineDate).toLocaleDateString(
@@ -95,8 +95,8 @@ export default async function CampaignsPage() {
                         ({progress.timeLeft.days} days left)
                       </span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Users className="mr-2 size-4" />
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaUsers className="size-4" />
                       {progress.ticketsRemaining !== null ? (
                         <span>
                           {progress.ticketsRemaining} tickets remaining
