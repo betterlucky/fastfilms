@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 import { formatPrice } from './utils'
-import { settings } from '@/config/settings'
+import { settings } from '@/lib/settings'
 
 // Create a transporter using Gmail SMTP with secure settings
 const transporter = nodemailer.createTransport({

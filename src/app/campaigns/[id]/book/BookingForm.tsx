@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import { settings } from '@/config/settings'
+import { settings } from '@/lib/settings'
 import { Card } from '@/components/ui/card'
 import {
   Select,

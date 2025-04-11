@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 import { stripe, formatAmountForStripe } from '@/lib/stripe'
 import { sendEmail } from '@/lib/email'
 import { generateTicketConfirmationEmail } from '@/lib/email'
-import { settings } from '@/config/settings'
+import { settings } from '@/lib/settings'
 import { Prisma, PurchaseStatus } from '@prisma/client'
 import type { PrismaClient } from '@prisma/client'
 

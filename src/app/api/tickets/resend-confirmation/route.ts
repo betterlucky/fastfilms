@@ -5,7 +5,7 @@ import { generateTicketConfirmationEmail } from '@/lib/email'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { EmailData } from '@/lib/types'
-import { settings } from '@/config/settings'
+import { settings } from '@/lib/settings'
 
 // Rate limiting: 1 email per 5 minutes
 const RESEND_COOLDOWN = 5 * 60 * 1000 // 5 minutes in milliseconds

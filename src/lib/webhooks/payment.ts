@@ -1,4 +1,4 @@
-import { settings } from '@/config/settings'
+import { settings } from '@/lib/settings'
 import {
   PrismaClient,
   Prisma,
