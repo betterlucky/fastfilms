@@ -272,25 +272,9 @@ function generateConfirmationEmail(
 
   const ticketList = tickets
     .map((ticket) => {
-      const ordersList = ticket.orders
-        .map((order) => {
-          const choices = order.choices
-            .map((choice) => `${choice.selectedChoice} (${choice.optionId})`)
-            .join(', ')
-
-          return `
-            <li>
-              ${order.menuItem.name}${choices ? ` - ${choices}` : ''}
-              (${formatPrice(order.menuItem.price)})
-            </li>
-          `
-        })
-        .join('')
-
       return `
         <div style="margin-bottom: 20px;">
           <h3>Ticket #${ticket.id}</h3>
-          ${ordersList ? `<h4>Orders:</h4><ul>${ordersList}</ul>` : ''}
         </div>
       `
     })
