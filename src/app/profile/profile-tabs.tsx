@@ -13,6 +13,28 @@ import { TicketIcon } from 'lucide-react'
 import OrderHistory from '@/components/OrderHistory'
 import UserComments from '@/components/UserComments'
 import { AvatarWithFallback } from '@/components/ui/avatar-with-fallback'
+import { cn } from '@/lib/utils'
+
+// Color palette for avatars
+const COLORS = [
+  'bg-red-500',
+  'bg-orange-500',
+  'bg-amber-500',
+  'bg-yellow-500',
+  'bg-lime-500',
+  'bg-green-500',
+  'bg-emerald-500',
+  'bg-teal-500',
+  'bg-cyan-500',
+  'bg-sky-500',
+  'bg-blue-500',
+  'bg-indigo-500',
+  'bg-violet-500',
+  'bg-purple-500',
+  'bg-fuchsia-500',
+  'bg-pink-500',
+  'bg-rose-500',
+]
 
 interface User {
   id: string
@@ -20,6 +42,7 @@ interface User {
   email?: string | null
   role?: string
   image?: string | null
+  avatarColor?: string | null
 }
 
 interface ProfileTabsProps {
@@ -31,16 +54,17 @@ export default function ProfileTabs({ user }: ProfileTabsProps) {
   const { update } = useSession()
   const router = useRouter()
 
-  const handleNameUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleProfileUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     const name = formData.get('name') as string
+    const avatarColor = formData.get('avatarColor') as string
 
     try {
       const response = await fetch('/api/user/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, avatarColor }),
       })
 
       if (!response.ok) throw new Error('Failed to update profile')
@@ -69,6 +93,7 @@ export default function ProfileTabs({ user }: ProfileTabsProps) {
                 src={user.image}
                 name={user.name}
                 email={user.email}
+                avatarColor={user.avatarColor}
               />
               <div>
                 <h2 className="text-xl font-semibold">{user.name || 'Anonymous'}</h2>
@@ -79,7 +104,7 @@ export default function ProfileTabs({ user }: ProfileTabsProps) {
               </div>
             </div>
 
-            <form onSubmit={handleNameUpdate} className="mt-6 space-y-4">
+            <form onSubmit={handleProfileUpdate} className="mt-6 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Display Name</Label>
                 <Input
@@ -89,6 +114,35 @@ export default function ProfileTabs({ user }: ProfileTabsProps) {
                   placeholder="Enter your display name"
                 />
               </div>
+              
+              <div className="space-y-2">
+                <Label>Avatar Color</Label>
+                <div className="grid grid-cols-8 gap-2">
+                  {COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => {
+                        const form = document.querySelector('form')
+                        if (form) {
+                          const input = form.querySelector('input[name="avatarColor"]') as HTMLInputElement
+                          if (input) {
+                            input.value = color
+                            form.requestSubmit()
+                          }
+                        }
+                      }}
+                      className={cn(
+                        'size-8 rounded-full transition-transform hover:scale-110',
+                        color,
+                        user.avatarColor === color && 'ring-2 ring-offset-2 ring-gray-900'
+                      )}
+                    />
+                  ))}
+                </div>
+                <input type="hidden" name="avatarColor" defaultValue={user.avatarColor || ''} />
+              </div>
+
               <Button type="submit">Update Profile</Button>
             </form>
           </CardContent>

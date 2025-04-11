@@ -26,6 +26,7 @@ interface AvatarWithFallbackProps {
   src?: string | null
   name?: string | null
   email?: string | null
+  avatarColor?: string | null
   className?: string
 }
 
@@ -33,6 +34,7 @@ export function AvatarWithFallback({
   src,
   name,
   email,
+  avatarColor,
   className,
 }: AvatarWithFallbackProps) {
   // Get initials from name or email
@@ -50,8 +52,9 @@ export function AvatarWithFallback({
     return 'A'
   }
 
-  // Generate consistent color based on name/email
+  // Generate consistent color based on name/email if no color is set
   const getColor = () => {
+    if (avatarColor) return avatarColor
     const str = name || email || 'A'
     let hash = 0
     for (let i = 0; i < str.length; i++) {
@@ -66,7 +69,7 @@ export function AvatarWithFallback({
   return (
     <Avatar className={cn('h-20 w-20', className)}>
       {src && <AvatarImage src={src} alt={name || 'User avatar'} />}
-      <AvatarFallback className={cn(color, 'text-white font-semibold')}>
+      <AvatarFallback className={cn(color, 'text-white font-semibold text-2xl')}>
         {initials.toUpperCase()}
       </AvatarFallback>
     </Avatar>

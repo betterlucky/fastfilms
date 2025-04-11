@@ -21,6 +21,7 @@ export default async function ProfilePage() {
       email: true,
       role: true,
       image: true,
+      avatarColor: true,
     },
   })
 

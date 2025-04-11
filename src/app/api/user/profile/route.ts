@@ -1,35 +1,25 @@
-import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export async function PATCH(request: Request) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-    const { name } = await request.json()
-    if (!name?.trim()) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      )
-    }
+  try {
+    const { name, avatarColor } = await request.json()
 
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: { name: name.trim() },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        role: true,
+      data: {
+        ...(name && { name }),
+        ...(avatarColor && { avatarColor }),
       },
     })
 

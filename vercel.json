@@ -2,6 +2,7 @@
   "version": 2,
   "framework": "nextjs",
   "regions": ["lhr1"],
+  "buildCommand": "npm run vercel-build",
   "env": {
     "NEXTAUTH_URL": "https://fastfilms-staging.vercel.app"
   },
