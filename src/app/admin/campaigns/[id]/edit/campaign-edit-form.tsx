@@ -71,6 +71,7 @@ export function CampaignEditForm({
     description: z.string().min(1),
     movieTitle: z.string().min(1),
     screeningDate: z.date(),
+    deadlineDate: z.date(),
     ticketCap: z.number().min(0),
     fundingTarget: z.number().min(0),
     status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED', 'FAILED']),
@@ -84,6 +85,7 @@ export function CampaignEditForm({
       description: campaign.description,
       movieTitle: campaign.movieTitle,
       screeningDate: new Date(campaign.screeningDate),
+      deadlineDate: new Date(campaign.deadlineDate),
       ticketCap: campaign.ticketCap,
       fundingTarget: Number(campaign.fundingTarget),
       status: campaign.status as 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'FAILED',
@@ -106,6 +108,8 @@ export function CampaignEditForm({
         },
         body: JSON.stringify({
           ...values,
+          screeningDate: values.screeningDate.toISOString(),
+          deadlineDate: values.deadlineDate.toISOString(),
           venueId: selectedVenue,
           screenId: selectedScreen === 'unassign' ? null : selectedScreen || null,
           charityId: campaign.charityId || 'none',
@@ -282,6 +286,28 @@ export function CampaignEditForm({
                     timeIntervals={15}
                     className="w-full rounded-md border border-input bg-background px-3 py-2"
                     placeholderText="Select date and time"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="deadlineDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Campaign Deadline</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    selected={field.value}
+                    onChange={(date) => field.onChange(date)}
+                    showTimeSelect
+                    dateFormat="dd/MM/yyyy HH:mm"
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    placeholderText="Select deadline date and time"
                   />
                 </FormControl>
                 <FormMessage />

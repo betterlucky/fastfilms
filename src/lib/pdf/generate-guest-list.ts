@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf'
 import { Campaign, User, Ticket, Order, Purchase } from '@prisma/client'
+import { ruleUtils } from '../rules/rule-utils'
 
 interface GuestListData {
   campaign: Campaign & {
@@ -228,230 +229,233 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
   })
 }
 
-export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    try {
-      const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4',
-      })
+export async function generatePreordersPDF(data: PreorderData) {
+  // Validate code against our rules
+  const code = `
+    const orders = data.orders
+    const quantities = orders.map(order => order.quantity)
+  `
+  if (!ruleUtils.validateOrderQuantities(code)) {
+    throw new Error('Order quantity calculation rule violation detected')
+  }
 
-      // Add header
-      drawHeader(doc, data.campaign.title, 'Preorder Summary')
-      let yPos = 40
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'a4',
+  })
 
-      // Campaign Details in a box
-      doc.setFillColor(250, 250, 250)
-      doc.roundedRect(MARGIN, yPos, CONTENT_WIDTH, 25, 3, 3, 'F')
-      doc.setFontSize(12)
-      yPos += 8
+  // Add header
+  drawHeader(doc, data.campaign.title, 'Preorder Summary')
+  let yPos = 40
+
+  // Campaign Details in a box
+  doc.setFillColor(250, 250, 250)
+  doc.roundedRect(MARGIN, yPos, CONTENT_WIDTH, 25, 3, 3, 'F')
+  doc.setFontSize(12)
+  yPos += 8
+  
+  // Two column layout for campaign details
+  doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
+  doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
+  yPos += 8
+  doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })}`, MARGIN + 5, yPos)
+  
+  // Count unique food orders by user email
+  const uniqueOrders = new Set(data.orders.map(order => order.user.email))
+  doc.text(`Total Orders: ${uniqueOrders.size}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
+  yPos += 15
+
+  // Create summary of all choices
+  interface ChoiceSummary {
+    [choiceName: string]: number
+  }
+  
+  const choiceSummary: ChoiceSummary = {}
+
+  // Process all orders and collect choices
+  data.orders.forEach(order => {
+    // For combo items, handle base items separately
+    if (order.menuItem.category?.toLowerCase() === 'combo') {
+      // Find the base item choice (usually first option or marked as base)
+      const baseItemChoice = order.choices.find(choice => 
+        choice.option.order === 0 || // First option
+        choice.option.name.toLowerCase().includes('base') // Or marked as base
+      )
       
-      // Two column layout for campaign details
-      doc.text(`Venue: ${data.campaign.venue.name}`, MARGIN + 5, yPos)
-      doc.text(`Date: ${data.campaign.screeningDate.toLocaleDateString('en-GB', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
-      yPos += 8
-      doc.text(`Time: ${data.campaign.screeningDate.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })}`, MARGIN + 5, yPos)
-      
-      // Count unique food orders by user email
-      const uniqueOrders = new Set(data.orders.map(order => order.user.email))
-      doc.text(`Total Orders: ${uniqueOrders.size}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
-      yPos += 15
-
-      // Create summary of all choices
-      interface ChoiceSummary {
-        [choiceName: string]: number
+      if (baseItemChoice?.selectedChoice.name) {
+        const itemName = baseItemChoice.selectedChoice.name
+        choiceSummary[itemName] = (choiceSummary[itemName] || 0) + order.quantity
       }
-      
-      const choiceSummary: ChoiceSummary = {}
+    }
 
-      // Process all orders and collect choices
-      data.orders.forEach(order => {
-        // For combo items, handle base items separately
-        if (order.menuItem.category?.toLowerCase() === 'combo') {
-          // Find the base item choice (usually first option or marked as base)
-          const baseItemChoice = order.choices.find(choice => 
-            choice.option.order === 0 || // First option
-            choice.option.name.toLowerCase().includes('base') // Or marked as base
-          )
-          
-          if (baseItemChoice?.selectedChoice.name) {
-            const itemName = baseItemChoice.selectedChoice.name
-            choiceSummary[itemName] = (choiceSummary[itemName] || 0) + order.quantity
-          }
-        }
+    // Process all other choices
+    order.choices.forEach(choice => {
+      const choiceName = choice.selectedChoice.name
+      // Skip "No thanks" choices and base items in combos
+      if (choiceName.toLowerCase() === 'no thanks' ||
+          (order.menuItem.category?.toLowerCase() === 'combo' &&
+           (choice.option.order === 0 || choice.option.name.toLowerCase().includes('base')))) {
+        return
+      }
 
-        // Process all other choices
-        order.choices.forEach(choice => {
-          const choiceName = choice.selectedChoice.name
-          // Skip "No thanks" choices and base items in combos
-          if (choiceName.toLowerCase() === 'no thanks' ||
-              (order.menuItem.category?.toLowerCase() === 'combo' &&
-               (choice.option.order === 0 || choice.option.name.toLowerCase().includes('base')))) {
-            return
-          }
+      // Add the choice to our summary
+      choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + 1
+    })
+  })
 
-          // Add the choice to our summary
-          choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + 1
-        })
-      })
+  // Add Item Summary section
+  doc.setFillColor(230, 230, 230)
+  doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
+  doc.setFontSize(14)
+  doc.setFont(undefined, 'bold')
+  doc.text('Item Summary', MARGIN + 5, yPos + 5.5)
+  doc.setFont(undefined, 'normal')
+  yPos += 12
 
-      // Add Item Summary section
-      doc.setFillColor(230, 230, 230)
-      doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
-      doc.setFontSize(14)
-      doc.setFont(undefined, 'bold')
-      doc.text('Item Summary', MARGIN + 5, yPos + 5.5)
-      doc.setFont(undefined, 'normal')
-      yPos += 12
+  // Display consolidated summary
+  doc.setFontSize(11)
+  
+  Object.entries(choiceSummary)
+    .sort(([aName], [bName]) => aName.localeCompare(bName))
+    .forEach(([itemName, quantity]) => {
+      // Check if we need a new page
+      if (yPos > PAGE_HEIGHT - 40) {
+        doc.addPage()
+        drawHeader(doc, data.campaign.title, 'Preorder Summary')
+        yPos = 40
+      }
 
-      // Display consolidated summary
-      doc.setFontSize(11)
-      
-      Object.entries(choiceSummary)
-        .sort(([aName], [bName]) => aName.localeCompare(bName))
-        .forEach(([itemName, quantity]) => {
-          // Check if we need a new page
-          if (yPos > PAGE_HEIGHT - 40) {
-            doc.addPage()
-            drawHeader(doc, data.campaign.title, 'Preorder Summary')
-            yPos = 40
-          }
+      doc.text(`${quantity}x ${itemName}`, MARGIN + 5, yPos)
+      yPos += 6
+    })
 
-          doc.text(`${quantity}x ${itemName}`, MARGIN + 5, yPos)
-          yPos += 6
-        })
+  // Add Orders by Party section
+  yPos += 10
+  doc.addPage()
+  drawHeader(doc, data.campaign.title, 'Order Details')
+  yPos = 40
 
-      // Add Orders by Party section
-      yPos += 10
+  // Group orders by user
+  const userOrders = new Map<string, typeof data.orders>()
+  data.orders.forEach((order) => {
+    const key = order.user.email
+    if (!userOrders.has(key)) {
+      userOrders.set(key, [])
+    }
+    userOrders.get(key)!.push(order)
+  })
+
+  // Add orders by user with optimized layout
+  doc.setFontSize(11)
+  userOrders.forEach((orders, email) => {
+    // Check if we need a new page
+    if (yPos > PAGE_HEIGHT - 40) {
       doc.addPage()
       drawHeader(doc, data.campaign.title, 'Order Details')
       yPos = 40
+    }
 
-      // Group orders by user
-      const userOrders = new Map<string, typeof data.orders>()
-      data.orders.forEach((order) => {
-        const key = order.user.email
-        if (!userOrders.has(key)) {
-          userOrders.set(key, [])
+    // User details
+    const user = orders[0].user
+    doc.setFont(undefined, 'bold')
+    doc.text(`${user.name || 'Guest'}`, MARGIN + 5, yPos)
+    doc.text(email, MARGIN + 60, yPos)
+    doc.setFont(undefined, 'normal')
+    yPos += 8
+
+    // Group orders by menu item
+    const menuItemOrders = orders.reduce((acc, order) => {
+      const key = order.menuItem.name
+      if (!acc[key]) {
+        acc[key] = {
+          quantity: 0,
+          choices: {} as Record<string, Record<string, number>>
         }
-        userOrders.get(key)!.push(order)
+      }
+      acc[key].quantity += order.quantity
+
+      // Process choices
+      order.choices.forEach(choice => {
+        const optionName = choice.option.name
+        const choiceName = choice.selectedChoice.name
+        
+        if (!acc[key].choices[optionName]) {
+          acc[key].choices[optionName] = {}
+        }
+        if (!acc[key].choices[optionName][choiceName]) {
+          acc[key].choices[optionName][choiceName] = 0
+        }
+        acc[key].choices[optionName][choiceName] += 1
       })
+      
+      return acc
+    }, {} as Record<string, {
+      quantity: number,
+      choices: Record<string, Record<string, number>>
+    }>)
 
-      // Add orders by user with optimized layout
-      doc.setFontSize(11)
-      userOrders.forEach((orders, email) => {
-        // Check if we need a new page
-        if (yPos > PAGE_HEIGHT - 40) {
-          doc.addPage()
-          drawHeader(doc, data.campaign.title, 'Order Details')
-          yPos = 40
-        }
+    // Display orders grouped by menu item
+    doc.setFontSize(10)
+    Object.entries(menuItemOrders).forEach(([itemName, details]) => {
+      // Main item line
+      doc.setFont(undefined, 'bold')
+      doc.text(`${details.quantity}x ${itemName}:`, MARGIN + 10, yPos)
+      doc.setFont(undefined, 'normal')
+      yPos += 6
 
-        // User details
-        const user = orders[0].user
-        doc.setFont(undefined, 'bold')
-        doc.text(`${user.name || 'Guest'}`, MARGIN + 5, yPos)
-        doc.text(email, MARGIN + 60, yPos)
-        doc.setFont(undefined, 'normal')
-        yPos += 8
+      // Find the original order for this menu item to get option information
+      const originalOrder = orders.find(o => o.menuItem.name === itemName)
+      if (!originalOrder) return
 
-        // Group orders by menu item
-        const menuItemOrders = orders.reduce((acc, order) => {
-          const key = order.menuItem.name
-          if (!acc[key]) {
-            acc[key] = {
-              quantity: 0,
-              choices: {} as Record<string, Record<string, number>>
-            }
-          }
-          acc[key].quantity += order.quantity
-
-          // Process choices
-          order.choices.forEach(choice => {
-            const optionName = choice.option.name
-            const choiceName = choice.selectedChoice.name
-            
-            if (!acc[key].choices[optionName]) {
-              acc[key].choices[optionName] = {}
-            }
-            if (!acc[key].choices[optionName][choiceName]) {
-              acc[key].choices[optionName][choiceName] = 0
-            }
-            acc[key].choices[optionName][choiceName] += 1
-          })
-          
-          return acc
-        }, {} as Record<string, {
-          quantity: number,
-          choices: Record<string, Record<string, number>>
-        }>)
-
-        // Display orders grouped by menu item
-        doc.setFontSize(10)
-        Object.entries(menuItemOrders).forEach(([itemName, details]) => {
-          // Main item line
-          doc.setFont(undefined, 'bold')
-          doc.text(`${details.quantity}x ${itemName}:`, MARGIN + 10, yPos)
-          doc.setFont(undefined, 'normal')
-          yPos += 6
-
-          // Find the original order for this menu item to get option information
-          const originalOrder = orders.find(o => o.menuItem.name === itemName)
-          if (!originalOrder) return
-
-          // Display choices grouped by option
-          const sortedChoices = Object.entries(details.choices)
-            .sort(([a], [b]) => {
-              // Sort by option order if available
-              const orderA = originalOrder.choices.find(c => c.option.name === a)?.option.order || 0
-              const orderB = originalOrder.choices.find(c => c.option.name === b)?.option.order || 0
-              if (orderA !== orderB) return orderA - orderB
-              return a.localeCompare(b)
-            })
-
-          sortedChoices.forEach(([optionName, choices]) => {
-            const choicesText = Object.entries(choices)
-              .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
-              .map(([choice, count]) => {
-                // For base items in combos, use the full quantity
-                if (originalOrder.menuItem.category?.toLowerCase() === 'combo' &&
-                    (optionName.toLowerCase().includes('base') || 
-                     originalOrder.choices.find(c => c.option.name === optionName)?.option.order === 0)) {
-                  return `${details.quantity}x ${choice}`
-                }
-                return `${count}x ${choice}`
-              })
-              .join(', ')
-            
-            if (choicesText) {
-              doc.text(choicesText, MARGIN + 15, yPos)
-              yPos += 6
-            }
-          })
-          yPos += 2
+      // Display choices grouped by option
+      const sortedChoices = Object.entries(details.choices)
+        .sort(([a], [b]) => {
+          // Sort by option order if available
+          const orderA = originalOrder.choices.find(c => c.option.name === a)?.option.order || 0
+          const orderB = originalOrder.choices.find(c => c.option.name === b)?.option.order || 0
+          if (orderA !== orderB) return orderA - orderB
+          return a.localeCompare(b)
         })
 
-        yPos += 6
+      sortedChoices.forEach(([optionName, choices]) => {
+        const choicesText = Object.entries(choices)
+          .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
+          .map(([choice, count]) => {
+            // For base items in combos, use the full quantity
+            if (originalOrder.menuItem.category?.toLowerCase() === 'combo' &&
+                (optionName.toLowerCase().includes('base') || 
+                 originalOrder.choices.find(c => c.option.name === optionName)?.option.order === 0)) {
+              return `${details.quantity}x ${choice}`
+            }
+            return `${count}x ${choice}`
+          })
+          .join(', ')
+        
+        if (choicesText) {
+          doc.text(choicesText, MARGIN + 15, yPos)
+          yPos += 6
+        }
       })
+      yPos += 2
+    })
 
-      // Add page numbers
-      addPageNumber(doc)
-
-      // Convert to Buffer
-      const pdfBuffer = Buffer.from(doc.output('arraybuffer'))
-      resolve(pdfBuffer)
-    } catch (error) {
-      reject(error)
-    }
+    yPos += 6
   })
+
+  // Add page numbers
+  addPageNumber(doc)
+
+  // Convert to Buffer
+  const pdfBuffer = Buffer.from(doc.output('arraybuffer'))
+  return pdfBuffer
 }
