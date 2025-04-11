@@ -102,7 +102,7 @@ export default function RootLayout({
             </div>
             <Toaster />
             <SonnerToaster />
-            <Analytics />
+            {/* <Analytics /> */}
           </Providers>
         </ThemeProvider>
       </body>
