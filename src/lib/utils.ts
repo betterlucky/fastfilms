@@ -36,3 +36,10 @@ export function calculateTimeLeft(deadlineDate: Date): { days: number } {
   const days = Math.ceil(difference / (1000 * 60 * 60 * 24))
   return { days: Math.max(days, 0) }
 }
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+  }).format(amount)
+}

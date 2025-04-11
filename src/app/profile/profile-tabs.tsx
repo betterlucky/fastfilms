@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { TicketIcon } from 'lucide-react'
+import { FaTicketAlt } from 'react-icons/fa'
 import OrderHistory from '@/components/OrderHistory'
 import UserComments from '@/components/UserComments'
 import { AvatarWithFallback } from '@/components/ui/avatar-with-fallback'
@@ -159,7 +159,7 @@ export default function ProfileTabs({ user }: ProfileTabsProps) {
                 onClick={() => router.push('/tickets')}
                 className="flex items-center gap-2"
               >
-                <TicketIcon className="size-4" />
+                <FaTicketAlt className="size-4" />
                 View All Tickets
               </Button>
             </div>

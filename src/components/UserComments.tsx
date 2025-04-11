@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
-import { MessageSquare, Edit, Trash2, X, Check, ArrowUpDown } from 'lucide-react'
+import { FaComment, FaEdit, FaTrash, FaTimes, FaCheck, FaSort } from 'react-icons/fa'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/components/ui/use-toast'
 import {
@@ -202,7 +202,7 @@ export default function UserComments() {
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
-            <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
+            <FaComment className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No comments yet</h3>
             <p className="mt-1 text-sm text-gray-500">
               Your comments on campaigns will appear here
@@ -250,41 +250,20 @@ export default function UserComments() {
                       {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                     </span>
                     <div className="flex gap-2">
-                      {editingCommentId === comment.id ? (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setShowEditConfirm(true)}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setEditingCommentId(null)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(comment)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(comment.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(comment)}
+                      >
+                        <FaEdit className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(comment.id)}
+                      >
+                        <FaTrash className="size-4" />
+                      </Button>
                     </div>
                   </div>
                   {editingCommentId === comment.id ? (
@@ -292,22 +271,32 @@ export default function UserComments() {
                       <Textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="min-h-[100px]"
                         maxLength={MAX_COMMENT_LENGTH}
+                        className="min-h-[100px]"
                       />
-                      <div className="flex justify-between text-sm text-gray-500">
-                        <span>
-                          {editContent.length}/{MAX_COMMENT_LENGTH} characters
-                        </span>
-                        {editContent.length > MAX_COMMENT_LENGTH && (
-                          <span className="text-red-500">
-                            Comment too long
-                          </span>
-                        )}
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingCommentId(null)
+                            setEditContent('')
+                          }}
+                        >
+                          <FaTimes className="mr-2 size-4" />
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => setShowEditConfirm(true)}
+                        >
+                          <FaCheck className="mr-2 size-4" />
+                          Save
+                        </Button>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm">{comment.content}</p>
+                    <p className="text-sm text-gray-700">{comment.content}</p>
                   )}
                 </div>
               </div>

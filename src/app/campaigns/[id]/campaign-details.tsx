@@ -6,9 +6,19 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { CalendarIcon, Clock, Users, Ticket } from 'lucide-react'
 import { getCampaignProgress, getProgressBarClasses } from '@/lib/campaign-utils'
 import CommentsSection from '@/components/CommentsSection'
+import { format } from 'date-fns'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { AvatarWithFallback } from '@/components/ui/avatar-with-fallback'
+import { formatCurrency } from '@/lib/utils'
+import ShareButtons from '@/components/ShareButtons'
+import { FaHeart, FaRegHeart, FaShare, FaUsers, FaTicketAlt } from 'react-icons/fa'
+import { MdLocationOn, MdCalendarToday, MdAccessTime } from 'react-icons/md'
+import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface Comment {
   id: string
@@ -52,6 +62,9 @@ interface CampaignDetailsProps {
     venue: {
       id: string
       name: string
+      address: string
+      city: string
+      postcode: string
     }
     charityId: string | null
     menuItems: {
@@ -64,6 +77,10 @@ interface CampaignDetailsProps {
     isTest: boolean
     currentFunding: string
     fundingTarget: string
+    charity?: {
+      name: string
+      logoPath?: string | null
+    } | null
   }
   isAdmin: boolean
   availableScreens: {
@@ -124,6 +141,26 @@ export default function CampaignDetails({
   })
   const progressClasses = getProgressBarClasses(progress)
 
+  const shareUrl = `${window.location.origin}/campaigns/${campaign.id}`
+
+  const [isLiked, setIsLiked] = useState(false)
+  const [isLiking, setIsLiking] = useState(false)
+  const [isShareOpen, setIsShareOpen] = useState(false)
+
+  const handleLike = async () => {
+    if (isLiking) return
+    setIsLiking(true)
+    try {
+      // Implement the logic to like the campaign
+      setIsLiked(true)
+      toast.success('Campaign liked!')
+    } catch (error) {
+      toast.error('Failed to like the campaign')
+    } finally {
+      setIsLiking(false)
+    }
+  }
+
   return (
     <div className="container mx-auto py-8">
       <div className="mx-auto max-w-4xl">
@@ -173,8 +210,8 @@ export default function CampaignDetails({
                         <div className="flex justify-between text-sm">
                           <span>Funding Progress</span>
                           <span>
-                            {progress.formattedCurrentFunding} of{' '}
-                            {progress.formattedFundingTarget}
+                            {formatCurrency(Number(campaign.currentFunding))} of{' '}
+                            {formatCurrency(Number(campaign.fundingTarget))}
                           </span>
                         </div>
                         <div className="space-y-1">
@@ -200,14 +237,14 @@ export default function CampaignDetails({
 
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center text-gray-500">
-                          <CalendarIcon className="mr-2 size-4" />
+                          <MdLocationOn className="mr-2 size-4" />
                           <span>
                             Screening:{' '}
                             {formattedDate} at {formattedTime}
                           </span>
                         </div>
                         <div className="flex items-center text-gray-500">
-                          <Clock className="mr-2 size-4" />
+                          <MdAccessTime className="mr-2 size-4" />
                           <span>
                             Deadline:{' '}
                             {new Date(campaign.deadlineDate).toLocaleDateString(
@@ -221,7 +258,7 @@ export default function CampaignDetails({
                           </span>
                         </div>
                         <div className="flex items-center text-gray-500">
-                          <Users className="mr-2 size-4" />
+                          <FaUsers className="mr-2 size-4" />
                           {progress.ticketsRemaining !== null ? (
                             <span>
                               {progress.ticketsRemaining} tickets remaining
@@ -303,6 +340,45 @@ export default function CampaignDetails({
                 campaignId={campaign.id}
                 initialComments={initialComments}
               />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <ShareButtons 
+                  url={shareUrl}
+                  title={`${campaign.title} - Fast Films`}
+                  description={campaign.description}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  className={isLiked ? 'text-red-500 hover:text-red-600' : ''}
+                >
+                  {isLiked ? (
+                    <FaHeart className="size-4" />
+                  ) : (
+                    <FaRegHeart className="size-4" />
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setIsShareOpen(true)}
+                >
+                  <FaShare className="size-4" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

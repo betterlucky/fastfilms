@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
-import { TicketIcon, Utensils } from 'lucide-react'
+import { FaTicketAlt, FaUtensils } from 'react-icons/fa'
 import { settings } from '@/lib/settings'
 
 interface Order {
@@ -228,7 +228,7 @@ export default function OrderHistory() {
                 {/* Tickets */}
                 <div className="rounded-lg bg-gray-50 p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                    <TicketIcon className="size-4" />
+                    <FaTicketAlt className="size-4" />
                     <span>Tickets</span>
                   </div>
                   <div className="mt-2 space-y-2">
@@ -249,27 +249,26 @@ export default function OrderHistory() {
                 {order.orders.length > 0 && (
                   <div className="rounded-lg bg-gray-50 p-4">
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                      <Utensils className="size-4" />
+                      <FaUtensils className="size-4" />
                       <span>Food & Drinks</span>
                     </div>
                     <div className="mt-2 space-y-2">
                       {order.orders.map((item) => (
-                        <div key={item.id} className="space-y-1">
-                          <p className="text-sm">
-                            {item.quantity}x {item.menuItem.name} at {formatPrice(item.menuItem.price)} each
-                            {item.choices.some(c => Number(c.selectedChoice.priceAdjustment) !== 0) && ' + options'}
-                            {' '}({formatPrice(calculateMenuItemTotal(item))})
+                        <div key={item.id} className="text-sm">
+                          <p>
+                            {item.quantity}x {item.menuItem.name} - {formatPrice(calculateMenuItemTotal(item))}
                           </p>
                           {item.choices.length > 0 && (
-                            <div className="ml-4 text-xs text-gray-500">
-                              {item.choices.map((choice, idx) => (
-                                <p key={idx}>
+                            <ul className="ml-4 mt-1 list-disc text-gray-500">
+                              {item.choices.map((choice) => (
+                                <li key={choice.option.name}>
                                   {choice.option.name}: {choice.selectedChoice.name}
-                                  {Number(choice.selectedChoice.priceAdjustment) !== 0 && 
-                                    ` (${formatPrice(choice.selectedChoice.priceAdjustment)})`}
-                                </p>
+                                  {Number(choice.selectedChoice.priceAdjustment) > 0 && (
+                                    ` (+${formatPrice(choice.selectedChoice.priceAdjustment)})`
+                                  )}
+                                </li>
                               ))}
-                            </div>
+                            </ul>
                           )}
                         </div>
                       ))}
