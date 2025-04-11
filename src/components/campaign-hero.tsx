@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { getCampaignProgress, getProgressBarClasses } from '@/lib/campaign-utils'
 
 interface Campaign {
   id: string
@@ -26,7 +27,6 @@ interface Campaign {
   screeningDate: Date
   deadlineDate: Date
   formattedDate: string
-  timeLeft: { days: number }
   venue: {
     name: string
     id: string
@@ -36,7 +36,6 @@ interface Campaign {
     id: string
     capacity: number
   } | null
-  hasScreenAllocated: boolean
   isTest: boolean
 }
 
@@ -46,6 +45,8 @@ interface CampaignHeroProps {
 
 export function CampaignHero({ campaign }: CampaignHeroProps) {
   const router = useRouter()
+  const progress = getCampaignProgress(campaign)
+  const progressClasses = getProgressBarClasses(progress)
 
   return (
     <div className="space-y-12">
@@ -107,7 +108,7 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                       Cinema: {campaign.venue.name}
                     </p>
                     <p className="text-sm text-gray-500">
-                      £{campaign.currentFunding.toFixed(2)} raised
+                      {progress.formattedCurrentFunding} raised
                     </p>
                   </div>
                   <div className="flex items-center justify-between">
@@ -115,47 +116,39 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                       Date: {campaign.formattedDate}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {campaign.timeLeft.days} days left
+                      {progress.timeLeft.days} days left
                     </p>
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-500">
-                      Target: £{campaign.fundingTarget.toFixed(2)}
+                      Target: {progress.formattedFundingTarget}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {Math.round(
-                        (campaign.currentFunding / campaign.fundingTarget) * 100
-                      )}
-                      % funded
+                      {progress.formattedProgress} funded
                     </p>
                   </div>
                   <div className="space-y-1">
                     <div className="h-2.5 w-full rounded-full bg-gray-200">
                       <div
                         className={`h-2.5 rounded-full ${
-                          campaign.currentFunding >= campaign.fundingTarget
-                            ? campaign.hasScreenAllocated &&
-                              campaign.currentTickets >= campaign.ticketCap
-                              ? 'bg-red-500'
-                              : 'bg-green-500'
+                          progressClasses.indicator['bg-green-500']
+                            ? 'bg-green-500'
+                            : progressClasses.indicator['bg-red-500']
+                            ? 'bg-red-500'
                             : 'bg-primary'
                         }`}
                         style={{
-                          width: `${Math.min((campaign.currentFunding / campaign.fundingTarget) * 100, 100)}%`,
+                          width: `${progress.progress}%`,
                         }}
                       />
                     </div>
-                    {campaign.currentFunding >= campaign.fundingTarget && (
+                    {progress.isFullyFunded && (
                       <p
                         className={`text-sm font-medium ${
-                          campaign.hasScreenAllocated &&
-                          campaign.currentTickets >= campaign.ticketCap
-                            ? 'text-red-500'
-                            : 'text-green-500'
+                          progress.isSoldOut ? 'text-red-500' : 'text-green-500'
                         }`}
                       >
-                        {campaign.hasScreenAllocated &&
-                        campaign.currentTickets >= campaign.ticketCap
+                        {progress.isSoldOut
                           ? 'SOLD OUT'
                           : 'Screening funded, tickets available'}
                       </p>

@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { CalendarIcon, Clock, Users, Ticket } from 'lucide-react'
+import { getCampaignProgress, getProgressBarClasses } from '@/lib/campaign-utils'
 
 interface CampaignDetailsProps {
   campaign: {
@@ -87,6 +88,13 @@ export default function CampaignDetails({
     year: 'numeric',
   })
 
+  const progress = getCampaignProgress({
+    ...campaign,
+    currentFunding: Number(campaign.currentFunding),
+    fundingTarget: Number(campaign.fundingTarget)
+  })
+  const progressClasses = getProgressBarClasses(progress)
+
   return (
     <div className="container mx-auto py-8">
       <div className="mx-auto max-w-4xl">
@@ -136,48 +144,24 @@ export default function CampaignDetails({
                         <div className="flex justify-between text-sm">
                           <span>Funding Progress</span>
                           <span>
-                            £{Number(campaign.currentFunding).toFixed(2)} of £
-                            {Number(campaign.fundingTarget).toFixed(2)}
+                            {progress.formattedCurrentFunding} of{' '}
+                            {progress.formattedFundingTarget}
                           </span>
                         </div>
                         <div className="space-y-1">
                           <Progress
-                            value={
-                              (Number(campaign.currentFunding) /
-                                Number(campaign.fundingTarget)) *
-                              100
-                            }
-                            className={cn('h-2', {
-                              'bg-green-100':
-                                Number(campaign.currentFunding) >=
-                                  Number(campaign.fundingTarget) &&
-                                campaign.currentTickets < campaign.ticketCap,
-                              'bg-red-100':
-                                campaign.currentTickets >= campaign.ticketCap,
-                            })}
-                            indicatorClassName={cn({
-                              'bg-green-500':
-                                Number(campaign.currentFunding) >=
-                                  Number(campaign.fundingTarget) &&
-                                campaign.currentTickets < campaign.ticketCap,
-                              'bg-red-500':
-                                campaign.currentTickets >= campaign.ticketCap,
-                              'bg-primary':
-                                Number(campaign.currentFunding) <
-                                Number(campaign.fundingTarget),
-                            })}
+                            value={progress.progress}
+                            className={cn('h-2', progressClasses.background)}
+                            indicatorClassName={cn(progressClasses.indicator)}
                           />
-                          {Number(campaign.currentFunding) >=
-                            Number(campaign.fundingTarget) && (
+                          {progress.isFullyFunded && (
                             <p
                               className={cn('text-sm font-medium', {
-                                'text-green-600':
-                                  campaign.currentTickets < campaign.ticketCap,
-                                'text-red-600':
-                                  campaign.currentTickets >= campaign.ticketCap,
+                                'text-green-600': !progress.isSoldOut,
+                                'text-red-600': progress.isSoldOut,
                               })}
                             >
-                              {campaign.currentTickets >= campaign.ticketCap
+                              {progress.isSoldOut
                                 ? 'Screening SOLD OUT!'
                                 : 'Screening funded! Tickets still available'}
                             </p>
@@ -215,18 +199,13 @@ export default function CampaignDetails({
                         </div>
                         <div className="flex items-center text-gray-500">
                           <Users className="mr-2 size-4" />
-                          {campaign.screen ? (
+                          {progress.ticketsRemaining !== null ? (
                             <span>
-                              {campaign.ticketCap - campaign.currentTickets}{' '}
-                              tickets remaining
+                              {progress.ticketsRemaining} tickets remaining
                             </span>
                           ) : (
-                            <span>{campaign.currentTickets} tickets sold</span>
+                            <span>{progress.ticketsSold} tickets sold</span>
                           )}
-                        </div>
-                        <div className="flex items-center text-gray-500">
-                          <Ticket className="mr-2 size-4" />
-                          <span>From £5 + £0.50 fee</span>
                         </div>
                       </div>
                     </div>

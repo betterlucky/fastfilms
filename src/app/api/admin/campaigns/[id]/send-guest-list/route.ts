@@ -94,50 +94,73 @@ export async function POST(
       return new NextResponse('Venue contact email not set', { status: 400 })
     }
 
-    // Transform tickets to include orders from their purchases
-    const ticketsWithOrders = campaign.tickets.map((ticket) => ({
-      ...ticket,
-      orders:
-        ticket.purchase?.orders.map((order) => ({
-          id: order.id,
-          quantity: order.quantity,
-        })) || [],
-    }))
-
-    // Transform orders for preorder PDF
-    const allOrders = Array.from(
-      new Set(
-        campaign.tickets.map(ticket => ticket.purchase?.id)
-      )
-    ).flatMap(purchaseId => {
-      const ticket = campaign.tickets.find(t => t.purchase?.id === purchaseId)
-      if (!ticket || !ticket.purchase) return []
-      
-      return ticket.purchase.orders.map(order => ({
-        id: order.id,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-        purchaseId: order.purchaseId,
-        menuItemId: order.menuItemId,
-        quantity: order.quantity,
+    // Get all tickets for guest list
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        campaignId: params.id,
+        status: {
+          in: ['CONFIRMED', 'PAY_IT_FORWARD']
+        },
+      },
+      include: {
         user: {
-          name: ticket.user.name,
-          email: ticket.user.email
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    // Get orders directly for preorders PDF
+    const orders = await prisma.order.findMany({
+      where: {
+        purchase: {
+          tickets: {
+            some: {
+              campaignId: params.id,
+              status: {
+                in: ['CONFIRMED', 'PAY_IT_FORWARD']
+              }
+            }
+          }
+        }
+      },
+      include: {
+        purchase: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              }
+            }
+          }
         },
         menuItem: {
-          name: order.menuItem.name,
-          price: Number(order.menuItem.price)
-        },
-        choices: order.choices.map(choice => ({
-          option: {
-            name: choice.option.name
-          },
-          selectedChoice: {
-            name: choice.selectedChoice.name,
-            priceAdjustment: Number(choice.selectedChoice.priceAdjustment)
+          select: {
+            name: true,
+            price: true,
+            category: true,
           }
-        }))
-      }))
+        },
+        choices: {
+          include: {
+            option: {
+              select: {
+                name: true,
+                order: true,
+              }
+            },
+            selectedChoice: {
+              select: {
+                name: true,
+                priceAdjustment: true,
+              }
+            }
+          }
+        }
+      }
     })
 
     // Generate PDFs
@@ -146,7 +169,7 @@ export async function POST(
         ...campaign,
         venue: campaign.venue,
       },
-      tickets: ticketsWithOrders,
+      tickets,
     })
 
     const preordersPDF = await generatePreordersPDF({
@@ -154,40 +177,49 @@ export async function POST(
         ...campaign,
         venue: campaign.venue,
       },
-      orders: allOrders,
+      orders: orders.map(order => ({
+        id: order.id,
+        quantity: order.quantity,
+        user: order.purchase.user,
+        menuItem: {
+          name: order.menuItem.name,
+          price: Number(order.menuItem.price),
+          category: order.menuItem.category,
+        },
+        choices: order.choices.map(choice => ({
+          option: {
+            name: choice.option.name,
+            order: choice.option.order,
+          },
+          selectedChoice: {
+            name: choice.selectedChoice.name,
+            priceAdjustment: choice.selectedChoice.priceAdjustment 
+              ? Number(choice.selectedChoice.priceAdjustment)
+              : undefined,
+          },
+        })),
+      })),
     })
 
     // Send email with PDF attachments
-    const message = `Guest list for ${campaign.movieTitle}
-Date: ${new Date(campaign.screeningDate).toLocaleDateString('en-GB', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-})}
-Time: ${new Date(campaign.screeningDate).toLocaleTimeString('en-GB', {
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false
-})}
-Total Guests: ${campaign.tickets.length}`
-
-    await transporter.sendMail({
+    const message = {
       from: process.env.CONTACT_EMAIL,
       to: campaign.venue.contactEmail,
-      subject: `Guest List & Preorders - ${campaign.title}`,
-      text: message,
+      subject: `Guest List and Preorders for ${campaign.title}`,
+      text: `Please find attached the guest list and preorders for ${campaign.title}.`,
       attachments: [
         {
-          filename: `${campaign.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_guestlist.pdf`,
+          filename: 'guest-list.pdf',
           content: guestListPDF,
         },
         {
-          filename: `${campaign.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_preorders.pdf`,
+          filename: 'preorders.pdf',
           content: preordersPDF,
         },
       ],
-    })
+    }
+
+    await transporter.sendMail(message)
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {

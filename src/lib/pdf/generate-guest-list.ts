@@ -7,17 +7,10 @@ interface GuestListData {
       name: string
     }
   }
-  tickets: (Ticket & {
+  tickets: {
+    id: string
     user: Pick<User, 'name' | 'email'>
-    purchase:
-      | (Purchase & {
-          orders: {
-            id: string
-            quantity: number
-          }[]
-        })
-      | null
-  })[]
+  }[]
 }
 
 interface PreorderData {
@@ -26,22 +19,26 @@ interface PreorderData {
       name: string
     }
   }
-  orders: (Order & {
+  orders: {
+    id: string
+    quantity: number
     user: Pick<User, 'name' | 'email'>
     menuItem: {
       name: string
       price: number
+      category: string
     }
     choices: {
       option: {
         name: string
+        order: number
       }
       selectedChoice: {
         name: string
         priceAdjustment?: number
       }
     }[]
-  })[]
+  }[]
 }
 
 // Constants for layout
@@ -152,22 +149,20 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       doc.text(`Total Guests: ${data.tickets.length}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
       yPos += 15
 
-      // Group tickets by purchase
+      // Group tickets by user email (since we no longer have purchase info)
       const groupedTickets = data.tickets.reduce((acc, ticket) => {
-        const purchaseId = ticket.purchase?.id || 'no-purchase'
-        if (!acc[purchaseId]) {
-          acc[purchaseId] = {
+        const email = ticket.user.email
+        if (!acc[email]) {
+          acc[email] = {
             user: ticket.user,
             tickets: [],
-            hasPreorders: ticket.purchase?.orders.length > 0
           }
         }
-        acc[purchaseId].tickets.push(ticket)
+        acc[email].tickets.push(ticket)
         return acc
       }, {} as Record<string, {
         user: Pick<User, 'name' | 'email'>
-        tickets: Ticket[]
-        hasPreorders: boolean
+        tickets: typeof data.tickets
       }>)
 
       // Sort groups by user name
@@ -183,7 +178,6 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
       doc.text('Email', MARGIN + COLUMN_WIDTHS.NAME + 10, yPos + 5.5)
       doc.text('Party Size', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos + 5.5)
-      doc.text('Preorders', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos + 5.5)
       doc.setFont(undefined, 'normal')
       yPos += 12
 
@@ -204,7 +198,6 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
           doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
           doc.text('Email', MARGIN + COLUMN_WIDTHS.NAME + 10, yPos + 5.5)
           doc.text('Party Size', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos + 5.5)
-          doc.text('Preorders', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos + 5.5)
           doc.setFont(undefined, 'normal')
           yPos += 12
           doc.setFontSize(10)
@@ -220,7 +213,6 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
         doc.text(group.user.name || 'Guest', MARGIN + 5, yPos)
         doc.text(group.user.email, MARGIN + COLUMN_WIDTHS.NAME + 10, yPos)
         doc.text(group.tickets.length.toString(), MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos)
-        doc.text(group.hasPreorders ? 'Yes' : 'No', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos)
         yPos += 8
       })
 
@@ -269,71 +261,48 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
         minute: '2-digit',
         hour12: false
       })}`, MARGIN + 5, yPos)
-      doc.text(`Total Orders: ${data.orders.length}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
+      
+      // Count unique food orders by user email
+      const uniqueOrders = new Set(data.orders.map(order => order.user.email))
+      doc.text(`Total Orders: ${uniqueOrders.size}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
       yPos += 15
 
-      // Create item summary with consolidated choices
-      interface ItemSummary {
-        quantity: number
-        choices: Map<string, Map<string, number>>
+      // Create summary of all choices
+      interface ChoiceSummary {
+        [choiceName: string]: number
       }
       
-      const itemSummary = new Map<string, ItemSummary>()
+      const choiceSummary: ChoiceSummary = {}
 
-      // Helper function to add or update item summary
-      function addToSummary(itemName: string, quantity: number, choices: Array<{
-        option: { name: string },
-        selectedChoice: { name: string }
-      }>) {
-        const existing = itemSummary.get(itemName) || {
-          quantity: 0,
-          choices: new Map()
+      // Process all orders and collect choices
+      data.orders.forEach(order => {
+        // For combo items, handle base items separately
+        if (order.menuItem.category?.toLowerCase() === 'combo') {
+          // Find the base item choice (usually first option or marked as base)
+          const baseItemChoice = order.choices.find(choice => 
+            choice.option.order === 0 || // First option
+            choice.option.name.toLowerCase().includes('base') // Or marked as base
+          )
+          
+          if (baseItemChoice?.selectedChoice.name) {
+            const itemName = baseItemChoice.selectedChoice.name
+            choiceSummary[itemName] = (choiceSummary[itemName] || 0) + order.quantity
+          }
         }
 
-        existing.quantity += quantity
-
-        // Track choices
-        choices.forEach(choice => {
-          const optionName = choice.option.name
+        // Process all other choices
+        order.choices.forEach(choice => {
           const choiceName = choice.selectedChoice.name
-
-          if (!existing.choices.has(optionName)) {
-            existing.choices.set(optionName, new Map())
+          // Skip "No thanks" choices and base items in combos
+          if (choiceName.toLowerCase() === 'no thanks' ||
+              (order.menuItem.category?.toLowerCase() === 'combo' &&
+               (choice.option.order === 0 || choice.option.name.toLowerCase().includes('base')))) {
+            return
           }
 
-          const choiceCounts = existing.choices.get(optionName)!
-          choiceCounts.set(choiceName, (choiceCounts.get(choiceName) || 0) + quantity)
+          // Add the choice to our summary
+          choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + 1
         })
-
-        itemSummary.set(itemName, existing)
-      }
-
-      // Process orders and consolidate items
-      data.orders.forEach(order => {
-        // Check if this is a combo item by looking for "Combo" in the name
-        const isCombo = order.menuItem.name.toLowerCase().includes('combo')
-        
-        if (!isCombo) {
-          // For non-combo items, just add them directly
-          addToSummary(order.menuItem.name, order.quantity, order.choices)
-        } else {
-          // For combo items, we need to process each choice as a separate item
-          // First, add the main combo item
-          addToSummary(order.menuItem.name, order.quantity, [])
-          
-          // Then process each component of the combo
-          order.choices.forEach(choice => {
-            // Skip choices that are "No thanks" or similar
-            if (choice.selectedChoice.name.toLowerCase() === 'no thanks') {
-              return
-            }
-            
-            // For drinks and similar items that might appear both in combos and standalone
-            if (choice.option.name.toLowerCase().includes('drink')) {
-              addToSummary(choice.selectedChoice.name, order.quantity, [])
-            }
-          })
-        }
       })
 
       // Add Item Summary section
@@ -345,13 +314,12 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
       doc.setFont(undefined, 'normal')
       yPos += 12
 
-      // Display consolidated item summary
+      // Display consolidated summary
       doc.setFontSize(11)
       
-      // First display main items (non-choices)
-      Array.from(itemSummary.entries())
+      Object.entries(choiceSummary)
         .sort(([aName], [bName]) => aName.localeCompare(bName))
-        .forEach(([itemName, summary]) => {
+        .forEach(([itemName, quantity]) => {
           // Check if we need a new page
           if (yPos > PAGE_HEIGHT - 40) {
             doc.addPage()
@@ -359,27 +327,8 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
             yPos = 40
           }
 
-          // Main item line
-          doc.setFont(undefined, 'bold')
-          doc.text(`${summary.quantity}x ${itemName}`, MARGIN + 5, yPos)
-          doc.setFont(undefined, 'normal')
+          doc.text(`${quantity}x ${itemName}`, MARGIN + 5, yPos)
           yPos += 6
-
-          // Display choices if any
-          summary.choices.forEach((choiceCounts, optionName) => {
-            // Skip empty or "No thanks" choices
-            const validChoices = Array.from(choiceCounts.entries())
-              .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
-            
-            if (validChoices.length > 0) {
-              const choicesText = validChoices
-                .map(([choice, count]) => `${count}x ${choice}`)
-                .join(', ')
-              doc.text(`${optionName}: ${choicesText}`, MARGIN + 15, yPos)
-              yPos += 6
-            }
-          })
-          yPos += 2
         })
 
       // Add Orders by Party section
@@ -404,7 +353,7 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
         // Check if we need a new page
         if (yPos > PAGE_HEIGHT - 40) {
           doc.addPage()
-          drawHeader(doc, data.campaign.title, 'Preorder Summary')
+          drawHeader(doc, data.campaign.title, 'Order Details')
           yPos = 40
         }
 
@@ -416,34 +365,83 @@ export function generatePreordersPDF(data: PreorderData): Promise<Buffer> {
         doc.setFont(undefined, 'normal')
         yPos += 8
 
-        // Orders in a server-friendly format
-        doc.setFontSize(10)
-        let userTotal = 0
-        orders.forEach((order) => {
-          const priceAdjustments = order.choices.reduce((sum, choice) => 
-            sum + (Number(choice.selectedChoice.priceAdjustment) || 0), 0)
-          const itemTotal = (order.menuItem.price * order.quantity) + (priceAdjustments * order.quantity)
-          userTotal += itemTotal
+        // Group orders by menu item
+        const menuItemOrders = orders.reduce((acc, order) => {
+          const key = order.menuItem.name
+          if (!acc[key]) {
+            acc[key] = {
+              quantity: 0,
+              choices: {} as Record<string, Record<string, number>>
+            }
+          }
+          acc[key].quantity += order.quantity
 
+          // Process choices
+          order.choices.forEach(choice => {
+            const optionName = choice.option.name
+            const choiceName = choice.selectedChoice.name
+            
+            if (!acc[key].choices[optionName]) {
+              acc[key].choices[optionName] = {}
+            }
+            if (!acc[key].choices[optionName][choiceName]) {
+              acc[key].choices[optionName][choiceName] = 0
+            }
+            acc[key].choices[optionName][choiceName] += 1
+          })
+          
+          return acc
+        }, {} as Record<string, {
+          quantity: number,
+          choices: Record<string, Record<string, number>>
+        }>)
+
+        // Display orders grouped by menu item
+        doc.setFontSize(10)
+        Object.entries(menuItemOrders).forEach(([itemName, details]) => {
           // Main item line
-          doc.text(`${order.quantity}x ${order.menuItem.name}:`, MARGIN + 10, yPos)
+          doc.setFont(undefined, 'bold')
+          doc.text(`${details.quantity}x ${itemName}:`, MARGIN + 10, yPos)
+          doc.setFont(undefined, 'normal')
           yPos += 6
 
-          // Choices in a clear format
-          order.choices.forEach((choice) => {
-            doc.text(`  ${choice.option.name}: ${choice.selectedChoice.name}`, MARGIN + 15, yPos)
-            yPos += 6
+          // Find the original order for this menu item to get option information
+          const originalOrder = orders.find(o => o.menuItem.name === itemName)
+          if (!originalOrder) return
+
+          // Display choices grouped by option
+          const sortedChoices = Object.entries(details.choices)
+            .sort(([a], [b]) => {
+              // Sort by option order if available
+              const orderA = originalOrder.choices.find(c => c.option.name === a)?.option.order || 0
+              const orderB = originalOrder.choices.find(c => c.option.name === b)?.option.order || 0
+              if (orderA !== orderB) return orderA - orderB
+              return a.localeCompare(b)
+            })
+
+          sortedChoices.forEach(([optionName, choices]) => {
+            const choicesText = Object.entries(choices)
+              .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
+              .map(([choice, count]) => {
+                // For base items in combos, use the full quantity
+                if (originalOrder.menuItem.category?.toLowerCase() === 'combo' &&
+                    (optionName.toLowerCase().includes('base') || 
+                     originalOrder.choices.find(c => c.option.name === optionName)?.option.order === 0)) {
+                  return `${details.quantity}x ${choice}`
+                }
+                return `${count}x ${choice}`
+              })
+              .join(', ')
+            
+            if (choicesText) {
+              doc.text(choicesText, MARGIN + 15, yPos)
+              yPos += 6
+            }
           })
           yPos += 2
         })
 
-        // User total
-        doc.setFontSize(11)
-        doc.setFont(undefined, 'bold')
-        doc.text('Total:', MARGIN + 10, yPos)
-        doc.text(`£${(userTotal / 100).toFixed(2)}`, MARGIN + CONTENT_WIDTH - 30, yPos, { align: 'right' })
-        doc.setFont(undefined, 'normal')
-        yPos += 10
+        yPos += 6
       })
 
       // Add page numbers

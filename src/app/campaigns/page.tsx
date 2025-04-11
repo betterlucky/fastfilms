@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { getCampaigns } from '@/lib/campaigns'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
+import { getCampaignProgress, getProgressBarClasses } from '@/lib/campaign-utils'
 
 interface Campaign {
   id: string
@@ -18,14 +19,10 @@ interface Campaign {
   currentTickets: number
   ticketCap: number
   formattedDate: string
-  timeLeft: {
-    days: number
-  }
-  formattedTarget: string
-  formattedCurrent: string
-  progress: number
   screeningDate: Date
   deadlineDate: Date
+  currentFunding: number
+  fundingTarget: number
   isTest: boolean
   screen: {
     id: string
@@ -39,29 +36,28 @@ export default async function CampaignsPage() {
   const campaigns = await getCampaigns()
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Campaigns</h1>
-      </div>
+    <div className="container mx-auto py-8">
+      <div className="mx-auto max-w-4xl space-y-8">
+        <div className="space-y-4">
+          <h1 className="text-3xl font-bold">Upcoming Screenings</h1>
+          <p className="text-gray-600">
+            Support these campaigns to bring films to your local cinema
+          </p>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {campaigns.map((campaign) => (
-          <Link key={campaign.id} href={`/campaigns/${campaign.id}`}>
-            <Card className="h-full transition-transform hover:-translate-y-1 hover:shadow-lg">
-              <CardHeader>
-                <CardTitle>{campaign.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="relative space-y-4">
-                  <div className="relative">
-                    {campaign.isTest && (
-                      <div className="absolute -right-12 top-6 z-10 w-[200px] rotate-45 bg-red-500 py-2 text-center text-sm font-semibold text-white shadow-lg">
-                        TEST CAMPAIGN
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-gray-600">{campaign.description}</p>
+        {campaigns.map((campaign) => {
+          const progress = getCampaignProgress(campaign)
+          const progressClasses = getProgressBarClasses(progress)
 
+          return (
+            <Link key={campaign.id} href={`/campaigns/${campaign.id}`}>
+              <Card className="group transition-colors hover:border-gray-400">
+                <CardHeader>
+                  <CardTitle className="group-hover:text-gray-600">
+                    {campaign.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center text-sm text-gray-500">
                       <CalendarIcon className="mr-2 size-4" />
@@ -89,18 +85,17 @@ export default async function CampaignsPage() {
                             month: 'long',
                           }
                         )}{' '}
-                        ({campaign.timeLeft.days} days left)
+                        ({progress.timeLeft.days} days left)
                       </span>
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <Users className="mr-2 size-4" />
-                      {campaign.screen ? (
+                      {progress.ticketsRemaining !== null ? (
                         <span>
-                          {campaign.ticketCap - campaign.currentTickets} tickets
-                          remaining
+                          {progress.ticketsRemaining} tickets remaining
                         </span>
                       ) : (
-                        <span>{campaign.currentTickets} tickets sold</span>
+                        <span>{progress.ticketsSold} tickets sold</span>
                       )}
                     </div>
                   </div>
@@ -109,50 +104,35 @@ export default async function CampaignsPage() {
                     <div className="flex justify-between text-sm">
                       <span>Funding Progress</span>
                       <span>
-                        {campaign.formattedCurrent} of{' '}
-                        {campaign.formattedTarget}
+                        {progress.formattedCurrentFunding} of{' '}
+                        {progress.formattedFundingTarget}
                       </span>
                     </div>
                     <div className="space-y-1">
                       <Progress
-                        value={campaign.progress}
-                        className={cn('h-2', {
-                          'bg-green-100':
-                            campaign.progress >= 100 &&
-                            campaign.currentTickets < campaign.ticketCap,
-                          'bg-red-100':
-                            campaign.currentTickets >= campaign.ticketCap,
-                        })}
-                        indicatorClassName={cn({
-                          'bg-green-500':
-                            campaign.progress >= 100 &&
-                            campaign.currentTickets < campaign.ticketCap,
-                          'bg-red-500':
-                            campaign.currentTickets >= campaign.ticketCap,
-                          'bg-primary': campaign.progress < 100,
-                        })}
+                        value={progress.progress}
+                        className={cn('h-2', progressClasses.background)}
+                        indicatorClassName={cn(progressClasses.indicator)}
                       />
-                      {campaign.progress >= 100 && (
+                      {progress.isFullyFunded && (
                         <p
                           className={cn('text-sm font-medium', {
-                            'text-green-600':
-                              campaign.currentTickets < campaign.ticketCap,
-                            'text-red-600':
-                              campaign.currentTickets >= campaign.ticketCap,
+                            'text-green-600': !progress.isSoldOut,
+                            'text-red-600': progress.isSoldOut,
                           })}
                         >
-                          {campaign.currentTickets >= campaign.ticketCap
+                          {progress.isSoldOut
                             ? 'Screening SOLD OUT!'
                             : 'Screening funded! Tickets still available'}
                         </p>
                       )}
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                </CardContent>
+              </Card>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )
