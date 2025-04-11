@@ -58,9 +58,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://image.tmdb.org/t/p/w500/gqY0ITBgT7A82poL9jv851qdnIb.jpg',
-        width: 500,
-        height: 750,
+        url: 'https://fastfilms.vercel.app/og-image',
+        width: 1200,
+        height: 630,
         alt: 'FastFilms Community Cinema',
       },
     ],
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'FastFilms - Community Cinema Crowdfunding',
     description: 'Support and attend community film screenings across Cornwall',
-    images: ['https://image.tmdb.org/t/p/w500/gqY0ITBgT7A82poL9jv851qdnIb.jpg'],
+    images: ['https://fastfilms.vercel.app/og-image'],
   },
 }
 
