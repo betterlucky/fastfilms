@@ -43,7 +43,7 @@ export default async function CampaignPurchasesPage({
               choices: {
                 include: {
                   option: true,
-                  selectedChoice: true,
+                  selectedChoices: true,
                 },
               },
             },
@@ -86,6 +86,15 @@ export default async function CampaignPurchasesPage({
         ...order.menuItem,
         price: convertDecimal(order.menuItem.price),
       },
+      choices: order.choices.map(choice => ({
+        option: {
+          name: choice.option.name
+        },
+        selectedChoices: choice.selectedChoices.map(sc => ({
+          name: sc.name,
+          priceAdjustment: convertDecimal(sc.priceAdjustment)
+        }))
+      }))
     })),
   }))
 

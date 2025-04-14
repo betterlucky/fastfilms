@@ -57,11 +57,11 @@ export async function sendGuestListsForToday(): Promise<{
                             name: true,
                           },
                         },
-                        selectedChoice: {
+                        selectedChoices: {
                           select: {
                             name: true,
                           },
-                        },
+                        }
                       },
                     },
                   },
@@ -93,7 +93,7 @@ export async function sendGuestListsForToday(): Promise<{
                 quantity: order.quantity,
                 options: order.choices.map((choice) => ({
                   optionName: choice.option?.name || '',
-                  choice: choice.selectedChoice?.name || '',
+                  choice: choice.selectedChoices.map(c => c.name).join(', ') || '',
                 })),
               }))
             )
@@ -107,7 +107,7 @@ export async function sendGuestListsForToday(): Promise<{
                 quantity: order.quantity,
                 options: order.choices.map((choice) => ({
                   optionName: choice.option?.name || '',
-                  choice: choice.selectedChoice?.name || '',
+                  choice: choice.selectedChoices.map(c => c.name).join(', ') || '',
                 })),
               })),
             })

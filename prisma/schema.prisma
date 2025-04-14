@@ -175,7 +175,7 @@ model MenuItemOptionChoice {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   option          MenuItemOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  orderChoices    OrderChoice[]
+  orderChoices    OrderChoice[]  @relation("OrderChoiceToMenuItemOptionChoice")
 
   @@index([optionId])
 }
@@ -257,15 +257,17 @@ model PurchaseResend {
 }
 
 model OrderChoice {
-  id               String               @id @default(cuid())
+  id               String                 @id @default(cuid())
   orderId          String
   optionId         String
-  selectedChoiceId String
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  option           MenuItemOption       @relation(fields: [optionId], references: [id])
-  order            Order                @relation(fields: [orderId], references: [id])
-  selectedChoice   MenuItemOptionChoice @relation(fields: [selectedChoiceId], references: [id])
+  selectedChoices  MenuItemOptionChoice[] @relation("OrderChoiceToMenuItemOptionChoice")
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  option           MenuItemOption         @relation(fields: [optionId], references: [id])
+  order            Order                  @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([optionId])
 }
 
 model Comment {

@@ -53,11 +53,11 @@ export async function GET() {
             },
             choices: {
               select: {
-                selectedChoice: {
+                selectedChoices: {
                   select: {
                     name: true,
                     priceAdjustment: true,
-                  }
+                  },
                 },
                 option: {
                   select: {

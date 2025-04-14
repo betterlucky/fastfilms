@@ -120,9 +120,10 @@ export async function handlePaymentSuccess(
                         name: true,
                       },
                     },
-                    selectedChoice: {
+                    selectedChoices: {
                       select: {
                         name: true,
+                        priceAdjustment: true,
                       },
                     },
                   },
@@ -185,7 +186,7 @@ export async function handlePaymentSuccess(
           price: Number(order.menuItem.price),
           options: order.choices.map((choice) => ({
             name: choice.option.name,
-            choice: choice.selectedChoice.name,
+            choice: choice.selectedChoices.map(c => c.name).join(', '),
           })),
         })) || [],
       }

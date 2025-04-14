@@ -2,11 +2,12 @@ import { Decimal } from '@prisma/client/runtime/library'
 
 export interface OrderChoice {
   optionId: string
-  selectedChoiceId: string
-  option?: {
+  selectedChoices: Array<{
+    id: string
     name: string
-  }
-  selectedChoice?: {
+    priceAdjustment?: number
+  }>
+  option?: {
     name: string
   }
 }

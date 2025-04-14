@@ -22,7 +22,10 @@ interface Order {
   quantity: number
   choices: Array<{
     option: { name: string }
-    selectedChoice: { name: string }
+    selectedChoices: Array<{ 
+      name: string 
+      priceAdjustment: number
+    }>
   }>
 }
 

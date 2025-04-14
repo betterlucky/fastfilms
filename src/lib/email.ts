@@ -394,9 +394,10 @@ interface OrderItem {
     option: {
       name: string
     }
-    selectedChoice: {
+    selectedChoices: {
       name: string
-    }
+      priceAdjustment?: number
+    }[]
   }>
 }
 

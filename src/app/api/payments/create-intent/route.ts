@@ -169,16 +169,24 @@ export async function POST(request: NextRequest) {
                     create: validMenuSelections.flatMap((selection) => {
                       // Create separate orders for each quantity to handle different choices
                       return Array.from({ length: selection.quantity }).map((_, index) => ({
-                        menuItemId: selection.menuItemId,
+                        menuItem: {
+                          connect: { id: selection.menuItemId }
+                        },
                         quantity: 1, // Each order has quantity 1 since we're creating multiple orders
                         choices: {
                           create: Object.entries(menuSelections[selection.menuItemId].options).map(([optionId, choiceArrays]) => ({
-                            optionId,
-                            selectedChoiceId: choiceArrays[index]?.[0] || choiceArrays[0][0], // Use index-specific choice if available, fallback to first choice
+                            option: {
+                              connect: { id: optionId }
+                            },
+                            selectedChoices: {
+                              connect: (choiceArrays[index] || []).map(choiceId => ({
+                                id: choiceId
+                              }))
+                            }
                           }))
-                        },
+                        }
                       }))
-                    }),
+                    })
                   }
                 : undefined,
           },
@@ -190,12 +198,12 @@ export async function POST(request: NextRequest) {
                 choices: {
                   include: {
                     option: true,
-                    selectedChoice: true,
-                  },
-                },
-              },
-            },
-          },
+                    selectedChoices: true
+                  }
+                }
+              }
+            }
+          }
         })
 
         await tx.campaign.update({
@@ -229,8 +237,8 @@ export async function POST(request: NextRequest) {
           price: Number(order.menuItem.price),
           options: order.choices.map((choice) => ({
             name: choice.option.name,
-            choice: choice.selectedChoice.name,
-            priceAdjustment: Number(choice.selectedChoice.priceAdjustment || 0)
+            choice: choice.selectedChoices.map(c => c.name).join(', '),
+            priceAdjustment: Number(choice.selectedChoices.reduce((sum, c) => sum + Number(c.priceAdjustment), 0))
           })),
         })),
       }
@@ -291,16 +299,24 @@ export async function POST(request: NextRequest) {
                 create: validMenuSelections.flatMap((selection) => {
                   // Create separate orders for each quantity to handle different choices
                   return Array.from({ length: selection.quantity }).map((_, index) => ({
-                    menuItemId: selection.menuItemId,
+                    menuItem: {
+                      connect: { id: selection.menuItemId }
+                    },
                     quantity: 1, // Each order has quantity 1 since we're creating multiple orders
                     choices: {
                       create: Object.entries(menuSelections[selection.menuItemId].options).map(([optionId, choiceArrays]) => ({
-                        optionId,
-                        selectedChoiceId: choiceArrays[index]?.[0] || choiceArrays[0][0], // Use index-specific choice if available, fallback to first choice
+                        option: {
+                          connect: { id: optionId }
+                        },
+                        selectedChoices: {
+                          connect: (choiceArrays[index] || []).map(choiceId => ({
+                            id: choiceId
+                          }))
+                        }
                       }))
-                    },
+                    }
                   }))
-                }),
+                })
               }
             : undefined,
       },

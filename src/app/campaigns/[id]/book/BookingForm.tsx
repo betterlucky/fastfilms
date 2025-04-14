@@ -316,12 +316,6 @@ export default function BookingForm({
     e.preventDefault()
     setError(null)
 
-    // Validate that at least one ticket type is selected
-    if (quantity === 0 && payItForwardTickets === 0) {
-      setError('Please select at least one ticket type')
-      return
-    }
-
     // Validate ticket quantity
     if (quantity > maxTickets) {
       setError(`Maximum ${maxTickets} tickets allowed per booking`)
@@ -331,6 +325,15 @@ export default function BookingForm({
     // Validate menu selections before proceeding
     if (!validateMenuSelections()) {
       setError('Please select all required options for your menu items')
+      return
+    }
+
+    // Add validation to ensure at least one item is selected (tickets or food)
+    const hasTickets = quantity > 0 || payItForwardTickets > 0
+    const hasFoodItems = Object.values(menuSelections).some(selection => selection.quantity > 0)
+    
+    if (!hasTickets && !hasFoodItems) {
+      setError('Please select at least one ticket or food item')
       return
     }
 
@@ -650,47 +653,116 @@ export default function BookingForm({
                                               : `Select ${option.minChoices}-${option.maxChoices}`}
                                           </p>
                                         </div>
-                                        <Select
-                                          value={
-                                            menuSelections[item.id]?.options[
-                                              option.id
-                                            ]?.[index]?.join(',') || ''
-                                          }
-                                          onValueChange={(value) =>
-                                            handleOptionChoiceChange(
-                                              item.id,
-                                              option.id,
-                                              value ? value.split(',') : [],
-                                              index
-                                            )
-                                          }
-                                        >
-                                          <SelectTrigger
-                                            className={cn(
-                                              'bg-white',
-                                              validation[item.id]?.[option.id]
-                                                ?.isValid === false &&
-                                                'border-red-500'
-                                            )}
-                                          >
-                                            <SelectValue
-                                              placeholder={`Select ${option.name.toLowerCase()}`}
-                                            />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {option.choices.map((choice) => (
-                                              <SelectItem
-                                                key={choice.id}
-                                                value={choice.id}
-                                                className="bg-white hover:bg-gray-100"
+                                        {option.maxChoices > 1 ? (
+                                          // For multiple selections (like 2 drinks)
+                                          <div className="space-y-2">
+                                            {Array.from({ length: option.maxChoices }).map((_, choiceIndex) => (
+                                              <Select
+                                                key={choiceIndex}
+                                                value={
+                                                  menuSelections[item.id]?.options[
+                                                    option.id
+                                                  ]?.[index]?.[choiceIndex] || ''
+                                                }
+                                                onValueChange={(value) => {
+                                                  const currentChoices = 
+                                                    menuSelections[item.id]?.options[
+                                                      option.id
+                                                    ]?.[index] || [];
+                                                  const newChoices = [...currentChoices];
+                                                  if (value) {
+                                                    newChoices[choiceIndex] = value;
+                                                  } else {
+                                                    newChoices.splice(choiceIndex, 1);
+                                                  }
+                                                  handleOptionChoiceChange(
+                                                    item.id,
+                                                    option.id,
+                                                    newChoices.filter(Boolean),
+                                                    index
+                                                  );
+                                                }}
                                               >
-                                                {choice.name}
-                                                {choice.priceAdjustment > 0 &&
-                                                  ` (+£${choice.priceAdjustment.toFixed(2)})`}
-                                              </SelectItem>
+                                                <SelectTrigger
+                                                  className={cn(
+                                                    'bg-white',
+                                                    validation[item.id]?.[option.id]
+                                                      ?.isValid === false &&
+                                                      'border-red-500'
+                                                  )}
+                                                >
+                                                  <SelectValue
+                                                    placeholder={`Select ${option.name.toLowerCase()} ${choiceIndex + 1}`}
+                                                  />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {option.choices.map((choice) => (
+                                                    <SelectItem
+                                                      key={choice.id}
+                                                      value={choice.id}
+                                                      className="bg-white hover:bg-gray-100"
+                                                      disabled={
+                                                        menuSelections[item.id]?.options[
+                                                          option.id
+                                                        ]?.[index]?.includes(choice.id) &&
+                                                        menuSelections[item.id]?.options[
+                                                          option.id
+                                                        ]?.[index]?.[choiceIndex] !== choice.id
+                                                      }
+                                                    >
+                                                      {choice.name}
+                                                      {choice.priceAdjustment > 0 &&
+                                                        ` (+£${choice.priceAdjustment.toFixed(2)})`}
+                                                    </SelectItem>
+                                                  ))}
+                                                </SelectContent>
+                                              </Select>
                                             ))}
-                                          </SelectContent>
-                                        </Select>
+                                          </div>
+                                        ) : (
+                                          // Existing single selection code
+                                          <Select
+                                            value={
+                                              menuSelections[item.id]?.options[
+                                                option.id
+                                              ]?.[index]?.join(',') || ''
+                                            }
+                                            onValueChange={(value) =>
+                                              handleOptionChoiceChange(
+                                                item.id,
+                                                option.id,
+                                                value ? [value] : [],
+                                                index
+                                              )
+                                            }
+                                          >
+                                            <SelectTrigger
+                                              className={cn(
+                                                'bg-white',
+                                                validation[item.id]?.[option.id]
+                                                  ?.isValid === false &&
+                                                  'border-red-500'
+                                              )}
+                                            >
+                                              <SelectValue
+                                                placeholder={`Select ${option.name.toLowerCase()}`}
+                                              />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {option.choices.map((choice) => (
+                                                <SelectItem
+                                                  key={choice.id}
+                                                  value={choice.id}
+                                                  className="bg-white hover:bg-gray-100"
+                                                >
+                                                  {choice.name}
+                                                  {choice.priceAdjustment > 0 &&
+                                                    ` (+£${choice.priceAdjustment.toFixed(2)})`}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                        )}
                                       </div>
                                     ) : (
                                       <div className="space-y-1">

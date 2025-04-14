@@ -102,7 +102,13 @@ export async function PUT(
             // Only delete choices that aren't referenced by any orders
             for (const choiceId of choicesToDelete) {
               const hasOrders = await tx.orderChoice.findFirst({
-                where: { selectedChoiceId: choiceId }
+                where: { 
+                  selectedChoices: {
+                    some: {
+                      id: choiceId
+                    }
+                  }
+                }
               })
               
               if (!hasOrders) {

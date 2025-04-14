@@ -53,11 +53,11 @@ export async function POST(
                             name: true,
                           },
                         },
-                        selectedChoice: {
+                        selectedChoices: {
                           select: {
                             name: true,
                           },
-                        },
+                        }
                       },
                     },
                   },
@@ -94,7 +94,7 @@ export async function POST(
               quantity: order.quantity,
               options: order.choices.map((choice) => ({
                 optionName: choice.option?.name || '',
-                choice: choice.selectedChoice?.name || '',
+                choice: choice.selectedChoices.map((choice) => choice.name).join(', ') || '',
               })),
             }))
           )
@@ -108,7 +108,7 @@ export async function POST(
               quantity: order.quantity,
               options: order.choices.map((choice) => ({
                 optionName: choice.option?.name || '',
-                choice: choice.selectedChoice?.name || '',
+                choice: choice.selectedChoices.map((choice) => choice.name).join(', ') || '',
               })),
             })),
           })

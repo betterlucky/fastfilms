@@ -8,7 +8,7 @@ export interface WebhookHandlerResponse {
 
 export interface OrderChoice {
   optionId: string
-  selectedChoice: string
+  selectedChoices: string[]
 }
 
 export interface OrderWithMenuItem extends Omit<Order, 'choices'> {

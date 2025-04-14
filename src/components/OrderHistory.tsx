@@ -34,10 +34,10 @@ interface Order {
       price: number | string
     }
     choices: {
-      selectedChoice: {
+      selectedChoices: {
         name: string
-        priceAdjustment: number | string
-      }
+        priceAdjustment: number
+      }[]
       option: {
         name: string
       }
@@ -69,7 +69,7 @@ export default function OrderHistory() {
   const calculateMenuItemTotal = (item: Order['orders'][0]): number => {
     const basePrice = Number(item.menuItem.price)
     const choicesAdjustment = item.choices.reduce((sum, choice) => 
-      sum + Number(choice.selectedChoice.priceAdjustment), 0)
+      sum + choice.selectedChoices.reduce((choiceSum, c) => choiceSum + Number(c.priceAdjustment), 0), 0)
     return (basePrice + choicesAdjustment) * item.quantity
   }
 
@@ -106,8 +106,8 @@ export default function OrderHistory() {
         quantity: item.quantity,
         choices: item.choices.map(c => ({
           option: c.option.name,
-          choice: c.selectedChoice.name,
-          adjustment: c.selectedChoice.priceAdjustment
+          choice: c.selectedChoices.map(c => c.name).join(', '),
+          adjustment: c.selectedChoices.reduce((sum, c) => sum + Number(c.priceAdjustment), 0)
         })),
         total: calculateMenuItemTotal(item)
       })),
@@ -262,9 +262,9 @@ export default function OrderHistory() {
                             <ul className="ml-4 mt-1 list-disc text-gray-500">
                               {item.choices.map((choice) => (
                                 <li key={choice.option.name}>
-                                  {choice.option.name}: {choice.selectedChoice.name}
-                                  {Number(choice.selectedChoice.priceAdjustment) > 0 && (
-                                    ` (+${formatPrice(choice.selectedChoice.priceAdjustment)})`
+                                  {choice.option.name}: {choice.selectedChoices.map(c => c.name).join(', ')}
+                                  {choice.selectedChoices.some(c => Number(c.priceAdjustment) > 0) && (
+                                    ` (+${formatPrice(choice.selectedChoices.reduce((sum, c) => sum + Number(c.priceAdjustment), 0))})`
                                   )}
                                 </li>
                               ))}

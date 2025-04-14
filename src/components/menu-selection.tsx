@@ -11,7 +11,7 @@ interface MenuItemWithOptions extends MenuItem {
 
 interface OrderChoice {
   optionId: string
-  selectedChoice: string
+  selectedChoices: string[]
 }
 
 interface Order {
@@ -75,7 +75,7 @@ export function MenuSelection({
           choices:
             menuItem?.options.map((option) => ({
               optionId: option.id,
-              selectedChoice: itemChoices[option.id] || option.choices[0].id,
+              selectedChoices: itemChoices[option.id] ? [itemChoices[option.id]] : [option.choices[0].id],
             })) || [],
         }
       })

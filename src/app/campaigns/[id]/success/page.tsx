@@ -49,7 +49,7 @@ export default async function SuccessPage({
               choices: {
                 include: {
                   option: true,
-                  selectedChoice: true,
+                  selectedChoices: true,
                 },
               },
             },
@@ -89,7 +89,7 @@ export default async function SuccessPage({
   const menuTotal = tickets[0].purchase?.orders.reduce((sum, order) => {
     const itemTotal = Number(order.menuItem.price) * order.quantity
     const optionsTotal = order.choices.reduce((optSum, choice) => 
-      optSum + Number(choice.selectedChoice.priceAdjustment || 0), 0)
+      optSum + Number(choice.selectedChoices.reduce((sum, c) => sum + Number(c.priceAdjustment), 0)), 0)
     return sum + itemTotal + optionsTotal
   }, 0) || 0
   const transactionFee = settings.transactionFee
@@ -144,9 +144,9 @@ export default async function SuccessPage({
                         <ul className="ml-6 list-inside list-disc text-sm">
                           {order.choices.map((choice) => (
                             <li key={choice.id}>
-                              {choice.option.name}: {choice.selectedChoice.name}
-                              {Number(choice.selectedChoice.priceAdjustment) > 0 && 
-                                ` (+£${Number(choice.selectedChoice.priceAdjustment).toFixed(2)})`}
+                              {choice.option.name}: {choice.selectedChoices.map(c => c.name).join(', ')}
+                              {choice.selectedChoices.some(c => Number(c.priceAdjustment) > 0) && 
+                                ` (+£${choice.selectedChoices.reduce((sum, c) => sum + Number(c.priceAdjustment), 0).toFixed(2)})`}
                             </li>
                           ))}
                         </ul>

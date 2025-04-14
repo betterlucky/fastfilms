@@ -34,10 +34,10 @@ interface PreorderData {
         name: string
         order: number
       }
-      selectedChoice: {
+      selectedChoices: {
         name: string
         priceAdjustment?: number
-      }
+      }[]
     }[]
   }[]
 }
@@ -289,19 +289,19 @@ export async function generatePreordersPDF(data: PreorderData) {
     if (order.menuItem.category?.toLowerCase() === 'combo') {
       // For combo items, process each choice individually
       order.choices.forEach(choice => {
-        const choiceName = choice.selectedChoice.name
+        const choiceNames = choice.selectedChoices.map(c => c.name).join(', ')
         // Skip "No thanks" choices
-        if (choiceName.toLowerCase() === 'no thanks') {
+        if (choiceNames.toLowerCase() === 'no thanks') {
           return
         }
         // For base combo items (like Crunchy Crisps), use order quantity
         // For add-ons and drinks, count as individual items
         if (choice.option.name === 'Crunchy Crisps') {
-          choiceSummary[choiceName] = (choiceSummary[choiceName] || 0) + 1
+          choiceSummary[choiceNames] = (choiceSummary[choiceNames] || 0) + 1
         } else {
           // Only count each unique choice once
-          if (!choiceSummary[choiceName]) {
-            choiceSummary[choiceName] = 1
+          if (!choiceSummary[choiceNames]) {
+            choiceSummary[choiceNames] = 1
           }
         }
       })
@@ -387,14 +387,14 @@ export async function generatePreordersPDF(data: PreorderData) {
       if (order.menuItem.category?.toLowerCase() === 'combo') {
         // Group choices by option type to avoid duplicates
         order.choices.forEach(choice => {
-          const optionName = choice.option.name
-          const choiceName = choice.selectedChoice.name
+          const choiceNames = choice.selectedChoices.map(c => c.name).join(', ')
+          const choiceName = choice.selectedChoices.find(c => c.name.toLowerCase() !== 'no thanks')?.name || ''
           
           if (choiceName.toLowerCase() !== 'no thanks') {
-            if (!acc[key].choices[optionName]) {
-              acc[key].choices[optionName] = {}
+            if (!acc[key].choices[choiceNames]) {
+              acc[key].choices[choiceNames] = {}
             }
-            acc[key].choices[optionName][choiceName] = order.quantity
+            acc[key].choices[choiceNames][choiceName] = order.quantity
           }
         })
       }

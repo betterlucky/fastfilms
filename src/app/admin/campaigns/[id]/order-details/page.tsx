@@ -39,7 +39,7 @@ export default async function OrderDetailsPage({
           choices: {
             include: {
               option: true,
-              selectedChoice: true,
+              selectedChoices: true,
             },
           },
         },
@@ -80,7 +80,7 @@ export default async function OrderDetailsPage({
   const menuTotal = processedPurchase.orders.reduce((sum, order) => {
     const itemTotal = order.menuItem.price * order.quantity
     const optionsTotal = order.choices.reduce((optSum, choice) => 
-      optSum + Number(choice.selectedChoice.priceAdjustment || 0), 0)
+      optSum + Number(choice.selectedChoices.reduce((sum, c) => sum + Number(c.priceAdjustment), 0)), 0)
     return sum + itemTotal + optionsTotal
   }, 0)
 
@@ -166,9 +166,9 @@ export default async function OrderDetailsPage({
                             <ul className="ml-4 list-disc text-sm">
                               {order.choices.map((choice) => (
                                 <li key={choice.id}>
-                                  {choice.option.name}: {choice.selectedChoice.name}
-                                  {Number(choice.selectedChoice.priceAdjustment) > 0 && 
-                                    ` (+£${Number(choice.selectedChoice.priceAdjustment).toFixed(2)})`}
+                                  {choice.option.name}: {choice.selectedChoices.map(c => c.name).join(', ')}
+                                  {choice.selectedChoices.some(c => Number(c.priceAdjustment) > 0) && 
+                                    ` (+£${choice.selectedChoices.reduce((sum, c) => sum + Number(c.priceAdjustment), 0).toFixed(2)})`}
                                 </li>
                               ))}
                             </ul>

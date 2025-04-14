@@ -59,7 +59,7 @@ export async function POST(request: Request) {
                 choices: {
                   include: {
                     option: true,
-                    selectedChoice: true,
+                    selectedChoices: true,
                   },
                 },
               },
@@ -86,8 +86,7 @@ export async function POST(request: Request) {
         price: Number(order.menuItem.price),
         options: order.choices.map(choice => ({
           name: choice.option.name,
-          choice: choice.selectedChoice.name,
-          priceAdjustment: Number(choice.selectedChoice.priceAdjustment || 0)
+          choice: choice.selectedChoices.map(c => c.name).join(', ')
         })),
       })),
     }

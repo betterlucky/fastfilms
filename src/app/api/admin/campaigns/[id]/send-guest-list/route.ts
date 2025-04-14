@@ -69,12 +69,12 @@ export async function POST(
                             name: true,
                           },
                         },
-                        selectedChoice: {
+                        selectedChoices: {
                           select: {
                             name: true,
                             priceAdjustment: true
-                          },
-                        },
+                          }
+                        }
                       },
                     },
                   },
@@ -128,7 +128,7 @@ export async function POST(
                 order: true,
               }
             },
-            selectedChoice: {
+            selectedChoices: {
               select: {
                 name: true,
                 priceAdjustment: true,
@@ -167,12 +167,12 @@ export async function POST(
             name: choice.option.name,
             order: choice.option.order,
           },
-          selectedChoice: {
-            name: choice.selectedChoice.name,
-            priceAdjustment: choice.selectedChoice.priceAdjustment 
-              ? Number(choice.selectedChoice.priceAdjustment)
+          selectedChoices: choice.selectedChoices.map(sc => ({
+            name: sc.name,
+            priceAdjustment: sc.priceAdjustment 
+              ? Number(sc.priceAdjustment)
               : undefined,
-          },
+          })),
         })),
       })),
     })
