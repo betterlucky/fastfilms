@@ -41,9 +41,9 @@ export async function POST(
             contactEmail: true,
           },
         },
-        tickets: {
+        purchases: {
           where: {
-            status: TicketStatus.CONFIRMED,
+            status: 'CONFIRMED',
           },
           include: {
             user: {
@@ -52,37 +52,43 @@ export async function POST(
                 email: true,
               },
             },
-            purchase: {
-              include: {
-                orders: {
-                  include: {
-                    menuItem: {
-                      select: {
-                        name: true,
-                        price: true
-                      },
-                    },
-                    choices: {
-                      include: {
-                        option: {
-                          select: {
-                            name: true,
-                          },
-                        },
-                        selectedChoices: {
-                          select: {
-                            name: true,
-                            priceAdjustment: true
-                          }
-                        }
-                      },
-                    },
-                  },
-                },
+            tickets: {
+              where: {
+                status: TicketStatus.CONFIRMED,
+              },
+              select: {
+                id: true,
               },
             },
-          },
-        },
+            orders: {
+              include: {
+                menuItem: {
+                  select: {
+                    name: true,
+                    price: true,
+                    category: true,
+                  }
+                },
+                choices: {
+                  include: {
+                    option: {
+                      select: {
+                        name: true,
+                        order: true,
+                      }
+                    },
+                    selectedChoices: {
+                      select: {
+                        name: true,
+                        priceAdjustment: true,
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
     })
 
@@ -145,7 +151,12 @@ export async function POST(
         ...campaign,
         venue: campaign.venue,
       },
-      tickets: campaign.tickets,
+      purchases: campaign.purchases.map(purchase => ({
+        id: purchase.id,
+        createdAt: purchase.createdAt,
+        user: purchase.user,
+        tickets: purchase.tickets,
+      })),
     })
 
     const preordersPDF = await generatePreordersPDF({

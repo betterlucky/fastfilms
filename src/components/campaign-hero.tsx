@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { getCampaignProgress, getProgressBarClasses } from '@/lib/campaign-utils'
@@ -128,25 +130,17 @@ export function CampaignHero({ campaign }: CampaignHeroProps) {
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <div className="h-2.5 w-full rounded-full bg-gray-200">
-                      <div
-                        className={`h-2.5 rounded-full ${
-                          progressClasses.indicator['bg-green-500']
-                            ? 'bg-green-500'
-                            : progressClasses.indicator['bg-red-500']
-                            ? 'bg-red-500'
-                            : 'bg-primary'
-                        }`}
-                        style={{
-                          width: `${progress.progress}%`,
-                        }}
-                      />
-                    </div>
+                    <Progress
+                      value={progress.progress}
+                      className={cn('h-2', progressClasses.background)}
+                      indicatorClassName={cn(progressClasses.indicator)}
+                    />
                     {progress.isFullyFunded && (
                       <p
-                        className={`text-sm font-medium ${
-                          progress.isSoldOut ? 'text-red-500' : 'text-green-500'
-                        }`}
+                        className={cn('text-sm font-medium', {
+                          'text-green-600': !progress.isSoldOut,
+                          'text-red-600': progress.isSoldOut,
+                        })}
                       >
                         {progress.isSoldOut
                           ? 'SOLD OUT'

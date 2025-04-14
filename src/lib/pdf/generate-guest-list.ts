@@ -8,9 +8,13 @@ interface GuestListData {
       name: string
     }
   }
-  tickets: {
+  purchases: {
     id: string
+    createdAt: Date
     user: Pick<User, 'name' | 'email'>
+    tickets: {
+      id: string
+    }[]
   }[]
 }
 
@@ -150,29 +154,28 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
         minute: '2-digit',
         hour12: false
       })}`, MARGIN + 5, yPos)
-      doc.text(`Total Guests: ${data.tickets.length}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
+
+      // Count total tickets across all purchases
+      const totalTickets = data.purchases.reduce((sum, purchase) => sum + purchase.tickets.length, 0)
+      doc.text(`Total Guests: ${totalTickets}`, MARGIN + CONTENT_WIDTH/2 + 5, yPos)
       yPos += 15
 
-      // Group tickets by user email (since we no longer have purchase info)
-      const groupedTickets = data.tickets.reduce((acc, ticket) => {
-        const email = ticket.user.email
+      // Group purchases by user email for better organization
+      const userPurchases = data.purchases.reduce((acc, purchase) => {
+        const email = purchase.user.email
         if (!acc[email]) {
-          acc[email] = {
-            user: ticket.user,
-            tickets: [],
-          }
+          acc[email] = []
         }
-        acc[email].tickets.push(ticket)
+        acc[email].push(purchase)
         return acc
-      }, {} as Record<string, {
-        user: Pick<User, 'name' | 'email'>
-        tickets: typeof data.tickets
-      }>)
+      }, {} as Record<string, typeof data.purchases>)
 
-      // Sort groups by user name
-      const sortedGroups = Object.values(groupedTickets).sort((a, b) =>
-        (a.user.name || '').localeCompare(b.user.name || '')
-      )
+      // Sort users by name
+      const sortedUsers = Object.entries(userPurchases).sort(([, purchasesA], [, purchasesB]) => {
+        const nameA = purchasesA[0].user.name || ''
+        const nameB = purchasesB[0].user.name || ''
+        return nameA.localeCompare(nameB)
+      })
 
       // Column headers with better spacing
       doc.setFillColor(230, 230, 230)
@@ -181,43 +184,42 @@ export function generateGuestListPDF(data: GuestListData): Promise<Buffer> {
       doc.setFont(undefined, 'bold')
       doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
       doc.text('Email', MARGIN + COLUMN_WIDTHS.NAME + 10, yPos + 5.5)
-      doc.text('Party Size', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos + 5.5)
+      doc.text('Purchase Date', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos + 5.5)
+      doc.text('Tickets', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos + 5.5)
       doc.setFont(undefined, 'normal')
       yPos += 12
 
       // Add guest groups with optimized layout
       doc.setFontSize(10)
-      sortedGroups.forEach((group, index) => {
-        // Check if we need a new page
-        if (yPos > PAGE_HEIGHT - 20) {
-          doc.addPage()
-          drawHeader(doc, data.campaign.title, 'Guest List')
-          yPos = 40
-
-          // Repeat column headers
-          doc.setFillColor(230, 230, 230)
-          doc.rect(MARGIN, yPos, CONTENT_WIDTH, 8, 'F')
-          doc.setFontSize(11)
-          doc.setFont(undefined, 'bold')
-          doc.text('Party Leader', MARGIN + 5, yPos + 5.5)
-          doc.text('Email', MARGIN + COLUMN_WIDTHS.NAME + 10, yPos + 5.5)
-          doc.text('Party Size', MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos + 5.5)
-          doc.setFont(undefined, 'normal')
-          yPos += 12
-          doc.setFontSize(10)
-        }
-
-        // Add zebra striping
-        if (index % 2 === 0) {
-          doc.setFillColor(250, 250, 250)
-          doc.rect(MARGIN, yPos - 4, CONTENT_WIDTH, 8, 'F')
-        }
-
-        // Main guest info
-        doc.text(group.user.name || 'Guest', MARGIN + 5, yPos)
-        doc.text(group.user.email, MARGIN + COLUMN_WIDTHS.NAME + 10, yPos)
-        doc.text(group.tickets.length.toString(), MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos)
+      sortedUsers.forEach(([email, purchases]) => {
+        // User header
+        const user = purchases[0].user
+        doc.setFont(undefined, 'bold')
+        doc.text(`${user.name || 'Guest'}`, MARGIN + 5, yPos)
+        doc.text(email, MARGIN + COLUMN_WIDTHS.NAME + 10, yPos)
+        doc.setFont(undefined, 'normal')
         yPos += 8
+
+        // Sort purchases by date
+        purchases.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+
+        // List each purchase
+        purchases.forEach((purchase, index) => {
+          // Check if we need a new page
+          if (yPos > PAGE_HEIGHT - 20) {
+            doc.addPage()
+            drawHeader(doc, data.campaign.title, 'Guest List')
+            yPos = 40
+          }
+
+          const purchaseDate = new Date(purchase.createdAt)
+          doc.text(`Purchase ${index + 1}:`, MARGIN + 10, yPos)
+          doc.text(formatDate(purchaseDate), MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + 15, yPos)
+          doc.text(`${purchase.tickets.length} tickets`, MARGIN + COLUMN_WIDTHS.NAME + COLUMN_WIDTHS.EMAIL + COLUMN_WIDTHS.PARTY_SIZE + 20, yPos)
+          yPos += 6
+        })
+
+        yPos += 8 // Add space between users
       })
 
       // Add page numbers
@@ -289,21 +291,14 @@ export async function generatePreordersPDF(data: PreorderData) {
     if (order.menuItem.category?.toLowerCase() === 'combo') {
       // For combo items, process each choice individually
       order.choices.forEach(choice => {
-        const choiceNames = choice.selectedChoices.map(c => c.name).join(', ')
-        // Skip "No thanks" choices
-        if (choiceNames.toLowerCase() === 'no thanks') {
-          return
-        }
-        // For base combo items (like Crunchy Crisps), use order quantity
-        // For add-ons and drinks, count as individual items
-        if (choice.option.name === 'Crunchy Crisps') {
-          choiceSummary[choiceNames] = (choiceSummary[choiceNames] || 0) + 1
-        } else {
-          // Only count each unique choice once
-          if (!choiceSummary[choiceNames]) {
-            choiceSummary[choiceNames] = 1
+        choice.selectedChoices.forEach(selectedChoice => {
+          // Skip "No thanks" choices in summary
+          if (selectedChoice.name.toLowerCase() === 'no thanks') {
+            return
           }
-        }
+          // Add each choice to the summary with the order quantity
+          choiceSummary[selectedChoice.name] = (choiceSummary[selectedChoice.name] || 0) + order.quantity
+        })
       })
     } else {
       // For non-combo items (like Furious Hot Box), use order quantity
@@ -372,74 +367,21 @@ export async function generatePreordersPDF(data: PreorderData) {
     doc.setFont(undefined, 'normal')
     yPos += 8
 
-    // Group orders by menu item
-    const menuItemOrders = orders.reduce((acc, order) => {
-      const key = order.menuItem.name
-      if (!acc[key]) {
-        acc[key] = {
-          quantity: 0,
-          choices: {} as Record<string, Record<string, number>>
-        }
-      }
-      acc[key].quantity += order.quantity
-
-      // Process choices
-      if (order.menuItem.category?.toLowerCase() === 'combo') {
-        // Group choices by option type to avoid duplicates
-        order.choices.forEach(choice => {
-          const choiceNames = choice.selectedChoices.map(c => c.name).join(', ')
-          const choiceName = choice.selectedChoices.find(c => c.name.toLowerCase() !== 'no thanks')?.name || ''
-          
-          if (choiceName.toLowerCase() !== 'no thanks') {
-            if (!acc[key].choices[choiceNames]) {
-              acc[key].choices[choiceNames] = {}
-            }
-            acc[key].choices[choiceNames][choiceName] = order.quantity
-          }
-        })
-      }
-      
-      return acc
-    }, {} as Record<string, {
-      quantity: number,
-      choices: Record<string, Record<string, number>>
-    }>)
-
-    // Display orders grouped by menu item
-    doc.setFontSize(10)
-    Object.entries(menuItemOrders).forEach(([itemName, details]) => {
+    // Display each order
+    orders.forEach(order => {
       // Main item line
       doc.setFont(undefined, 'bold')
-      doc.text(`${details.quantity}x ${itemName}:`, MARGIN + 10, yPos)
+      doc.text(`${order.quantity}x ${order.menuItem.name}:`, MARGIN + 10, yPos)
       doc.setFont(undefined, 'normal')
       yPos += 6
 
-      // Find the original order for this menu item to get option information
-      const originalOrder = orders.find(o => o.menuItem.name === itemName)
-      if (!originalOrder) return
-
-      // Display choices grouped by option
-      const sortedChoices = Object.entries(details.choices)
-        .sort(([a], [b]) => {
-          // Sort by option order if available
-          const orderA = originalOrder.choices.find(c => c.option.name === a)?.option.order || 0
-          const orderB = originalOrder.choices.find(c => c.option.name === b)?.option.order || 0
-          if (orderA !== orderB) return orderA - orderB
-          return a.localeCompare(b)
+      // Display all choices, including "No thanks"
+      order.choices.forEach(choice => {
+        choice.selectedChoices.forEach(selectedChoice => {
+          const choiceText = `${order.quantity}x ${selectedChoice.name}`
+          doc.text(choiceText, MARGIN + 15, yPos)
+          yPos += 6
         })
-
-      sortedChoices.forEach(([optionName, choices]) => {
-        Object.entries(choices)
-          .filter(([choice]) => choice.toLowerCase() !== 'no thanks')
-          .forEach(([choice, count]) => {
-            // For base combo items (Crunchy Crisps), use full quantity
-            // For add-ons and drinks, use individual quantities
-            const displayQuantity = optionName === 'Crunchy Crisps' ? 
-              details.quantity : 1
-            const choiceText = `${displayQuantity}x ${choice}`
-            doc.text(choiceText, MARGIN + 15, yPos)
-            yPos += 6
-          })
       })
       yPos += 2
     })
