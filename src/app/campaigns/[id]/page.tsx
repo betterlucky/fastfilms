@@ -48,7 +48,9 @@ export default async function CampaignPage({
           select: {
             id: true,
             name: true,
+            email: true,
             image: true,
+            avatarColor: true,
           },
         },
         replies: {
@@ -57,7 +59,9 @@ export default async function CampaignPage({
               select: {
                 id: true,
                 name: true,
+                email: true,
                 image: true,
+                avatarColor: true,
               },
             },
             replies: {
@@ -66,7 +70,9 @@ export default async function CampaignPage({
                   select: {
                     id: true,
                     name: true,
+                    email: true,
                     image: true,
+                    avatarColor: true,
                   },
                 },
               },

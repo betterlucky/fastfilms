@@ -17,7 +17,9 @@ export async function GET(
         user: {
           select: {
             name: true,
+            email: true,
             image: true,
+            avatarColor: true,
           },
         },
         replies: {
@@ -25,7 +27,9 @@ export async function GET(
             user: {
               select: {
                 name: true,
+                email: true,
                 image: true,
+                avatarColor: true,
               },
             },
           },
@@ -80,7 +84,9 @@ export async function POST(
         user: {
           select: {
             name: true,
+            email: true,
             image: true,
+            avatarColor: true,
           },
         },
         replies: {
@@ -88,7 +94,9 @@ export async function POST(
             user: {
               select: {
                 name: true,
+                email: true,
                 image: true,
+                avatarColor: true,
               },
             },
           },
