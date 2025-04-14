@@ -95,7 +95,7 @@ export function getProgressBarClasses(progress: CampaignProgress) {
     indicator: {
       'bg-green-500': progress.isFullyFunded && !progress.isSoldOut,
       'bg-red-500': progress.isSoldOut,
-      'bg-primary': !progress.isFullyFunded
+      'bg-primary-600': !progress.isFullyFunded
     }
   }
 }
