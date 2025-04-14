@@ -366,6 +366,39 @@ export function CampaignEditForm({
           )}
         />
 
+        <div>
+          <label className="mb-2 block text-sm font-medium">Menu Items</label>
+          {currentVenue?.menuItems.length === 0 ? (
+            <p className="text-sm text-gray-500">
+              No menu items available for this venue.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {currentVenue?.menuItems.map((menuItem) => (
+                <div key={menuItem.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`menuItem-${menuItem.id}`}
+                    checked={selectedMenuItems.includes(menuItem.id)}
+                    onCheckedChange={(checked) => {
+                      setSelectedMenuItems(
+                        checked
+                          ? [...selectedMenuItems, menuItem.id]
+                          : selectedMenuItems.filter((id) => id !== menuItem.id)
+                      )
+                    }}
+                  />
+                  <label
+                    htmlFor={`menuItem-${menuItem.id}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {menuItem.name} - £{Number(menuItem.price).toFixed(2)}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-end gap-4">
           <Button
             type="button"

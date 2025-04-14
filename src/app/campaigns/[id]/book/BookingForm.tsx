@@ -414,9 +414,6 @@ export default function BookingForm({
                   ? 'Admin testing mode: £0.01 tickets available'
                   : 'From £5.00 per ticket + £0.50 transaction fee'}
               </p>
-              <p className="text-sm text-gray-500">
-                Maximum {maxTickets} tickets per booking
-              </p>
             </div>
             <div className="flex items-center gap-2">
               <Input
